@@ -1,0 +1,19 @@
+# Docker Compose configuration for agy-company dashboard
+services:
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: agy-company-dashboard
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18000:3000"
+    environment:
+      # Path to mounted Obsidian Vault inside the container
+      - VAULT_DIR=/app/vault
+      # Enable polling to reliably catch file changes across WSL / Google Drive mounts
+      - WATCH_POLLING=true
+      - PORT=3000
+    volumes:
+      # Mount the Obsidian Vault directory into the container (default: ./vault, override via OBSIDIAN_VAULT_PATH)
+      - ${OBSIDIAN_VAULT_PATH:-./vault}:/app/vault

@@ -1,0 +1,5 @@
+{
+  "name": "company",
+  "description": "Virtual company management plugin with executive secretary, dynamic department spawning, and subagent delegation.",
+  "version": "1.0.0"
+}
