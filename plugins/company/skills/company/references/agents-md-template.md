@@ -53,6 +53,13 @@ Variables with `{{...}}` will be replaced with user onboarding input and system 
 - For heavy or specialized tasks (such as competitor research, technical design, marketing drafting), the Secretary can invoke background subagents.
 - Subagent results must be reviewed and compiled into the corresponding department directory before reporting back to the user.
 
+### Safe Git Operations & Reset Policy (破壊的リセットの禁止)
+- Destructive whole-repository reset commands (`git reset --hard`, `git clean -fd`, etc.) are **STRICTLY PROHIBITED** across all agents and subagents.
+- Never discard uncommitted work across the entire repository.
+- When reverting or discarding changes, operations MUST be strictly scoped to specific target files or directories:
+  - Allowed: `git restore <path>` or `git checkout -- <path>`
+  - Example: `git restore .company/[department]/work/temp.txt`
+
 ### Automated Logging
 - Decisions, learnings, and ideas must be recorded even without explicit instruction:
   - Decisions -> `secretary/notes/YYYY-MM-DD-decisions.md`

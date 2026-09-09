@@ -176,6 +176,7 @@ Antigravity CLI のチャットで以下のように入力します：
 2. サブエージェントは中間調査を `.company/research/work/` で行い、完成したレポートを `vault/01_Inbox/research/YYYY-MM-DD-HHmmss-VectorDB-Comparison.md` に納品します。
 3. 納品物には標準YAMLフロントマター（ID、タグ、関連ノートリンク）が自動付与されます。
 4. 秘書が「レポートの作成が完了いたしました！」と要約を報告します。
+5. **安全ガードレール**: サブエージェントによるリポジトリ全体の破壊的リセット（`git reset --hard` や `git clean -fd`）は全体ルールとして禁止されており、変更取り消しは必ず対象ファイル単位（`git restore <path>`）で行われます。
 
 ---
 
@@ -280,6 +281,7 @@ OBSIDIAN_VAULT_PATH=../vault docker compose up -d
 
 ---
 
-## 📄 ライセンス
+## 📄 ライセンス & サードパーティ通知
 
-MIT License (詳細は LICENSE ファイルをご確認ください)
+本プロジェクトは **MIT License** のもとで公開されています。
+詳細は [LICENSE](./LICENSE) をご覧ください。また、AI支援に関する免責事項および使用しているサードパーティ製ライブラリのライセンス一覧については [NOTICES.md](./NOTICES.md) をご確認ください。

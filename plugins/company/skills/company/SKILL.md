@@ -187,4 +187,8 @@ For specialized tasks across all departments:
    - **Publish Deliverable**: Once finalized, write the clean deliverable to `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md`.
    - **Header Standard**: Include YAML frontmatter (`id`, `aliases`, `tags`, `created`, `updated`, `link`).
    - **Cross-linking**: Link to any relevant notes in `link:`.
+   - **Safety Rule (No Destructive Full Resets)**:
+     - Destructive whole-repository reset commands (such as `git reset --hard`, `git clean -fd`) are **STRICTLY FORBIDDEN**.
+     - Subagents must NEVER discard uncommitted work across the host repository.
+     - To cancel, revert, or undo file changes, subagents must target only specific files or directories: `git restore <path>` or `git checkout -- <path>` (e.g. `git restore .company/[department]/work/temp.txt`).
 3. The Secretary verifies the published deliverable in `vault/01_Inbox/` and presents a summary to the user.
