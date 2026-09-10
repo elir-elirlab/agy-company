@@ -1,10 +1,26 @@
 # Markdown parsing and file manipulation utilities for Obsidian Vault
+import os
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from zoneinfo import ZoneInfo
 import yaml
 from pydantic import BaseModel
+
+
+def get_current_datetime() -> datetime:
+    """
+    Return the current datetime respecting the configured timezone.
+    Defaults to 'Asia/Tokyo' if the TZ environment variable is not explicitly set.
+    """
+    tz_name = os.getenv("TZ", "Asia/Tokyo")
+    try:
+        return datetime.now(ZoneInfo(tz_name))
+    except Exception:
+        # Fallback to system local time if timezone resolution fails
+        return datetime.now()
+
 
 
 class TodoItem(BaseModel):
@@ -179,9 +195,11 @@ def create_quick_inbox_note(vault_path: Path, title: str, content: str, departme
     else:
         target_dir = inbox_dir
 
+    # Ensure the target department inbox directory exists
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    now = datetime.now()
+    # Obtain current timestamp respecting timezone configuration
+    now = get_current_datetime()
     timestamp_str = now.strftime("%Y-%m-%d-%H%M%S")
     safe_title = re.sub(r'[^\w\-\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]', '-', title).strip("-")
     filename = f"{timestamp_str}-{safe_title}.md"

@@ -15,6 +15,7 @@ from .parser import (
     get_inbox_deliverables,
     create_quick_inbox_note,
     extract_frontmatter,
+    get_current_datetime,
     TodoItem,
     DeliverableMeta
 )
@@ -73,8 +74,9 @@ ws_manager = WebSocketManager()
 
 
 def get_today_daily_path() -> Path:
-    """Return the Path object for today's daily note."""
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    """Return the Path object for today's daily note, respecting configured timezone."""
+    # Compute today's date formatted as YYYY-MM-DD using timezone-aware current time
+    today_str = get_current_datetime().strftime("%Y-%m-%d")
     return VAULT_DIR / "02_Daily" / f"{today_str}.md"
 
 
@@ -83,6 +85,8 @@ def get_status():
     """
     Get dashboard summary status: daily task completion and deliverable count.
     """
+    # Use timezone-aware date string for today
+    today_str = get_current_datetime().strftime("%Y-%m-%d")
     daily_file = get_today_daily_path()
     todos = parse_daily_todos(daily_file) if daily_file.exists() else []
 
@@ -97,7 +101,7 @@ def get_status():
         departments = [d.name for d in inbox_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
 
     return {
-        "today": datetime.now().strftime("%Y-%m-%d"),
+        "today": today_str,
         "has_daily_note": daily_file.exists(),
         "todos": {
             "total": total_count,

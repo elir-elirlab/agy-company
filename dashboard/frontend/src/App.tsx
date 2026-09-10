@@ -64,6 +64,19 @@ export const App: React.FC = () => {
 
     refreshData();
 
+    // Set up periodic refresh every 60 seconds to ensure date transitions at midnight are caught
+    const intervalId = setInterval(() => {
+      refreshData();
+    }, 60000);
+
+    // Refresh immediately when tab becomes visible again (e.g. waking up laptop or switching back to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshData();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     // WebSocket connection to backend /ws
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -82,6 +95,8 @@ export const App: React.FC = () => {
     }
 
     return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (socket) socket.close();
     };
   }, [refreshData]);

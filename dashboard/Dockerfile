@@ -18,7 +18,12 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PORT=3000
+    PORT=3000 \
+    TZ=Asia/Tokyo
+
+# Install system dependencies (tzdata for timezone support)
+RUN apt-get update && apt-get install -y --no-install-recommends tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python backend dependencies
 COPY backend/requirements.txt ./

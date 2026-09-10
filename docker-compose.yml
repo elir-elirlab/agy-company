@@ -14,6 +14,8 @@ services:
       # Enable polling to reliably catch file changes across WSL / Google Drive mounts
       - WATCH_POLLING=true
       - PORT=3000
+      # Timezone configuration for the container (default: Asia/Tokyo)
+      - TZ=${TZ:-Asia/Tokyo}
     volumes:
       # Mount the Obsidian Vault directory into the container (default: ./vault, override via OBSIDIAN_VAULT_PATH)
       - ${OBSIDIAN_VAULT_PATH:-./vault}:/app/vault

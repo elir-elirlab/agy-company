@@ -15,9 +15,9 @@ def client_with_vault(tmp_path: Path):
     inbox.mkdir(parents=True)
     daily.mkdir(parents=True)
 
-    # Today's daily note
-    from datetime import datetime
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    # Today's daily note using timezone-aware helper
+    from dashboard.backend.parser import get_current_datetime
+    today_str = get_current_datetime().strftime("%Y-%m-%d")
     daily_content = f"""# {today_str}
 
 ## High Priority
@@ -62,8 +62,9 @@ def test_api_todos_today(client_with_vault: TestClient):
 
 def test_api_toggle_todo(client_with_vault: TestClient):
     """Test /api/todos/toggle endpoint successfully updates the task state."""
-    from datetime import datetime
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    # Obtain current date string respecting configured timezone
+    from dashboard.backend.parser import get_current_datetime
+    today_str = get_current_datetime().strftime("%Y-%m-%d")
 
     # Get today's todos first
     get_res = client_with_vault.get("/api/todos/today")
