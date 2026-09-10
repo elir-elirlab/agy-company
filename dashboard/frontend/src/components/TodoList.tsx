@@ -24,7 +24,7 @@ export const TodoList: React.FC<TodoListProps> = ({ todos, todayDate, onToggleTo
             <Calendar className="w-5 h-5" />
           </div>
           <h2 className="text-base font-bold text-white tracking-tight">{t.todos.title}</h2>
-          <span className="text-xs bg-slate-700/70 text-slate-300 font-mono px-2.5 py-0.5 rounded-full border border-slate-600/40">
+          <span className="text-sm bg-slate-700/70 text-slate-300 font-mono px-2.5 py-0.5 rounded-full border border-slate-600/40">
             {todayDate}
           </span>
         </div>
@@ -33,18 +33,18 @@ export const TodoList: React.FC<TodoListProps> = ({ todos, todayDate, onToggleTo
           href={obsidianUrl}
           target="_blank"
           rel="noreferrer"
-          className="text-xs bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 text-indigo-300 hover:text-white px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition"
+          className="text-sm bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 text-indigo-300 hover:text-white px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition"
           title={t.todos.openInObsidian}
         >
           <span>{t.todos.openInObsidian}</span>
-          <ExternalLink className="w-3.5 h-3.5" />
+          <ExternalLink className="w-4 h-4" />
         </a>
       </div>
 
       {todos.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-slate-500 py-12 px-4 text-center">
           <p className="text-base font-medium text-slate-400">{t.todos.noTasks}</p>
-          <p className="text-xs text-slate-500 mt-2 max-w-sm leading-relaxed">
+          <p className="text-sm text-slate-500 mt-2 max-w-sm leading-relaxed">
             {t.todos.noTasksHint}
           </p>
         </div>
@@ -76,7 +76,7 @@ export const TodoList: React.FC<TodoListProps> = ({ todos, todayDate, onToggleTo
                 <span>{todo.text}</span>
                 {todo.priority && (
                   <span
-                    className={`ml-2.5 text-xs px-2.5 py-0.5 rounded-full font-medium ${
+                    className={`ml-2.5 text-sm px-2.5 py-0.5 rounded-full font-medium ${
                       todo.priority.toLowerCase().includes('high') || todo.priority.includes('最優先')
                         ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                         : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'

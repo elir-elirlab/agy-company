@@ -66,7 +66,7 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-white text-lg">仮想組織図 (Organization Chart)</h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-sm text-slate-400">
                 階層構造・アクティブな部署・成果物の一元可視化
               </p>
             </div>
@@ -95,7 +95,7 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
                     <User className="w-5 h-5" />
                     <span>{data.owner.title}</span>
                   </div>
-                  <p className="text-xs text-slate-300">{data.owner.role}</p>
+                  <p className="text-sm text-slate-300">{data.owner.role}</p>
                 </div>
 
                 {/* Connecting Arrow */}
@@ -110,8 +110,8 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
                     <BellRing className="w-5 h-5" />
                     <span>{data.secretary.title}</span>
                   </div>
-                  <p className="text-xs text-slate-300">{data.secretary.role}</p>
-                  <span className="inline-block mt-2 text-[11px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
+                  <p className="text-sm text-slate-300">{data.secretary.role}</p>
+                  <span className="inline-block mt-2 text-sm bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30 font-medium">
                     常設・専属窓口
                   </span>
                 </div>
@@ -124,7 +124,7 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
 
                 {/* 3. Specialized Departments Grid */}
                 <div className="w-full">
-                  <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">
+                  <div className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">
                     専門部署 (Specialized Departments)
                   </div>
 
@@ -149,16 +149,16 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
                               <h4 className="font-bold text-slate-100 text-base group-hover:text-indigo-300 transition">
                                 {dept.name}
                               </h4>
-                              <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
+                              <span className="text-sm bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
                                 {dept.deliverables_count} 成果物
                               </span>
                             </div>
-                            <p className="text-xs text-slate-300 leading-relaxed">
+                            <p className="text-sm text-slate-300 leading-relaxed">
                               {dept.role}
                             </p>
                           </div>
 
-                          <div className="mt-3 pt-2 border-t border-slate-600/30 flex items-center justify-between text-[11px] text-slate-400">
+                          <div className="mt-3 pt-2 border-t border-slate-600/30 flex items-center justify-between text-sm text-slate-400">
                             <span className="font-mono">{dept.path}</span>
                             <span className="text-indigo-400 group-hover:underline">一覧を見る →</span>
                           </div>
@@ -172,48 +172,48 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
               {/* Directory Structure Tree */}
               {treeData && (
                 <div className="bg-slate-900/60 border border-slate-700/60 rounded-xl p-5 space-y-3">
-                  <div className="flex items-center space-x-2 text-slate-300 font-semibold text-sm">
-                    <FolderTree className="w-4 h-4 text-indigo-400" />
+                  <div className="flex items-center space-x-2 text-slate-300 font-semibold text-base">
+                    <FolderTree className="w-5 h-5 text-indigo-400" />
                     <span>Vault フォルダ構成ツリー</span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono text-slate-300">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-mono text-slate-300">
                     {/* 01_Inbox Tree */}
                     <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800">
-                      <div className="font-bold text-emerald-400 mb-1 flex items-center gap-1">
-                        <Layers className="w-3.5 h-3.5" />
+                      <div className="font-bold text-emerald-400 mb-1.5 flex items-center gap-1.5 text-base">
+                        <Layers className="w-4 h-4" />
                         01_Inbox/ (成果物)
                       </div>
                       {treeData.inbox && treeData.inbox.length > 0 ? (
-                        <ul className="space-y-1 pl-2 border-l border-slate-800 ml-1 mt-1">
+                        <ul className="space-y-1.5 pl-3 border-l border-slate-800 ml-1 mt-1.5">
                           {treeData.inbox.map((item: any) => (
-                            <li key={item.relative_path} className="flex items-center gap-1.5 text-slate-400">
+                            <li key={item.relative_path} className="flex items-center gap-1.5 text-slate-300">
                               {item.is_dir ? '📁' : '📄'}
                               <span>{item.name}</span>
                             </li>
                           ))}
                         </ul>
                       ) : (
-                        <span className="text-slate-600 pl-2">空のディレクトリ</span>
+                        <span className="text-slate-500 pl-2 text-sm">空のディレクトリ</span>
                       )}
                     </div>
 
                     {/* 02_Daily Tree */}
                     <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800">
-                      <div className="font-bold text-indigo-400 mb-1 flex items-center gap-1">
-                        <FileText className="w-3.5 h-3.5" />
+                      <div className="font-bold text-indigo-400 mb-1.5 flex items-center gap-1.5 text-base">
+                        <FileText className="w-4 h-4" />
                         02_Daily/ (デイリーノート)
                       </div>
                       {treeData.daily && treeData.daily.length > 0 ? (
-                        <ul className="space-y-1 pl-2 border-l border-slate-800 ml-1 mt-1">
+                        <ul className="space-y-1.5 pl-3 border-l border-slate-800 ml-1 mt-1.5">
                           {treeData.daily.map((item: any) => (
-                            <li key={item.relative_path} className="flex items-center gap-1.5 text-slate-400">
+                            <li key={item.relative_path} className="flex items-center gap-1.5 text-slate-300">
                               📄 <span>{item.name}</span>
                             </li>
                           ))}
                         </ul>
                       ) : (
-                        <span className="text-slate-600 pl-2">空のディレクトリ</span>
+                        <span className="text-slate-500 pl-2 text-sm">空のディレクトリ</span>
                       )}
                     </div>
                   </div>

@@ -27,11 +27,11 @@ export const Header: React.FC<HeaderProps> = ({ status, isConnected, onOpenQuick
               <h1 className="text-xl font-extrabold tracking-tight text-white">
                 {t.header.title}
               </h1>
-              <span className="text-xs bg-indigo-500/15 text-indigo-300 font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+              <span className="text-sm bg-indigo-500/15 text-indigo-300 font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
                 {t.header.cockpitSubtitle}
               </span>
             </div>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
+            <p className="text-sm text-slate-400 font-medium mt-0.5">
               {status?.today ? `${status.today} (${t.header.dailyStandup})` : 'Loading...'}
             </p>
           </div>
@@ -43,12 +43,12 @@ export const Header: React.FC<HeaderProps> = ({ status, isConnected, onOpenQuick
           <div className="flex items-center space-x-3 bg-slate-800/80 hover:bg-slate-800 px-4 py-2 rounded-xl border border-slate-700/60 shadow-inner transition">
             <CheckCircle2 className={`w-5 h-5 ${completionRate === 100 ? 'text-emerald-400' : 'text-indigo-400'}`} />
             <div>
-              <div className="text-xs text-slate-400 font-medium leading-none mb-1">
+              <div className="text-sm text-slate-400 font-medium leading-none mb-1">
                 {t.header.dailyProgress}
               </div>
               <div className="text-sm font-bold text-white leading-none">
                 {status?.todos.completed ?? 0} / {status?.todos.total ?? 0}
-                <span className="text-xs font-semibold text-slate-400 ml-1.5">({completionRate}%)</span>
+                <span className="text-sm font-semibold text-slate-400 ml-1.5">({completionRate}%)</span>
               </div>
             </div>
             <div className="w-20 bg-slate-700/80 h-2 rounded-full overflow-hidden ml-1 border border-slate-600/30">
@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({ status, isConnected, onOpenQuick
           {/* Settings Modal Button */}
           <button
             onClick={onOpenSettings}
-            className="bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white px-3.5 py-2 rounded-xl border border-slate-700/60 text-xs font-bold transition flex items-center gap-2"
+            className="bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white px-3.5 py-2 rounded-xl border border-slate-700/60 text-sm font-semibold transition flex items-center gap-2"
             title={t.header.settings}
             aria-label={t.header.settings}
           >
@@ -90,9 +90,9 @@ export const Header: React.FC<HeaderProps> = ({ status, isConnected, onOpenQuick
           </button>
 
           {/* Live Sync Status */}
-          <div className="flex items-center space-x-1.5 bg-slate-800/40 px-2.5 py-1.5 rounded-lg border border-slate-700/40 text-xs">
+          <div className="flex items-center space-x-1.5 bg-slate-800/40 px-2.5 py-1.5 rounded-lg border border-slate-700/40 text-sm">
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`} />
-            <span className="text-slate-400 text-xs font-medium">{isConnected ? t.header.live : t.header.offline}</span>
+            <span className="text-slate-400 text-sm font-medium">{isConnected ? t.header.live : t.header.offline}</span>
           </div>
         </div>
       </div>

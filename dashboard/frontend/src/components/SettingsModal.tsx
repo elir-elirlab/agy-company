@@ -115,7 +115,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">{t.settings.title}</h2>
-              <p className="text-xs text-slate-400">{t.settings.subtitle}</p>
+              <p className="text-sm text-slate-400">{t.settings.subtitle}</p>
             </div>
           </div>
           <button
@@ -148,7 +148,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               >
                 <div>
                   <div className="text-sm">日本語 (Japanese)</div>
-                  <div className="text-xs text-slate-400 font-normal mt-0.5">標準インターフェース</div>
+                  <div className="text-sm text-slate-400 font-normal mt-0.5">標準インターフェース</div>
                 </div>
                 {language === 'ja' && <Check className="w-4 h-4 text-indigo-400" />}
               </button>
@@ -165,7 +165,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               >
                 <div>
                   <div className="text-sm">English</div>
-                  <div className="text-xs text-slate-400 font-normal mt-0.5">English UI</div>
+                  <div className="text-sm text-slate-400 font-normal mt-0.5">English UI</div>
                 </div>
                 {language === 'en' && <Check className="w-4 h-4 text-indigo-400" />}
               </button>
@@ -181,12 +181,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 <Type className="w-4 h-4 text-indigo-400" />
                 <span>{t.settings.fontSizeSection}</span>
               </div>
-              <span className="text-xs font-mono font-bold bg-indigo-500/15 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">
+              <span className="text-sm font-mono font-bold bg-indigo-500/15 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">
                 {fontSize.toFixed(1)} px
               </span>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-sm text-slate-400 leading-relaxed">
               {t.settings.fontSizeDesc}
             </p>
 
@@ -201,7 +201,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 onChange={(e) => applyFontSize(parseFloat(e.target.value))}
                 className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none"
               />
-              <div className="flex justify-between text-[11px] text-slate-500 font-mono">
+              <div className="flex justify-between text-sm text-slate-500 font-mono">
                 <span>14px (最小)</span>
                 <span>18.5px (4K標準)</span>
                 <span>26px (最大)</span>
@@ -215,7 +215,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   key={preset.size}
                   type="button"
                   onClick={() => applyFontSize(preset.size)}
-                  className={`py-2 px-2.5 rounded-lg text-xs font-semibold border transition ${
+                  className={`py-2 px-2.5 rounded-lg text-sm font-semibold border transition ${
                     Math.abs(fontSize - preset.size) < 0.1
                       ? 'bg-indigo-600 text-white border-indigo-400 shadow-sm'
                       : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700'
@@ -231,26 +231,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               <button
                 type="button"
                 onClick={() => applyFontSize(DEFAULT_FONT_SIZE)}
-                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-400 transition"
+                className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-indigo-400 transition"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-4 h-4" />
                 <span>{t.settings.resetBtn}</span>
               </button>
             </div>
 
             {/* Live Preview Box */}
             <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-2">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              <div className="text-sm font-semibold uppercase tracking-wider text-slate-400">
                 {t.settings.samplePreview}
               </div>
               <div className="text-base text-slate-200 font-medium leading-relaxed">
                 {t.settings.sampleText}
               </div>
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">
+                <span className="text-sm bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">
                   Tag: sample
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-sm text-slate-400">
                   font-size: {fontSize.toFixed(1)}px (1rem = {fontSize.toFixed(1)}px)
                 </span>
               </div>
@@ -266,18 +266,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 <Maximize2 className="w-4 h-4 text-indigo-400" />
                 <span>{t.settings.mermaidSection}</span>
               </div>
-              <span className="text-xs font-mono font-bold bg-indigo-500/15 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">
+              <span className="text-sm font-mono font-bold bg-indigo-500/15 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">
                 {mermaidHeight} px
               </span>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-sm text-slate-400 leading-relaxed">
               {t.settings.mermaidDesc}
             </p>
 
             {/* Mermaid Height Slider */}
             <div className="space-y-2">
-              <div className="text-xs text-slate-300 font-semibold flex items-center justify-between">
+              <div className="text-sm text-slate-300 font-semibold flex items-center justify-between">
                 <span>{t.settings.mermaidHeightLabel}</span>
               </div>
               <input
@@ -289,7 +289,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 onChange={(e) => applyMermaidHeight(parseInt(e.target.value, 10))}
                 className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none"
               />
-              <div className="flex justify-between text-[11px] text-slate-500 font-mono">
+              <div className="flex justify-between text-sm text-slate-500 font-mono">
                 <span>200px</span>
                 <span>360px (標準)</span>
                 <span>800px</span>
@@ -303,7 +303,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   key={preset.size}
                   type="button"
                   onClick={() => applyMermaidHeight(preset.size)}
-                  className={`py-2 px-2.5 rounded-lg text-xs font-semibold border transition ${
+                  className={`py-2 px-2.5 rounded-lg text-sm font-semibold border transition ${
                     mermaidHeight === preset.size
                       ? 'bg-indigo-600 text-white border-indigo-400 shadow-sm'
                       : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700'
@@ -316,8 +316,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
             {/* Modal Max Width Options */}
             <div className="space-y-2 pt-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-                <Layout className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-300">
+                <Layout className="w-4 h-4 text-indigo-400" />
                 <span>{t.settings.modalWidthSection}</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -326,7 +326,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     key={opt.key}
                     type="button"
                     onClick={() => applyModalWidth(opt.key)}
-                    className={`py-2 px-2 rounded-lg text-xs font-semibold border transition ${
+                    className={`py-2 px-2 rounded-lg text-sm font-semibold border transition ${
                       modalWidth === opt.key
                         ? 'bg-indigo-600 text-white border-indigo-400 shadow-sm'
                         : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700'
@@ -346,9 +346,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   applyMermaidHeight(DEFAULT_MERMAID_HEIGHT);
                   applyModalWidth(DEFAULT_MODAL_WIDTH);
                 }}
-                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-400 transition"
+                className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-indigo-400 transition"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-4 h-4" />
                 <span>{t.settings.resetMermaidBtn}</span>
               </button>
             </div>

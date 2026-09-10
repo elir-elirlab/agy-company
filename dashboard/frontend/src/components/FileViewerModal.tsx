@@ -62,10 +62,10 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                 href={obsidianUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-sm shrink-0 whitespace-nowrap"
+                className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-sm shrink-0 whitespace-nowrap"
               >
                 <span>{t.fileViewer.openInObsidian}</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="w-4 h-4" />
               </a>
             </div>
 
@@ -84,25 +84,25 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
               <button
                 type="button"
                 onClick={() => setViewMode('preview')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition ${
                   viewMode === 'preview'
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <Eye className="w-3.5 h-3.5" />
+                <Eye className="w-4 h-4" />
                 <span>{t.fileViewer.tabPreview}</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('raw')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition ${
                   viewMode === 'raw'
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <FileText className="w-3.5 h-3.5" />
+                <FileText className="w-4 h-4" />
                 <span>{t.fileViewer.tabRaw}</span>
               </button>
             </div>
@@ -117,8 +117,8 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
             <>
               {/* Frontmatter Metadata Display */}
               {Object.keys(data.frontmatter || {}).length > 0 && (
-                <div className="bg-slate-900/80 border border-slate-700/60 rounded-xl p-4 space-y-2.5 text-xs shadow-inner">
-                  <div className="text-slate-400 font-semibold uppercase tracking-wider text-xs">
+                <div className="bg-slate-900/80 border border-slate-700/60 rounded-xl p-4 space-y-2.5 text-sm shadow-inner">
+                  <div className="text-slate-400 font-semibold uppercase tracking-wider text-sm">
                     {t.fileViewer.metadataTitle}
                   </div>
 
@@ -131,7 +131,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                     )}
                     {data.frontmatter.created && (
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                        <Calendar className="w-4 h-4 text-slate-500" />
                         <span className="text-slate-500">Created: </span>
                         <span className="font-mono text-slate-200">{data.frontmatter.created}</span>
                       </div>
@@ -141,7 +141,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                   {/* Tags */}
                   {data.frontmatter.tags && (
                     <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      <Tag className="w-3.5 h-3.5 text-slate-500" />
+                      <Tag className="w-4 h-4 text-slate-500" />
                       {Array.isArray(data.frontmatter.tags)
                         ? data.frontmatter.tags.map((t: string) => (
                             <span
@@ -158,12 +158,12 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                   {/* Cross links */}
                   {data.frontmatter.link && (
                     <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      <Link2 className="w-3.5 h-3.5 text-indigo-400" />
+                      <Link2 className="w-4 h-4 text-indigo-400" />
                       {Array.isArray(data.frontmatter.link)
                         ? data.frontmatter.link.map((l: string) => (
                             <span
                               key={l}
-                              className="bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 px-2.5 py-0.5 rounded-md font-mono text-xs"
+                              className="bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 px-2.5 py-0.5 rounded-md font-mono text-sm"
                             >
                               {l}
                             </span>

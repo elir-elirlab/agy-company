@@ -62,7 +62,7 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block text-sm font-semibold text-slate-300 mb-1.5">
               {t.quickNote.titleLabel}
             </label>
             <input
@@ -76,7 +76,7 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block text-sm font-semibold text-slate-300 mb-1.5">
               {t.quickNote.deptLabel}
             </label>
             <select
@@ -94,7 +94,7 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label className="block text-sm font-semibold text-slate-300 mb-1.5">
               {t.quickNote.contentLabel}
             </label>
             <textarea

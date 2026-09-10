@@ -113,11 +113,11 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
 
             // Fallback UI: show a gentle warning badge and display the raw code in a pre block
             el.innerHTML = `
-              <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-200 text-left space-y-1.5 my-2">
+              <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200 text-left space-y-1.5 my-2">
                 <div class="font-semibold flex items-center gap-1.5 text-amber-400">
                   <span>⚠️ Mermaid Diagram Syntax Error</span>
                 </div>
-                <pre class="overflow-x-auto text-slate-300 font-mono bg-slate-900/80 p-2.5 rounded-lg text-xs leading-relaxed"></pre>
+                <pre class="overflow-x-auto text-slate-300 font-mono bg-slate-900/80 p-2.5 rounded-lg text-sm leading-relaxed"></pre>
               </div>
             `;
             const pre = el.querySelector('pre');

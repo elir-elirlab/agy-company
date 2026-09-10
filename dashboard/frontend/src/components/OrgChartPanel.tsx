@@ -61,7 +61,7 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
           </div>
           <h2 className="text-base font-bold text-white tracking-tight">{t.org.title}</h2>
         </div>
-        <span className="text-xs bg-slate-700/70 text-slate-300 px-2.5 py-0.5 rounded-full font-medium border border-slate-600/40">
+        <span className="text-sm bg-slate-700/70 text-slate-300 px-2.5 py-0.5 rounded-full font-medium border border-slate-600/40">
           {data?.departments.length ?? 0} {t.org.departmentsCount}
         </span>
       </div>
@@ -80,7 +80,7 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
                 <User className="w-4 h-4" />
                 <span>{language === 'ja' ? data.owner.title : t.org.ownerTitle}</span>
               </div>
-              <p className="text-xs text-slate-300 mt-1 font-medium leading-relaxed">
+              <p className="text-sm text-slate-300 mt-1 font-medium leading-relaxed">
                 {language === 'ja' ? data.owner.role : t.org.ownerRole}
               </p>
             </div>
@@ -97,10 +97,10 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
                 <BellRing className="w-4 h-4" />
                 <span>{language === 'ja' ? data.secretary.title : t.org.secretaryTitle}</span>
               </div>
-              <p className="text-xs text-slate-300 mt-1 font-medium leading-relaxed">
+              <p className="text-sm text-slate-300 mt-1 font-medium leading-relaxed">
                 {language === 'ja' ? data.secretary.role : t.org.secretaryRole}
               </p>
-              <span className="inline-block mt-2 text-xs bg-indigo-500/20 text-indigo-300 font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+              <span className="inline-block mt-2 text-sm bg-indigo-500/20 text-indigo-300 font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
                 {t.org.permanentBadge}
               </span>
             </div>
@@ -113,12 +113,12 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
 
             {/* 3. Specialized Departments List */}
             <div className="w-full space-y-2">
-              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">
+              <div className="text-sm font-semibold text-slate-400 uppercase tracking-wider text-center">
                 {t.org.activeDeptsHeader}
               </div>
 
               {data.departments.length === 0 ? (
-                <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 text-center text-slate-400 text-xs leading-relaxed">
+                <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 text-center text-slate-400 text-sm leading-relaxed">
                   {t.org.noDeptsMessage}
                 </div>
               ) : (
@@ -140,11 +140,11 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
                           <span className="font-bold text-sm text-slate-100">
                             {dept.name}
                           </span>
-                          <span className="text-xs bg-emerald-500/20 text-emerald-300 font-medium px-2 py-0.5 rounded-full border border-emerald-500/30">
+                          <span className="text-sm bg-emerald-500/20 text-emerald-300 font-medium px-2 py-0.5 rounded-full border border-emerald-500/30">
                             {dept.deliverables_count} {t.org.deliverablesCount}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">
+                        <p className="text-sm text-slate-300 leading-relaxed line-clamp-2">
                           {dept.role}
                         </p>
                       </div>
@@ -157,50 +157,51 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
 
           {/* Directory Tree */}
           {treeData && (
-            <div className="bg-slate-900/70 border border-slate-700/60 rounded-xl p-4 space-y-3">
-              <div className="flex items-center space-x-2 text-slate-200 font-bold text-sm">
-                <FolderTree className="w-4.5 h-4.5 text-indigo-400" />
+            <div className="bg-slate-900/70 border border-slate-700/60 rounded-xl p-4 space-y-4">
+              {/* Directory Tree Title */}
+              <div className="flex items-center space-x-2 text-slate-200 font-bold text-base">
+                <FolderTree className="w-5 h-5 text-indigo-400" />
                 <span>{t.org.vaultTreeTitle}</span>
               </div>
 
-              <div className="space-y-3 font-mono">
-                {/* 01_Inbox */}
+              <div className="space-y-4 font-mono">
+                {/* 01_Inbox Directory */}
                 <div>
-                  <div className="font-bold text-emerald-400 flex items-center gap-1.5 text-sm">
-                    <Layers className="w-4 h-4" />
+                  <div className="font-bold text-emerald-400 flex items-center gap-2 text-base">
+                    <Layers className="w-4.5 h-4.5" />
                     {t.org.inboxFolder}
                   </div>
                   {treeData.inbox && treeData.inbox.length > 0 ? (
-                    <ul className="pl-3.5 border-l-2 border-slate-700 ml-1.5 mt-1.5 space-y-1.5 text-slate-300 text-xs">
+                    <ul className="pl-4 border-l-2 border-slate-700 ml-2 mt-2 space-y-2 text-slate-300 text-sm">
                       {treeData.inbox.map((item: any) => (
-                        <li key={item.relative_path} className="truncate hover:text-white transition">
+                        <li key={item.relative_path} className="truncate hover:text-white transition py-0.5">
                           {item.is_dir ? '📁' : '📄'} {item.name}
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <span className="text-slate-400 pl-4 py-1 inline-block italic text-xs">
+                    <span className="text-slate-400 pl-4 py-1.5 inline-block italic text-sm">
                       {t.org.empty}
                     </span>
                   )}
                 </div>
 
-                {/* 02_Daily */}
+                {/* 02_Daily Directory */}
                 <div>
-                  <div className="font-bold text-indigo-400 flex items-center gap-1.5 text-sm">
-                    <FileText className="w-4 h-4" />
+                  <div className="font-bold text-indigo-400 flex items-center gap-2 text-base">
+                    <FileText className="w-4.5 h-4.5" />
                     {t.org.dailyFolder}
                   </div>
                   {treeData.daily && treeData.daily.length > 0 ? (
-                    <ul className="pl-3.5 border-l-2 border-slate-700 ml-1.5 mt-1.5 space-y-1.5 text-slate-300 text-xs">
+                    <ul className="pl-4 border-l-2 border-slate-700 ml-2 mt-2 space-y-2 text-slate-300 text-sm">
                       {treeData.daily.map((item: any) => (
-                        <li key={item.relative_path} className="truncate hover:text-white transition">
+                        <li key={item.relative_path} className="truncate hover:text-white transition py-0.5">
                           📄 {item.name}
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <span className="text-slate-400 pl-4 py-1 inline-block italic text-xs">
+                    <span className="text-slate-400 pl-4 py-1.5 inline-block italic text-sm">
                       {t.org.empty}
                     </span>
                   )}
@@ -210,7 +211,7 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
           )}
         </div>
       ) : (
-        <div className="text-rose-400 text-xs text-center py-5">
+        <div className="text-rose-400 text-sm text-center py-5">
           Failed to load organization.
         </div>
       )}
