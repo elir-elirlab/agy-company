@@ -46,6 +46,8 @@ tags:
 ---
 id: {{YYYY-MM-DD-HHmmss}}
 aliases:
+  - "{{ALIAS_1}}"
+  - "{{ALIAS_2}}"
 tags:
   - {{DEPARTMENT_NAME}}
   - {{TOPIC_TAG_1}}

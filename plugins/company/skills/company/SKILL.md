@@ -52,6 +52,8 @@ vault/
 ---
 id: YYYY-mm-dd-HHmmss
 aliases:
+  - "別名1"
+  - "別名2"
 tags:
   - 部署名 (e.g. リサーチ, 開発, PM, マーケティング)
   - Topic-Tag-1
@@ -66,7 +68,7 @@ link:
 
 ### Frontmatter Field Rules:
 - **`id`**: Timestamp formatted as `YYYY-mm-dd-HHmmss` (e.g., `2026-09-08-231720`).
-- **`aliases`**: Alternative names or short titles.
+- **`aliases`**: Alternative names or short titles. 必ずダブルクォート（`""`）で括ること（例: `- "別名タイトル"`）。
 - **`tags`**: Must include the department name (e.g., `リサーチ`, `開発`, `PM`), followed by specific topic/domain tags.
 - **`created`**: Exact timestamp at creation in format `YYYY-MM-DD-HHmmss`.
 - **`updated`**: Timestamp of last modification in format `YYYY-MM-DD-HHmmss`.
