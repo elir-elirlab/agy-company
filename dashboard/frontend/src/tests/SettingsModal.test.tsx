@@ -120,12 +120,19 @@ describe('SettingsModal Component', () => {
       </I18nProvider>
     );
 
-    // Click 6XL option
-    const extraWideBtn = screen.getByText(/6XL/);
+    // Click 6XL option button
+    const extraWideBtn = screen.getByRole('button', { name: /6XL/i });
     fireEvent.click(extraWideBtn);
 
-    expect(document.documentElement.style.getPropertyValue('--modal-max-width')).toBe('72rem');
+    expect(document.documentElement.style.getPropertyValue('--modal-max-width')).toBe('82rem');
     expect(localStorage.getItem('agy_company_modal_width')).toBe('6xl');
+
+    // Click 7XL option button (Full width 95vw)
+    const fullBtn = screen.getByRole('button', { name: /7XL/i });
+    fireEvent.click(fullBtn);
+
+    expect(document.documentElement.style.getPropertyValue('--modal-max-width')).toBe('95vw');
+    expect(localStorage.getItem('agy_company_modal_width')).toBe('7xl');
   });
 
   it('resets Mermaid settings back to default when clicking reset button', () => {

@@ -18,10 +18,10 @@ export const MODAL_WIDTH_STORAGE_KEY = 'agy_company_modal_width';
 export const DEFAULT_MODAL_WIDTH = '5xl'; // Default wide layout for diagrams and reports
 
 export const MODAL_WIDTH_MAP: Record<string, string> = {
-  '4xl': '56rem', // 896px
-  '5xl': '64rem', // 1024px
-  '6xl': '72rem', // 1152px
-  '7xl': '80rem', // 1280px
+  '4xl': '48rem', // Compact (approx 768px-880px)
+  '5xl': '64rem', // Standard (approx 1024px-1180px)
+  '6xl': '82rem', // Wide (approx 1312px-1500px)
+  '7xl': '95vw',  // Dynamic full width (95% of viewport)
 };
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
@@ -106,7 +106,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/60">
           <div className="flex items-center gap-2.5">
@@ -316,9 +316,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
             {/* Modal Max Width Options */}
             <div className="space-y-2 pt-2">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-300">
-                <Layout className="w-4 h-4 text-indigo-400" />
-                <span>{t.settings.modalWidthSection}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-300">
+                  <Layout className="w-4 h-4 text-indigo-400" />
+                  <span>{t.settings.modalWidthSection}</span>
+                </div>
+                <span className="text-sm font-mono font-bold bg-indigo-500/15 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">
+                  {modalWidth.toUpperCase()} ({MODAL_WIDTH_MAP[modalWidth]})
+                </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {modalWidthOptions.map((opt) => (
@@ -335,6 +340,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     {opt.label}
                   </button>
                 ))}
+              </div>
+
+              {/* Dynamic Visual Width Preview Box */}
+              <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 mt-2 space-y-1.5">
+                <div className="w-full bg-slate-900/90 h-10 rounded-lg flex items-center justify-center p-1 relative overflow-hidden border border-slate-700/60">
+                  <div
+                    className="bg-indigo-600/30 border border-indigo-400/80 h-full rounded flex items-center justify-center transition-all duration-300 shadow-sm"
+                    style={{
+                      width:
+                        modalWidth === '4xl' ? '50%' :
+                        modalWidth === '5xl' ? '68%' :
+                        modalWidth === '6xl' ? '84%' : '98%'
+                    }}
+                  >
+                    <span className="text-xs font-bold text-indigo-200 tracking-wider">
+                      {modalWidth.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-400 text-center">
+                  {language === 'ja'
+                    ? '※ ブラウザ画面の表示幅に合わせて最大幅が適用されます（7XLは全画面95%）'
+                    : '※ Max width is applied up to your browser window size (7XL spans 95vw)'}
+                </div>
               </div>
             </div>
 

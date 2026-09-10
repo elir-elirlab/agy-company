@@ -51,16 +51,15 @@ export const App: React.FC = () => {
       document.documentElement.style.setProperty('--mermaid-min-height', `${savedMermaidHeight}px`);
     }
 
-    const savedModalWidth = localStorage.getItem('agy_company_modal_width');
-    if (savedModalWidth) {
-      const widthMap: Record<string, string> = {
-        '4xl': '56rem',
-        '5xl': '64rem',
-        '6xl': '72rem',
-        '7xl': '80rem',
-      };
-      document.documentElement.style.setProperty('--modal-max-width', widthMap[savedModalWidth] || '64rem');
-    }
+    // Restore user-customized modal maximum width for FileViewerModal (default: 5xl / 64rem)
+    const savedModalWidth = localStorage.getItem('agy_company_modal_width') || '5xl';
+    const widthMap: Record<string, string> = {
+      '4xl': '48rem', // Compact (approx 768px-880px)
+      '5xl': '64rem', // Standard (approx 1024px-1180px)
+      '6xl': '82rem', // Wide (approx 1312px-1500px)
+      '7xl': '95vw',  // Dynamic full width (95% of viewport)
+    };
+    document.documentElement.style.setProperty('--modal-max-width', widthMap[savedModalWidth] || '64rem');
 
     refreshData();
 
