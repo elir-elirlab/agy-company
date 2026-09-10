@@ -1,13 +1,20 @@
-// Tests for SettingsModal component (Language switching & font size scaling)
+// Tests for SettingsModal component (Language switching, font size scaling, Mermaid diagram dimensions)
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SettingsModal, DEFAULT_FONT_SIZE } from '../components/SettingsModal';
+import {
+  SettingsModal,
+  DEFAULT_FONT_SIZE,
+  DEFAULT_MERMAID_HEIGHT,
+  DEFAULT_MODAL_WIDTH
+} from '../components/SettingsModal';
 import { I18nProvider } from '../i18n/context';
 
 describe('SettingsModal Component', () => {
   beforeEach(() => {
     localStorage.clear();
     document.documentElement.style.fontSize = '';
+    document.documentElement.style.removeProperty('--mermaid-min-height');
+    document.documentElement.style.removeProperty('--modal-max-width');
   });
 
   it('does not render when isOpen is false', () => {
@@ -59,12 +66,14 @@ describe('SettingsModal Component', () => {
     );
 
     // First change to 24px
-    const xlargePreset = screen.getByText(/24px/);
+    const xlargePreset = screen.getByRole('button', { name: /4K.*24px/ });
     fireEvent.click(xlargePreset);
     expect(document.documentElement.style.fontSize).toBe('24px');
 
-    // Click reset button
-    const resetBtn = screen.getByRole('button', { name: /初期値|Reset to default/i });
+    // Click font size reset button
+    const resetBtn = screen.getByRole('button', {
+      name: /初期値 \(18\.5px\) にリセット|Reset to default \(18\.5px\)/,
+    });
     fireEvent.click(resetBtn);
 
     expect(document.documentElement.style.fontSize).toBe(`${DEFAULT_FONT_SIZE}px`);
@@ -85,5 +94,58 @@ describe('SettingsModal Component', () => {
     // Header title should update to English
     expect(screen.getByText('Dashboard Settings')).toBeInTheDocument();
     expect(localStorage.getItem('agy_company_language')).toBe('en');
+  });
+
+  it('changes Mermaid diagram height and saves to localStorage when clicking height preset', () => {
+    const onClose = vi.fn();
+    render(
+      <I18nProvider>
+        <SettingsModal isOpen={true} onClose={onClose} />
+      </I18nProvider>
+    );
+
+    // Click 500px preset
+    const largeHeightBtn = screen.getByText(/500px/);
+    fireEvent.click(largeHeightBtn);
+
+    expect(document.documentElement.style.getPropertyValue('--mermaid-min-height')).toBe('500px');
+    expect(localStorage.getItem('agy_company_mermaid_height')).toBe('500');
+  });
+
+  it('changes modal width and saves to localStorage when clicking width option', () => {
+    const onClose = vi.fn();
+    render(
+      <I18nProvider>
+        <SettingsModal isOpen={true} onClose={onClose} />
+      </I18nProvider>
+    );
+
+    // Click 6XL option
+    const extraWideBtn = screen.getByText(/6XL/);
+    fireEvent.click(extraWideBtn);
+
+    expect(document.documentElement.style.getPropertyValue('--modal-max-width')).toBe('72rem');
+    expect(localStorage.getItem('agy_company_modal_width')).toBe('6xl');
+  });
+
+  it('resets Mermaid settings back to default when clicking reset button', () => {
+    const onClose = vi.fn();
+    render(
+      <I18nProvider>
+        <SettingsModal isOpen={true} onClose={onClose} />
+      </I18nProvider>
+    );
+
+    // Change to 650px
+    const xlargeHeightBtn = screen.getByText(/650px/);
+    fireEvent.click(xlargeHeightBtn);
+    expect(document.documentElement.style.getPropertyValue('--mermaid-min-height')).toBe('650px');
+
+    // Click diagram reset button
+    const resetBtn = screen.getByRole('button', { name: /ダイアグラム設定を初期値にリセット|Reset diagram settings to default/i });
+    fireEvent.click(resetBtn);
+
+    expect(document.documentElement.style.getPropertyValue('--mermaid-min-height')).toBe(`${DEFAULT_MERMAID_HEIGHT}px`);
+    expect(localStorage.getItem('agy_company_mermaid_height')).toBe(DEFAULT_MERMAID_HEIGHT.toString());
   });
 });

@@ -30,6 +30,23 @@ export const translations = {
       },
       currentSize: '現在のサイズ',
       resetBtn: '初期値 (18.5px) にリセット',
+      mermaidSection: 'Mermaid ダイアグラム描画設定',
+      mermaidDesc: 'プレビュー時のダイアグラムの最小描画高さやモーダルの表示幅を調整します。',
+      mermaidHeightLabel: 'ダイアグラムの最小高さ (Height)',
+      mermaidPresets: {
+        compact: '小 (240px)',
+        medium: '標準 (360px)',
+        large: '大 (500px)',
+        xlarge: '特大 (650px)'
+      },
+      modalWidthSection: '成果物モーダルの最大幅 (Modal Width)',
+      modalWidthPresets: {
+        standard: '標準 (4XL / 896px)',
+        wide: 'ワイド (5XL / 1024px)',
+        extraWide: '特大 (6XL / 1152px)',
+        full: 'フル (7XL / 1280px)'
+      },
+      resetMermaidBtn: 'ダイアグラム設定を初期値にリセット',
       samplePreview: 'リアルタイム表示プレビュー',
       sampleText: 'デイリータスクの消化や各部署の成果物の閲覧がここで行われます。',
       closeBtn: '閉じる'
@@ -116,6 +133,23 @@ export const translations = {
       },
       currentSize: 'Current size',
       resetBtn: 'Reset to default (18.5px)',
+      mermaidSection: 'Mermaid Diagram Settings',
+      mermaidDesc: 'Customize the minimum diagram height and modal width for reading large charts.',
+      mermaidHeightLabel: 'Diagram Minimum Height',
+      mermaidPresets: {
+        compact: 'Compact (240px)',
+        medium: 'Default (360px)',
+        large: 'Large (500px)',
+        xlarge: 'Extra Large (650px)'
+      },
+      modalWidthSection: 'Deliverable Modal Max Width',
+      modalWidthPresets: {
+        standard: 'Standard (4XL / 896px)',
+        wide: 'Wide (5XL / 1024px)',
+        extraWide: 'Extra Wide (6XL / 1152px)',
+        full: 'Full (7XL / 1280px)'
+      },
+      resetMermaidBtn: 'Reset diagram settings to default',
       samplePreview: 'Live Preview',
       sampleText: 'Daily tasks and department deliverables are synchronized here in real time.',
       closeBtn: 'Close'

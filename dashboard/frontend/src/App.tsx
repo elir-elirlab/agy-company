@@ -45,6 +45,23 @@ export const App: React.FC = () => {
       document.documentElement.style.fontSize = `${savedFontSize}px`;
     }
 
+    // Restore user-customized Mermaid diagram height and modal width
+    const savedMermaidHeight = localStorage.getItem('agy_company_mermaid_height');
+    if (savedMermaidHeight) {
+      document.documentElement.style.setProperty('--mermaid-min-height', `${savedMermaidHeight}px`);
+    }
+
+    const savedModalWidth = localStorage.getItem('agy_company_modal_width');
+    if (savedModalWidth) {
+      const widthMap: Record<string, string> = {
+        '4xl': '56rem',
+        '5xl': '64rem',
+        '6xl': '72rem',
+        '7xl': '80rem',
+      };
+      document.documentElement.style.setProperty('--modal-max-width', widthMap[savedModalWidth] || '64rem');
+    }
+
     refreshData();
 
     // WebSocket connection to backend /ws

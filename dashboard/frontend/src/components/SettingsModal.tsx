@@ -1,6 +1,6 @@
-// Settings modal allowing user to switch language (ja/en) and scale overall font size for 4K displays
+// Settings modal allowing user to switch language (ja/en), scale overall font size for 4K displays, and adjust Mermaid diagram rendering dimensions
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Settings, Globe, Type, RotateCcw, Check } from 'lucide-react';
+import { X, Settings, Globe, Type, RotateCcw, Check, Maximize2, Layout } from 'lucide-react';
 import { useI18n } from '../i18n/context';
 
 interface SettingsModalProps {
@@ -11,6 +11,19 @@ interface SettingsModalProps {
 const FONT_SIZE_STORAGE_KEY = 'agy_company_font_size';
 export const DEFAULT_FONT_SIZE = 18.5; // Optimized base font size for 4K displays
 
+export const MERMAID_HEIGHT_STORAGE_KEY = 'agy_company_mermaid_height';
+export const DEFAULT_MERMAID_HEIGHT = 360; // Default height providing comfortable diagram canvas
+
+export const MODAL_WIDTH_STORAGE_KEY = 'agy_company_modal_width';
+export const DEFAULT_MODAL_WIDTH = '5xl'; // Default wide layout for diagrams and reports
+
+export const MODAL_WIDTH_MAP: Record<string, string> = {
+  '4xl': '56rem', // 896px
+  '5xl': '64rem', // 1024px
+  '6xl': '72rem', // 1152px
+  '7xl': '80rem', // 1280px
+};
+
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const { t, language, setLanguage } = useI18n();
 
@@ -20,11 +33,38 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     return saved ? parseFloat(saved) : DEFAULT_FONT_SIZE;
   });
 
+  // Manage Mermaid diagram minimum height state
+  const [mermaidHeight, setMermaidHeightState] = useState<number>(() => {
+    const saved = localStorage.getItem(MERMAID_HEIGHT_STORAGE_KEY);
+    return saved ? parseInt(saved, 10) : DEFAULT_MERMAID_HEIGHT;
+  });
+
+  // Manage FileViewerModal maximum width state
+  const [modalWidth, setModalWidthState] = useState<string>(() => {
+    const saved = localStorage.getItem(MODAL_WIDTH_STORAGE_KEY);
+    return saved || DEFAULT_MODAL_WIDTH;
+  });
+
   // Apply font size to document root (html tag) so all Tailwind rem units scale proportionally
   const applyFontSize = useCallback((size: number) => {
     setFontSizeState(size);
     document.documentElement.style.fontSize = `${size}px`;
     localStorage.setItem(FONT_SIZE_STORAGE_KEY, size.toString());
+  }, []);
+
+  // Apply Mermaid diagram minimum height to CSS variable --mermaid-min-height
+  const applyMermaidHeight = useCallback((height: number) => {
+    setMermaidHeightState(height);
+    document.documentElement.style.setProperty('--mermaid-min-height', `${height}px`);
+    localStorage.setItem(MERMAID_HEIGHT_STORAGE_KEY, height.toString());
+  }, []);
+
+  // Apply modal width to CSS variable --modal-max-width
+  const applyModalWidth = useCallback((widthKey: string) => {
+    setModalWidthState(widthKey);
+    const cssVal = MODAL_WIDTH_MAP[widthKey] || '64rem';
+    document.documentElement.style.setProperty('--modal-max-width', cssVal);
+    localStorage.setItem(MODAL_WIDTH_STORAGE_KEY, widthKey);
   }, []);
 
   // Handle escape key to close modal
@@ -46,6 +86,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     { label: t.settings.fontSizePresets.medium, size: 18.5 },
     { label: t.settings.fontSizePresets.large, size: 21 },
     { label: t.settings.fontSizePresets.xlarge, size: 24 }
+  ];
+
+  // Preset Mermaid diagram height options
+  const mermaidPresets = [
+    { label: t.settings.mermaidPresets.compact, size: 240 },
+    { label: t.settings.mermaidPresets.medium, size: 360 },
+    { label: t.settings.mermaidPresets.large, size: 500 },
+    { label: t.settings.mermaidPresets.xlarge, size: 650 }
+  ];
+
+  // Modal max width options
+  const modalWidthOptions = [
+    { key: '4xl', label: t.settings.modalWidthPresets.standard },
+    { key: '5xl', label: t.settings.modalWidthPresets.wide },
+    { key: '6xl', label: t.settings.modalWidthPresets.extraWide },
+    { key: '7xl', label: t.settings.modalWidthPresets.full }
   ];
 
   return (
@@ -198,6 +254,103 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   font-size: {fontSize.toFixed(1)}px (1rem = {fontSize.toFixed(1)}px)
                 </span>
               </div>
+            </div>
+          </section>
+
+          <hr className="border-slate-800" />
+
+          {/* Mermaid Diagram & Modal Dimensions Section */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
+                <Maximize2 className="w-4 h-4 text-indigo-400" />
+                <span>{t.settings.mermaidSection}</span>
+              </div>
+              <span className="text-xs font-mono font-bold bg-indigo-500/15 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30">
+                {mermaidHeight} px
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t.settings.mermaidDesc}
+            </p>
+
+            {/* Mermaid Height Slider */}
+            <div className="space-y-2">
+              <div className="text-xs text-slate-300 font-semibold flex items-center justify-between">
+                <span>{t.settings.mermaidHeightLabel}</span>
+              </div>
+              <input
+                type="range"
+                min="200"
+                max="800"
+                step="20"
+                value={mermaidHeight}
+                onChange={(e) => applyMermaidHeight(parseInt(e.target.value, 10))}
+                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none"
+              />
+              <div className="flex justify-between text-[11px] text-slate-500 font-mono">
+                <span>200px</span>
+                <span>360px (標準)</span>
+                <span>800px</span>
+              </div>
+            </div>
+
+            {/* Quick Presets for Mermaid Height */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              {mermaidPresets.map((preset) => (
+                <button
+                  key={preset.size}
+                  type="button"
+                  onClick={() => applyMermaidHeight(preset.size)}
+                  className={`py-2 px-2.5 rounded-lg text-xs font-semibold border transition ${
+                    mermaidHeight === preset.size
+                      ? 'bg-indigo-600 text-white border-indigo-400 shadow-sm'
+                      : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Modal Max Width Options */}
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+                <Layout className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{t.settings.modalWidthSection}</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {modalWidthOptions.map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => applyModalWidth(opt.key)}
+                    className={`py-2 px-2 rounded-lg text-xs font-semibold border transition ${
+                      modalWidth === opt.key
+                        ? 'bg-indigo-600 text-white border-indigo-400 shadow-sm'
+                        : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Reset Mermaid Settings Button */}
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  applyMermaidHeight(DEFAULT_MERMAID_HEIGHT);
+                  applyModalWidth(DEFAULT_MODAL_WIDTH);
+                }}
+                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-400 transition"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{t.settings.resetMermaidBtn}</span>
+              </button>
             </div>
           </section>
         </div>

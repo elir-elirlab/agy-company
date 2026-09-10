@@ -43,7 +43,10 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-slate-850 bg-slate-800 border border-slate-700/80 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden transition-all">
+      <div
+        className="bg-slate-850 bg-slate-800 border border-slate-700/80 rounded-2xl shadow-2xl w-full max-h-[88vh] flex flex-col overflow-hidden transition-all"
+        style={{ maxWidth: 'var(--modal-max-width, 64rem)' }}
+      >
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-slate-700/80 bg-slate-800/80 space-y-3">
           {/* Top Row: Icon, Title, Obsidian Link, Close Button */}
