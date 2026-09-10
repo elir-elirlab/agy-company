@@ -45,32 +45,43 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-slate-850 bg-slate-800 border border-slate-700/80 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden transition-all">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/80 bg-slate-800/80">
-          <div className="flex items-center space-x-3">
-            <div className="bg-emerald-500/15 p-1.5 rounded-lg border border-emerald-500/30 text-emerald-400">
-              <FileCode className="w-5 h-5" />
+        <div className="px-6 py-4 border-b border-slate-700/80 bg-slate-800/80 space-y-3">
+          {/* Top Row: Icon, Title, Obsidian Link, Close Button */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              <div className="bg-emerald-500/15 p-1.5 rounded-lg border border-emerald-500/30 text-emerald-400 shrink-0">
+                <FileCode className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-white text-lg truncate" title={data?.filename || filePath.split('/').pop()}>
+                {data?.filename || filePath.split('/').pop()}
+              </h3>
+              <a
+                href={obsidianUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-sm shrink-0 whitespace-nowrap"
+              >
+                <span>{t.fileViewer.openInObsidian}</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
-            <h3 className="font-bold text-white text-lg truncate max-w-sm sm:max-w-md">
-              {data?.filename || filePath.split('/').pop()}
-            </h3>
-            <a
-              href={obsidianUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-sm"
+
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-700/60 shrink-0"
+              aria-label="Close modal"
             >
-              <span>{t.fileViewer.openInObsidian}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
-          <div className="flex items-center space-x-3">
-            {/* View Mode Switcher (Preview / Raw) */}
-            <div className="flex items-center bg-slate-900/80 p-1 rounded-xl border border-slate-700/60 shadow-inner">
+          {/* Bottom Row: View Mode Switcher (Preview / Raw) */}
+          <div className="flex items-center justify-start pt-0.5">
+            <div className="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-700/60 shadow-inner">
               <button
                 type="button"
                 onClick={() => setViewMode('preview')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
                   viewMode === 'preview'
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
@@ -82,7 +93,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
               <button
                 type="button"
                 onClick={() => setViewMode('raw')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
                   viewMode === 'raw'
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
@@ -92,14 +103,6 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                 <span>{t.fileViewer.tabRaw}</span>
               </button>
             </div>
-
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-white transition p-1 rounded-lg hover:bg-slate-700/60"
-              aria-label="Close modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
