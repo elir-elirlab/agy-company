@@ -84,7 +84,9 @@ export const translations = {
       openInObsidian: 'Obsidian で開く',
       metadataTitle: 'Frontmatter メタデータ',
       loading: 'ドキュメントを読み込み中...',
-      error: 'コンテンツの読み込みに失敗しました。'
+      error: 'コンテンツの読み込みに失敗しました。',
+      tabPreview: 'プレビュー',
+      tabRaw: '生テキスト'
     }
   },
   en: {
@@ -168,7 +170,9 @@ export const translations = {
       openInObsidian: 'Open in Obsidian',
       metadataTitle: 'Frontmatter Metadata',
       loading: 'Loading document...',
-      error: 'Failed to load content.'
+      error: 'Failed to load content.',
+      tabPreview: 'Preview',
+      tabRaw: 'Raw Markdown'
     }
   }
 };

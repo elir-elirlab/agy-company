@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { X, ExternalLink, Tag, Link2, Calendar, FileCode } from 'lucide-react';
+import { X, ExternalLink, Tag, Link2, Calendar, FileCode, Eye, FileText } from 'lucide-react';
 import { getObsidianUri } from '../utils/obsidian';
 import { useI18n } from '../i18n/context';
+import { MarkdownViewer } from './MarkdownViewer';
 
 interface FileViewerModalProps {
   filePath: string | null;
@@ -20,6 +21,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
   const { t } = useI18n();
   const [data, setData] = useState<FileDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<'preview' | 'raw'>('preview');
 
   useEffect(() => {
     if (!filePath) {
@@ -48,7 +50,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
             <div className="bg-emerald-500/15 p-1.5 rounded-lg border border-emerald-500/30 text-emerald-400">
               <FileCode className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-white text-lg truncate max-w-lg">
+            <h3 className="font-bold text-white text-lg truncate max-w-sm sm:max-w-md">
               {data?.filename || filePath.split('/').pop()}
             </h3>
             <a
@@ -62,13 +64,43 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
             </a>
           </div>
 
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-white transition"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* View Mode Switcher (Preview / Raw) */}
+            <div className="flex items-center bg-slate-900/80 p-1 rounded-xl border border-slate-700/60 shadow-inner">
+              <button
+                type="button"
+                onClick={() => setViewMode('preview')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  viewMode === 'preview'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>{t.fileViewer.tabPreview}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('raw')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                  viewMode === 'raw'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>{t.fileViewer.tabRaw}</span>
+              </button>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-white transition p-1 rounded-lg hover:bg-slate-700/60"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
@@ -80,7 +112,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
               {/* Frontmatter Metadata Display */}
               {Object.keys(data.frontmatter || {}).length > 0 && (
                 <div className="bg-slate-900/80 border border-slate-700/60 rounded-xl p-4 space-y-2.5 text-xs shadow-inner">
-                  <div className="text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+                  <div className="text-slate-400 font-semibold uppercase tracking-wider text-xs">
                     {t.fileViewer.metadataTitle}
                   </div>
 
@@ -125,7 +157,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                         ? data.frontmatter.link.map((l: string) => (
                             <span
                               key={l}
-                              className="bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 px-2.5 py-0.5 rounded-md font-mono text-[11px]"
+                              className="bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 px-2.5 py-0.5 rounded-md font-mono text-xs"
                             >
                               {l}
                             </span>
@@ -136,11 +168,15 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                 </div>
               )}
 
-              {/* Document Body Markdown */}
+              {/* Document Body Markdown Rendering */}
               <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-6 shadow-inner">
-                <pre className="text-base font-sans whitespace-pre-wrap text-slate-100 leading-relaxed">
-                  {data.body}
-                </pre>
+                {viewMode === 'preview' ? (
+                  <MarkdownViewer content={data.body} />
+                ) : (
+                  <pre className="text-base font-mono whitespace-pre-wrap text-slate-200 leading-relaxed overflow-x-auto">
+                    {data.body}
+                  </pre>
+                )}
               </div>
             </>
           ) : (

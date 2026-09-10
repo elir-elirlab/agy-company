@@ -71,6 +71,8 @@ This project incorporates, depends upon, or was built using the following open s
 | **clsx** | MIT | Luke Edwards | https://github.com/lukeed/clsx |
 | **tailwind-merge** | MIT | Dany Castillo | https://github.com/dcastil/tailwind-merge |
 | **Testing Library** | MIT | Kent C. Dodds and contributors | https://github.com/testing-library/react-testing-library |
+| **marked** | MIT | Christopher Jeffrey and contributors | https://github.com/markedjs/marked |
+| **DOMPurify** | Apache-2.0 | Mario Heiderich and Cure53 | https://github.com/cure53/DOMPurify |
 
 ---
 
