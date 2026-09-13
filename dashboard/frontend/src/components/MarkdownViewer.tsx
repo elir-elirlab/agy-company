@@ -1,7 +1,9 @@
-// Markdown rendering component supporting GFM, code blocks, tables, Obsidian wiki-links, and Mermaid diagrams
+// Markdown rendering component supporting GFM, code blocks, tables, Obsidian wiki-links, Mermaid diagrams, and LaTeX math
 import React, { useMemo, useEffect, useRef } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 interface MarkdownViewerProps {
   content: string;
@@ -46,6 +48,67 @@ function preprocessObsidianMarkdown(markdown: string): string {
   return processed;
 }
 
+/**
+ * Preprocess LaTeX math expressions before passing to marked.
+ * Converts $$...$$ (block math) and $...$ (inline math) into KaTeX-rendered HTML.
+ * Math expressions are wrapped in container elements so they survive DOMPurify sanitization.
+ *
+ * Processing order matters:
+ *   1. Block math ($$...$$) first — to avoid inner $...$ being matched as inline math
+ *   2. Inline math ($...$) second
+ */
+function preprocessMathExpressions(markdown: string): string {
+  if (!markdown) return '';
+
+  let processed = markdown;
+
+  // Step 1: Replace block math $$...$$ (can span multiple lines)
+  // Regex explanation: \$\$ matches literal $$, ([\s\S]+?) captures the LaTeX non-greedy, \$\$ matches closing $$
+  processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => {
+    try {
+      // Render block math in display mode (centered, larger) using KaTeX
+      const html = katex.renderToString(tex.trim(), {
+        displayMode: true,
+        throwOnError: false,      // Show error message instead of crashing
+        output: 'html',           // Produce HTML output (not MathML)
+        trust: false,             // Disable potentially unsafe commands
+      });
+      // Wrap in a div with class 'math-block' for styling and to mark as processed
+      return `<div class="math-block">${html}</div>`;
+    } catch (err) {
+      // If KaTeX fails, show the raw LaTeX in a styled error container
+      console.warn('KaTeX block rendering failed:', err);
+      return `<div class="math-block math-error">$$${tex}$$</div>`;
+    }
+  });
+
+  // Step 2: Replace inline math $...$ (single line only, non-greedy)
+  // Regex explanation:
+  //   (?<!\$)  — negative lookbehind: don't match if preceded by $ (avoids matching $$)
+  //   \$       — literal opening $
+  //   ([^\$\n]+?) — capture LaTeX content (no $ or newline, non-greedy)
+  //   \$       — literal closing $
+  //   (?!\$)   — negative lookahead: don't match if followed by $ (avoids matching $$)
+  processed = processed.replace(/(?<!\$)\$([^\$\n]+?)\$(?!\$)/g, (_, tex) => {
+    try {
+      // Render inline math (same line, normal size) using KaTeX
+      const html = katex.renderToString(tex.trim(), {
+        displayMode: false,
+        throwOnError: false,
+        output: 'html',
+        trust: false,
+      });
+      // Wrap in a span with class 'math-inline' for styling
+      return `<span class="math-inline">${html}</span>`;
+    } catch (err) {
+      console.warn('KaTeX inline rendering failed:', err);
+      return `<span class="math-inline math-error">$${tex}$</span>`;
+    }
+  });
+
+  return processed;
+}
+
 export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, className = '' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -59,12 +122,18 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content, classNa
         breaks: true
       });
 
-      const preprocessed = preprocessObsidianMarkdown(content);
+      // Preprocess math expressions first (before Obsidian syntax) so that
+      // $$ delimiters are converted to KaTeX HTML before any other transformations
+      const mathProcessed = preprocessMathExpressions(content);
+      const preprocessed = preprocessObsidianMarkdown(mathProcessed);
       const rawHtml = marked.parse(preprocessed) as string;
 
-      // Sanitize HTML using DOMPurify (Apache-2.0) to prevent XSS attacks
+      // Sanitize HTML using DOMPurify (Apache-2.0) to prevent XSS attacks.
+      // KaTeX generates complex HTML with inline styles and SVG elements,
+      // so we need to allow additional tags and attributes for math rendering.
       return DOMPurify.sanitize(rawHtml, {
-        ADD_ATTR: ['target', 'rel', 'class', 'title']
+        ADD_TAGS: ['span', 'div', 'svg', 'path', 'line', 'rect', 'circle', 'ellipse', 'polygon', 'polyline', 'g', 'use', 'defs', 'clipPath', 'mask', 'symbol', 'text', 'tspan', 'image'],
+        ADD_ATTR: ['target', 'rel', 'class', 'title', 'style', 'xmlns', 'viewBox', 'width', 'height', 'd', 'fill', 'stroke', 'stroke-width', 'transform', 'x', 'y', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'points', 'preserveAspectRatio', 'clip-path', 'aria-hidden', 'focusable', 'role']
       });
     } catch (err) {
       console.error('Failed to parse markdown:', err);

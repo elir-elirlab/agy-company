@@ -218,4 +218,40 @@ html {
   margin: 0 auto;
 }
 
+/* KaTeX math expression styling for dark theme */
+.markdown-body .math-block {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.25rem 1rem;
+  margin: 1.25rem 0;
+  background: rgba(9, 13, 22, 0.6);
+  border: 1px solid #334155;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}
 
+.markdown-body .math-inline {
+  display: inline;
+  margin: 0 0.15em;
+}
+
+/* Override KaTeX default color to match dark theme text */
+.markdown-body .katex {
+  color: #e2e8f0;
+  font-size: 1.05em;
+}
+
+/* Block-level KaTeX should be slightly larger */
+.markdown-body .math-block .katex {
+  font-size: 1.15em;
+}
+
+/* Error state styling for failed math rendering */
+.markdown-body .math-error {
+  color: #fbbf24;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+}

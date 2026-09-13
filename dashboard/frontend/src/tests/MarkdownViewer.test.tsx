@@ -88,5 +88,53 @@ This is **bold text** and a paragraph.
       expect(screen.getByText(/SYNTAX_ERROR/)).toBeInTheDocument();
     });
   });
-});
 
+  it('renders block math ($$...$$) with KaTeX', () => {
+    // Block math should produce a .math-block container with rendered KaTeX HTML
+    const sample = '$$E = mc^2$$';
+    const { container } = render(<MarkdownViewer content={sample} />);
+
+    const mathBlock = container.querySelector('.math-block');
+    expect(mathBlock).toBeInTheDocument();
+    // KaTeX generates elements with class 'katex' for rendered output
+    expect(mathBlock?.querySelector('.katex')).toBeInTheDocument();
+  });
+
+  it('renders inline math ($...$) with KaTeX', () => {
+    // Inline math should produce a .math-inline container with rendered KaTeX HTML
+    const sample = 'The formula $x^2 + y^2 = r^2$ defines a circle.';
+    const { container } = render(<MarkdownViewer content={sample} />);
+
+    const mathInline = container.querySelector('.math-inline');
+    expect(mathInline).toBeInTheDocument();
+    expect(mathInline?.querySelector('.katex')).toBeInTheDocument();
+    // Surrounding text should also be rendered
+    expect(container.textContent).toContain('The formula');
+    expect(container.textContent).toContain('defines a circle.');
+  });
+
+  it('renders complex block math with \\text and \\longleftrightarrow', () => {
+    // Test the specific formula from the user's request
+    const sample = '$$\\text{Gregorian Calendar (UTC)} \\longleftrightarrow \\text{Julian Date (JD / MJD)}$$';
+    const { container } = render(<MarkdownViewer content={sample} />);
+
+    const mathBlock = container.querySelector('.math-block');
+    expect(mathBlock).toBeInTheDocument();
+    expect(mathBlock?.querySelector('.katex')).toBeInTheDocument();
+    // KaTeX may insert zero-width Unicode characters between words in \text{},
+    // so use regex matching instead of exact substring for content verification
+    expect(mathBlock?.textContent).toMatch(/Gregorian/);
+    expect(mathBlock?.textContent).toMatch(/Julian/);
+    expect(mathBlock?.textContent).toMatch(/Calendar/);
+  });
+
+  it('gracefully handles invalid LaTeX with error fallback', () => {
+    // Invalid LaTeX should not crash; KaTeX with throwOnError: false renders an error message
+    const sample = '$$\\invalidcommandxyz{broken}$$';
+    const { container } = render(<MarkdownViewer content={sample} />);
+
+    // Even with invalid LaTeX, the component should render without crashing
+    const mathBlock = container.querySelector('.math-block');
+    expect(mathBlock).toBeInTheDocument();
+  });
+});
