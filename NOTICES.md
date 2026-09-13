@@ -73,6 +73,7 @@ This project incorporates, depends upon, or was built using the following open s
 | **Testing Library** | MIT | Kent C. Dodds and contributors | https://github.com/testing-library/react-testing-library |
 | **marked** | MIT | Christopher Jeffrey and contributors | https://github.com/markedjs/marked |
 | **DOMPurify** | Apache-2.0 | Mario Heiderich and Cure53 | https://github.com/cure53/DOMPurify |
+| **KaTeX** | MIT | Khan Academy and KaTeX Contributors | https://github.com/KaTeX/KaTeX |
 | **mermaid** | MIT | Knut Sveidqvist and Mermaid Contributors | https://github.com/mermaid-js/mermaid |
 
 ---
