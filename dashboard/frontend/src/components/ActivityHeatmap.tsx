@@ -158,10 +158,10 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ todayDate, onO
           </div>
         ) : (
           <div className="inline-block mx-auto">
-            {/* Days of week */}
-            <div className="grid grid-cols-7 gap-1 mb-1">
+            {/* Days of week header row with readable text size */}
+            <div className="grid grid-cols-7 gap-1 mb-1.5">
               {t.heatmap.weekDays.map((dayLabel, idx) => (
-                <div key={idx} className="w-6 text-center text-[10px] font-medium text-slate-500">
+                <div key={idx} className="w-6 text-center text-sm font-semibold text-slate-400">
                   {dayLabel}
                 </div>
               ))}
