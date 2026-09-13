@@ -241,6 +241,37 @@ def get_file(path: str):
     }
 
 
+@app.get("/api/daily/calendar")
+def get_daily_calendar(year: int, month: int):
+    """
+    Get active daily note dates for a specific month and year.
+    """
+    if month < 1 or month > 12:
+        raise HTTPException(status_code=422, detail="Month must be between 1 and 12")
+
+    daily_dir = VAULT_DIR / "02_Daily"
+    active_dates = []
+
+    if daily_dir.exists():
+        prefix = f"{year}-{month:02d}-"
+        for filename in os.listdir(daily_dir):
+            if filename.startswith(prefix) and filename.endswith(".md"):
+                # Extract date part by stripping .md extension
+                active_dates.append(filename[:-3])
+
+    active_dates.sort()
+    
+    # Get timezone-consistent today's date
+    today_str = get_current_datetime().strftime("%Y-%m-%d")
+
+    return {
+        "year": year,
+        "month": month,
+        "today": today_str,
+        "active_dates": active_dates
+    }
+
+
 @app.get("/api/tree")
 def get_tree():
     """

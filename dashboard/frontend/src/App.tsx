@@ -8,6 +8,8 @@ import { OrgChartPanel } from './components/OrgChartPanel';
 import { SettingsModal } from './components/SettingsModal';
 import { StatusResponse, TodoItem, DeliverableMeta } from './types';
 
+import { ActivityHeatmap } from './components/ActivityHeatmap';
+
 export const App: React.FC = () => {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [todos, setTodos] = useState<TodoItem[]>([]);
@@ -153,12 +155,19 @@ export const App: React.FC = () => {
       />
 
       <main className="w-full px-8 py-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Column 1: Permanent Org Chart Panel */}
-        <section className="lg:col-span-3 h-[calc(100vh-140px)]">
-          <OrgChartPanel
-            selectedDepartment={selectedDept}
-            onSelectDepartment={setSelectedDept}
+        {/* Column 1: Activity Heatmap + Org Chart Panel */}
+        <section className="lg:col-span-3 flex flex-col gap-6 h-[calc(100vh-140px)]">
+          <ActivityHeatmap
+            todayDate={status?.today}
+            onOpenFile={(path) => setActiveFilePath(path)}
           />
+          {/* OrgChartPanel takes remaining height after heatmap, min-h-0 enables flex shrink */}
+          <div className="flex-1 min-h-0">
+            <OrgChartPanel
+              selectedDepartment={selectedDept}
+              onSelectDepartment={setSelectedDept}
+            />
+          </div>
         </section>
 
         {/* Column 2: Daily Tasks */}

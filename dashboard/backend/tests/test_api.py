@@ -111,3 +111,37 @@ def test_api_org(client_with_vault: TestClient):
     assert data["departments"][0]["id"] == "research"
     assert data["departments"][0]["name"] == "リサーチ部門 (Research)"
 
+
+def test_api_daily_calendar(client_with_vault: TestClient):
+    """Test /api/daily/calendar endpoint for the current month."""
+    from dashboard.backend.parser import get_current_datetime
+    current_dt = get_current_datetime()
+    year = current_dt.year
+    month = current_dt.month
+    today_str = current_dt.strftime("%Y-%m-%d")
+
+    res = client_with_vault.get(f"/api/daily/calendar?year={year}&month={month}")
+    assert res.status_code == 200
+    data = res.json()
+
+    assert data["year"] == year
+    assert data["month"] == month
+    assert data["today"] == today_str
+    assert today_str in data["active_dates"]
+
+
+def test_api_daily_calendar_empty_month(client_with_vault: TestClient):
+    """Test /api/daily/calendar endpoint for a month with no notes."""
+    res = client_with_vault.get("/api/daily/calendar?year=2020&month=1")
+    assert res.status_code == 200
+    data = res.json()
+
+    assert data["year"] == 2020
+    assert data["month"] == 1
+    assert data["active_dates"] == []
+
+
+def test_api_daily_calendar_invalid_month(client_with_vault: TestClient):
+    """Test /api/daily/calendar endpoint rejects invalid month."""
+    res = client_with_vault.get("/api/daily/calendar?year=2026&month=13")
+    assert res.status_code == 422

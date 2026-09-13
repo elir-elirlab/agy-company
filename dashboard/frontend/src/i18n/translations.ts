@@ -68,6 +68,13 @@ export const translations = {
       dailyFolder: '02_Daily/ (デイリーノート)',
       empty: '空'
     },
+    heatmap: {
+      title: '活動カレンダー',
+      activeDays: '活動日',
+      weekDays: ['日', '月', '火', '水', '木', '金', '土'],
+      noActivity: '活動なし',
+      months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+    },
     todos: {
       title: 'デイリータスク',
       openInObsidian: 'Obsidian で開く',
@@ -170,6 +177,13 @@ export const translations = {
       inboxFolder: '01_Inbox/ (Deliverables)',
       dailyFolder: '02_Daily/ (Daily Notes)',
       empty: 'Empty'
+    },
+    heatmap: {
+      title: 'Activity Calendar',
+      activeDays: 'active days',
+      weekDays: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      noActivity: 'No activity',
+      months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     },
     todos: {
       title: 'Daily Tasks',
