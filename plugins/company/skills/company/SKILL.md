@@ -175,8 +175,29 @@ When a domain is invoked 2+ times or requested:
    - Generate `.company/[department_name]/AGENTS.md` with operational guidelines.
 2. **Create Deliverables Directory (Obsidian Vault)**:
    - Create `vault/01_Inbox/[department_name]/` for published deliverables.
-3. **Register Department**:
+3. **Register Department & Synchronize Dashboard Configs**:
    - Update `.company/AGENTS.md` and `vault/AGENTS.md` with new department details.
+   - **Update Bilingual Dashboard Configurations**:
+     If `config/departments-ja.json` and `config/departments-en.json` exist, add the new department under `"departments"` in both files:
+     - `config/departments-ja.json`:
+       ```json
+       "departments": {
+         "[department_name]": {
+           "name": "[部署名 (英語表記)]",
+           "role": "[主な役割・専門業務の要約]"
+         }
+       }
+       ```
+     - `config/departments-en.json`:
+       ```json
+       "departments": {
+         "[department_name]": {
+           "name": "[Department Name in English]",
+           "role": "[Key responsibilities & role summary in English]"
+         }
+       }
+       ```
+     - *Benefit*: The Web Dashboard Org Chart immediately reflects the localized department name and role in both Japanese and English modes without requiring a container restart!
 
 ---
 
