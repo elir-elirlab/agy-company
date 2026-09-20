@@ -11,6 +11,8 @@ services:
     environment:
       # Path to mounted Obsidian Vault inside the container
       - VAULT_DIR=/app/vault
+      # Path to mounted configuration directory inside the container
+      - CONFIG_DIR=/app/config
       # Enable polling to reliably catch file changes across WSL / Google Drive mounts
       - WATCH_POLLING=true
       - PORT=3000
@@ -19,3 +21,5 @@ services:
     volumes:
       # Mount the Obsidian Vault directory into the container (default: ./vault, override via OBSIDIAN_VAULT_PATH)
       - ${OBSIDIAN_VAULT_PATH:-./vault}:/app/vault
+      # Mount the configuration directory into the container (default: ./config, override via CONFIG_PATH)
+      - ${CONFIG_PATH:-./config}:/app/config

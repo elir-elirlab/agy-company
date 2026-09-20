@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { X, Building2, User, BellRing, Layers, FolderTree, FileText, ArrowDown } from 'lucide-react';
+import { useI18n } from '../i18n/context';
 
 interface DepartmentDetail {
   id: string;
   name: string;
   role: string;
+  translations?: {
+    ja?: { name: string; role: string };
+    en?: { name: string; role: string };
+  };
   deliverables_count: number;
   path: string;
 }
@@ -13,11 +18,19 @@ interface OrgChartData {
   owner: {
     title: string;
     role: string;
+    translations?: {
+      ja?: { title: string; role: string };
+      en?: { title: string; role: string };
+    };
   };
   secretary: {
     title: string;
     role: string;
     is_permanent: boolean;
+    translations?: {
+      ja?: { title: string; role: string; permanent_badge?: string };
+      en?: { title: string; role: string; permanent_badge?: string };
+    };
   };
   departments: DepartmentDetail[];
 }
@@ -33,6 +46,7 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
   onClose,
   onSelectDepartment
 }) => {
+  const { t, language } = useI18n();
   const [data, setData] = useState<OrgChartData | null>(null);
   const [treeData, setTreeData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,9 +107,15 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
                 <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 rounded-xl p-4 w-72 text-center shadow-md">
                   <div className="flex items-center justify-center space-x-2 text-amber-300 font-bold text-base mb-1">
                     <User className="w-5 h-5" />
-                    <span>{data.owner.title}</span>
+                    <span>
+                      {data.owner.translations?.[language]?.title ??
+                        (language === 'ja' ? data.owner.title : t.org.ownerTitle)}
+                    </span>
                   </div>
-                  <p className="text-sm text-slate-300">{data.owner.role}</p>
+                  <p className="text-sm text-slate-300">
+                    {data.owner.translations?.[language]?.role ??
+                      (language === 'ja' ? data.owner.role : t.org.ownerRole)}
+                  </p>
                 </div>
 
                 {/* Connecting Arrow */}
@@ -108,11 +128,17 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
                 <div className="bg-indigo-950/60 border border-indigo-500/40 rounded-xl p-4 w-80 text-center shadow-md">
                   <div className="flex items-center justify-center space-x-2 text-indigo-300 font-bold text-base mb-1">
                     <BellRing className="w-5 h-5" />
-                    <span>{data.secretary.title}</span>
+                    <span>
+                      {data.secretary.translations?.[language]?.title ??
+                        (language === 'ja' ? data.secretary.title : t.org.secretaryTitle)}
+                    </span>
                   </div>
-                  <p className="text-sm text-slate-300">{data.secretary.role}</p>
+                  <p className="text-sm text-slate-300">
+                    {data.secretary.translations?.[language]?.role ??
+                      (language === 'ja' ? data.secretary.role : t.org.secretaryRole)}
+                  </p>
                   <span className="inline-block mt-2 text-sm bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30 font-medium">
-                    常設・専属窓口
+                    {data.secretary.translations?.[language]?.permanent_badge ?? t.org.permanentBadge}
                   </span>
                 </div>
 
@@ -125,45 +151,49 @@ export const OrgChartModal: React.FC<OrgChartModalProps> = ({
                 {/* 3. Specialized Departments Grid */}
                 <div className="w-full">
                   <div className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">
-                    専門部署 (Specialized Departments)
+                    {t.org.activeDeptsHeader}
                   </div>
 
                   {data.departments.length === 0 ? (
                     <div className="bg-slate-900/50 border border-slate-700/60 rounded-xl p-6 text-center text-slate-500 text-sm">
-                      現在、設立された専門部署はありません。<br />
-                      秘書室で同じジャンルのタスク（リサーチ、開発など）が2回以上発生すると、自動的に部署が設立されます。
+                      {t.org.noDeptsMessage}
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {data.departments.map((dept) => (
-                        <div
-                          key={dept.id}
-                          onClick={() => {
-                            onSelectDepartment(dept.id);
-                            onClose();
-                          }}
-                          className="bg-slate-700/40 hover:bg-slate-700/70 border border-slate-600/50 rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between group"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-bold text-slate-100 text-base group-hover:text-indigo-300 transition">
-                                {dept.name}
-                              </h4>
-                              <span className="text-sm bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
-                                {dept.deliverables_count} 成果物
-                              </span>
-                            </div>
-                            <p className="text-sm text-slate-300 leading-relaxed">
-                              {dept.role}
-                            </p>
-                          </div>
+                      {data.departments.map((dept) => {
+                        const deptName = dept.translations?.[language]?.name ?? dept.name;
+                        const deptRole = dept.translations?.[language]?.role ?? dept.role;
 
-                          <div className="mt-3 pt-2 border-t border-slate-600/30 flex items-center justify-between text-sm text-slate-400">
-                            <span className="font-mono">{dept.path}</span>
-                            <span className="text-indigo-400 group-hover:underline">一覧を見る →</span>
+                        return (
+                          <div
+                            key={dept.id}
+                            onClick={() => {
+                              onSelectDepartment(dept.id);
+                              onClose();
+                            }}
+                            className="bg-slate-700/40 hover:bg-slate-700/70 border border-slate-600/50 rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between group"
+                          >
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-bold text-slate-100 text-base group-hover:text-indigo-300 transition">
+                                  {deptName}
+                                </h4>
+                                <span className="text-sm bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
+                                  {dept.deliverables_count} {t.org.deliverablesCount}
+                                </span>
+                              </div>
+                              <p className="text-sm text-slate-300 leading-relaxed">
+                                {deptRole}
+                              </p>
+                            </div>
+
+                            <div className="mt-3 pt-2 border-t border-slate-600/30 flex items-center justify-between text-sm text-slate-400">
+                              <span className="font-mono">{dept.path}</span>
+                              <span className="text-indigo-400 group-hover:underline">{t.org.viewList}</span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

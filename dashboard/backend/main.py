@@ -1,5 +1,6 @@
 # FastAPI application for agy-company dashboard backend
 import os
+import json
 import asyncio
 from datetime import datetime
 from pathlib import Path
@@ -32,8 +33,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configurable vault path from environment variable (default: project root vault/)
-VAULT_DIR = Path(os.getenv("VAULT_DIR", Path(__file__).resolve().parent.parent.parent / "vault"))
+# Base project root path resolution (three levels above dashboard/backend/main.py)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+# Configurable config directory (default: project root config/)
+CONFIG_DIR = Path(os.getenv("CONFIG_DIR", PROJECT_ROOT / "config"))
+
+
+def load_common_config() -> Dict[str, Any]:
+    """
+    Load common application configuration from config/config.json.
+    Returns default settings dictionary if file is absent or invalid.
+    """
+    config_file = CONFIG_DIR / "config.json"
+    if config_file.exists() and config_file.is_file():
+        try:
+            return json.loads(config_file.read_text(encoding="utf-8"))
+        except Exception:
+            # Fallback to empty dictionary on JSON syntax or file read error
+            return {}
+    return {}
+
+
+COMMON_CONFIG = load_common_config()
+
+# Configurable vault path with precedence:
+# 1. VAULT_DIR environment variable
+# 2. vault_dir specified in config/config.json
+# 3. Default fallback: PROJECT_ROOT / "vault"
+raw_vault = os.getenv("VAULT_DIR") or COMMON_CONFIG.get("vault_dir", "vault")
+vault_candidate = Path(raw_vault)
+if not vault_candidate.is_absolute():
+    # Resolve relative path against PROJECT_ROOT for consistent directory navigation
+    VAULT_DIR = (PROJECT_ROOT / vault_candidate).resolve()
+else:
+    VAULT_DIR = vault_candidate.resolve()
 
 
 class ToggleTodoRequest(BaseModel):
@@ -113,24 +147,65 @@ def get_status():
     }
 
 
-# Department meta dictionary for human-friendly descriptions
-DEPARTMENT_INFO = {
-    "research": {"name": "リサーチ部門 (Research)", "role": "市場調査・競合分析・技術サーベイ"},
-    "engineering": {"name": "開発部門 (Engineering)", "role": "アーキテクチャ設計・技術仕様・プロトタイプ"},
-    "pm": {"name": "PM部門 (PM Office)", "role": "プロジェクト進捗・マイルストーン・タスクチケット"},
-    "marketing": {"name": "マーケティング部門 (Marketing)", "role": "コンテンツ企画・SNS・プロモーション"},
-    "finance": {"name": "経理部門 (Finance)", "role": "請求書・経費管理・収支記録"},
-    "sales": {"name": "営業部門 (Sales)", "role": "クライアント管理・提案書・商談メモ"},
-    "creative": {"name": "クリエイティブ部門 (Creative)", "role": "デザイン方針・ブランドガイド・UI/UX"},
-    "hr": {"name": "人事部門 (HR)", "role": "採用管理・チーム編成・オンボーディング"},
+# Default organization and department fallbacks if JSON configuration files are missing or incomplete
+DEFAULT_ORG_JA = {
+    "owner": {"title": "オーナー (Owner)", "role": "事業推進・意思決定・統括"},
+    "secretary": {"title": "秘書室 (Executive Secretary)", "role": "窓口対応・タスク管理・壁打ち・部署への作業委譲", "permanent_badge": "常設・専属窓口"},
+    "departments": {
+        "research": {"name": "リサーチ部門 (Research)", "role": "市場調査・競合分析・技術サーベイ"},
+        "engineering": {"name": "開発部門 (Engineering)", "role": "アーキテクチャ設計・技術仕様・プロトタイプ"},
+        "pm": {"name": "PM部門 (PM Office)", "role": "プロジェクト進捗・マイルストーン・タスクチケット"},
+        "marketing": {"name": "マーケティング部門 (Marketing)", "role": "コンテンツ企画・SNS・プロモーション"},
+        "finance": {"name": "経理部門 (Finance)", "role": "請求書・経費管理・収支記録"},
+        "sales": {"name": "営業部門 (Sales)", "role": "クライアント管理・提案書・商談メモ"},
+        "creative": {"name": "クリエイティブ部門 (Creative)", "role": "デザイン方針・ブランドガイド・UI/UX"},
+        "hr": {"name": "人事部門 (HR)", "role": "採用管理・チーム編成・オンボーディング"},
+    }
 }
+
+DEFAULT_ORG_EN = {
+    "owner": {"title": "Owner", "role": "Business Strategy, Decisions & Oversight"},
+    "secretary": {"title": "Executive Secretary", "role": "Concierge, Task Management, Brainstorming & Delegation", "permanent_badge": "Permanent Interface"},
+    "departments": {
+        "research": {"name": "Research Department", "role": "Market research, competitor analysis & tech survey"},
+        "engineering": {"name": "Engineering Department", "role": "Architecture design, technical specs & prototyping"},
+        "pm": {"name": "PM Office", "role": "Project progress, milestones & task ticketing"},
+        "marketing": {"name": "Marketing Department", "role": "Content planning, social media & promotions"},
+        "finance": {"name": "Finance Department", "role": "Invoicing, expense tracking & financial records"},
+        "sales": {"name": "Sales Department", "role": "Client relations, proposals & sales meetings"},
+        "creative": {"name": "Creative Department", "role": "Design guidelines, brand identity & UI/UX"},
+        "hr": {"name": "HR Department", "role": "Recruiting, team structuring & onboarding"},
+    }
+}
+
+
+def load_locale_config(lang: str) -> Dict[str, Any]:
+    """
+    Load locale-specific department and org configuration from config/departments-{lang}.json.
+    Falls back to embedded defaults if file is missing or invalid.
+    """
+    file_path = CONFIG_DIR / f"departments-{lang}.json"
+    fallback = DEFAULT_ORG_JA if lang == "ja" else DEFAULT_ORG_EN
+    if file_path.exists() and file_path.is_file():
+        try:
+            data = json.loads(file_path.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return data
+        except Exception:
+            # Fallback on JSON parse error
+            pass
+    return fallback
 
 
 @app.get("/api/org")
 def get_organization():
     """
     Get organization structure and department details for Org Chart visualization.
+    Dynamically loads configuration from config/departments-ja.json and config/departments-en.json.
     """
+    config_ja = load_locale_config("ja")
+    config_en = load_locale_config("en")
+
     deliverables = get_inbox_deliverables(VAULT_DIR)
     inbox_dir = VAULT_DIR / "01_Inbox"
 
@@ -144,27 +219,66 @@ def get_organization():
         for folder in sorted(inbox_dir.iterdir()):
             if folder.is_dir() and not folder.name.startswith("."):
                 dept_id = folder.name
-                info = DEPARTMENT_INFO.get(dept_id, {
-                    "name": f"{dept_id.capitalize()} 部門",
-                    "role": "専門業務の遂行と成果物の作成"
-                })
+
+                # Retrieve Japanese metadata with fallback
+                dept_ja = config_ja.get("departments", {}).get(dept_id, {})
+                ja_name = dept_ja.get("name") or f"{dept_id.capitalize()} 部門"
+                ja_role = dept_ja.get("role") or "専門業務の遂行と成果物の作成"
+
+                # Retrieve English metadata with fallback to Japanese or capitalized name
+                dept_en = config_en.get("departments", {}).get(dept_id, {})
+                en_name = dept_en.get("name") or ja_name or f"{dept_id.capitalize()} Department"
+                en_role = dept_en.get("role") or ja_role or "Specialized operational tasks and deliverables"
+
                 active_departments.append({
                     "id": dept_id,
-                    "name": info["name"],
-                    "role": info["role"],
+                    "name": ja_name,
+                    "role": ja_role,
+                    "translations": {
+                        "ja": {"name": ja_name, "role": ja_role},
+                        "en": {"name": en_name, "role": en_role}
+                    },
                     "deliverables_count": dept_counts.get(dept_id, 0),
                     "path": f"01_Inbox/{dept_id}"
                 })
 
+    # Owner and Secretary definitions with bilingual translations
+    owner_ja = config_ja.get("owner", DEFAULT_ORG_JA["owner"])
+    owner_en = config_en.get("owner", DEFAULT_ORG_EN["owner"])
+    secretary_ja = config_ja.get("secretary", DEFAULT_ORG_JA["secretary"])
+    secretary_en = config_en.get("secretary", DEFAULT_ORG_EN["secretary"])
+
     return {
         "owner": {
-            "title": "オーナー (Owner)",
-            "role": "事業推進・意思決定・統括"
+            "title": owner_ja.get("title", "オーナー (Owner)"),
+            "role": owner_ja.get("role", "事業推進・意思決定・統括"),
+            "translations": {
+                "ja": {
+                    "title": owner_ja.get("title", "オーナー (Owner)"),
+                    "role": owner_ja.get("role", "事業推進・意思決定・統括")
+                },
+                "en": {
+                    "title": owner_en.get("title", "Owner"),
+                    "role": owner_en.get("role", "Business Strategy, Decisions & Oversight")
+                }
+            }
         },
         "secretary": {
-            "title": "秘書室 (Executive Secretary)",
-            "role": "窓口対応・タスク管理・壁打ち・部署への作業委譲",
-            "is_permanent": True
+            "title": secretary_ja.get("title", "秘書室 (Executive Secretary)"),
+            "role": secretary_ja.get("role", "窓口対応・タスク管理・壁打ち・部署への作業委譲"),
+            "is_permanent": True,
+            "translations": {
+                "ja": {
+                    "title": secretary_ja.get("title", "秘書室 (Executive Secretary)"),
+                    "role": secretary_ja.get("role", "窓口対応・タスク管理・壁打ち・部署への作業委譲"),
+                    "permanent_badge": secretary_ja.get("permanent_badge", "常設・専属窓口")
+                },
+                "en": {
+                    "title": secretary_en.get("title", "Executive Secretary"),
+                    "role": secretary_en.get("role", "Concierge, Task Management, Brainstorming & Delegation"),
+                    "permanent_badge": secretary_en.get("permanent_badge", "Permanent Interface")
+                }
+            }
         },
         "departments": active_departments
     }

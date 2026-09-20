@@ -1,0 +1,45 @@
+{
+  "owner": {
+    "title": "オーナー (Owner)",
+    "role": "事業推進・意思決定・統括"
+  },
+  "secretary": {
+    "title": "秘書室 (Executive Secretary)",
+    "role": "窓口対応・タスク管理・壁打ち・部署への作業委譲",
+    "permanent_badge": "常設・専属窓口"
+  },
+  "departments": {
+    "research": {
+      "name": "リサーチ部門 (Research)",
+      "role": "市場調査・競合分析・技術サーベイ"
+    },
+    "engineering": {
+      "name": "開発部門 (Engineering)",
+      "role": "アーキテクチャ設計・技術仕様・プロトタイプ"
+    },
+    "pm": {
+      "name": "PM部門 (PM Office)",
+      "role": "プロジェクト進捗・マイルストーン・タスクチケット"
+    },
+    "marketing": {
+      "name": "マーケティング部門 (Marketing)",
+      "role": "コンテンツ企画・SNS・プロモーション"
+    },
+    "finance": {
+      "name": "経理部門 (Finance)",
+      "role": "請求書・経費管理・収支記録"
+    },
+    "sales": {
+      "name": "営業部門 (Sales)",
+      "role": "クライアント管理・提案書・商談メモ"
+    },
+    "creative": {
+      "name": "クリエイティブ部門 (Creative)",
+      "role": "デザイン方針・ブランドガイド・UI/UX"
+    },
+    "hr": {
+      "name": "人事部門 (HR)",
+      "role": "採用管理・チーム編成・オンボーディング"
+    }
+  }
+}

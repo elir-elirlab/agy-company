@@ -1,0 +1,45 @@
+{
+  "owner": {
+    "title": "Owner",
+    "role": "Business Strategy, Decisions & Oversight"
+  },
+  "secretary": {
+    "title": "Executive Secretary",
+    "role": "Concierge, Task Management, Brainstorming & Delegation",
+    "permanent_badge": "Permanent Interface"
+  },
+  "departments": {
+    "research": {
+      "name": "Research Department",
+      "role": "Market research, competitor analysis & tech survey"
+    },
+    "engineering": {
+      "name": "Engineering Department",
+      "role": "Architecture design, technical specs & prototyping"
+    },
+    "pm": {
+      "name": "PM Office",
+      "role": "Project progress, milestones & task ticketing"
+    },
+    "marketing": {
+      "name": "Marketing Department",
+      "role": "Content planning, social media & promotions"
+    },
+    "finance": {
+      "name": "Finance Department",
+      "role": "Invoicing, expense tracking & financial records"
+    },
+    "sales": {
+      "name": "Sales Department",
+      "role": "Client relations, proposals & sales meetings"
+    },
+    "creative": {
+      "name": "Creative Department",
+      "role": "Design guidelines, brand identity & UI/UX"
+    },
+    "hr": {
+      "name": "HR Department",
+      "role": "Recruiting, team structuring & onboarding"
+    }
+  }
+}

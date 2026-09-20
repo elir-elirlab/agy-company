@@ -6,6 +6,10 @@ interface DepartmentDetail {
   id: string;
   name: string;
   role: string;
+  translations?: {
+    ja?: { name: string; role: string };
+    en?: { name: string; role: string };
+  };
   deliverables_count: number;
   path: string;
 }
@@ -14,11 +18,19 @@ interface OrgChartData {
   owner: {
     title: string;
     role: string;
+    translations?: {
+      ja?: { title: string; role: string };
+      en?: { title: string; role: string };
+    };
   };
   secretary: {
     title: string;
     role: string;
     is_permanent: boolean;
+    translations?: {
+      ja?: { title: string; role: string; permanent_badge?: string };
+      en?: { title: string; role: string; permanent_badge?: string };
+    };
   };
   departments: DepartmentDetail[];
 }
@@ -78,10 +90,14 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
             <div className="bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/35 rounded-xl p-3.5 w-full text-center shadow-sm">
               <div className="flex items-center justify-center space-x-1.5 text-amber-300 font-bold text-sm">
                 <User className="w-4 h-4" />
-                <span>{language === 'ja' ? data.owner.title : t.org.ownerTitle}</span>
+                <span>
+                  {data.owner.translations?.[language]?.title ??
+                    (language === 'ja' ? data.owner.title : t.org.ownerTitle)}
+                </span>
               </div>
               <p className="text-sm text-slate-300 mt-1 font-medium leading-relaxed">
-                {language === 'ja' ? data.owner.role : t.org.ownerRole}
+                {data.owner.translations?.[language]?.role ??
+                  (language === 'ja' ? data.owner.role : t.org.ownerRole)}
               </p>
             </div>
 
@@ -95,13 +111,17 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
             <div className="bg-indigo-950/50 border border-indigo-500/35 rounded-xl p-3.5 w-full text-center shadow-sm">
               <div className="flex items-center justify-center space-x-1.5 text-indigo-300 font-bold text-sm">
                 <BellRing className="w-4 h-4" />
-                <span>{language === 'ja' ? data.secretary.title : t.org.secretaryTitle}</span>
+                <span>
+                  {data.secretary.translations?.[language]?.title ??
+                    (language === 'ja' ? data.secretary.title : t.org.secretaryTitle)}
+                </span>
               </div>
               <p className="text-sm text-slate-300 mt-1 font-medium leading-relaxed">
-                {language === 'ja' ? data.secretary.role : t.org.secretaryRole}
+                {data.secretary.translations?.[language]?.role ??
+                  (language === 'ja' ? data.secretary.role : t.org.secretaryRole)}
               </p>
               <span className="inline-block mt-2 text-sm bg-indigo-500/20 text-indigo-300 font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
-                {t.org.permanentBadge}
+                {data.secretary.translations?.[language]?.permanent_badge ?? t.org.permanentBadge}
               </span>
             </div>
 
@@ -125,6 +145,9 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
                 <div className="space-y-2">
                   {data.departments.map((dept) => {
                     const isSelected = selectedDepartment === dept.id;
+                    // Resolve localized department name and role based on active language
+                    const deptName = dept.translations?.[language]?.name ?? dept.name;
+                    const deptRole = dept.translations?.[language]?.role ?? dept.role;
 
                     return (
                       <div
@@ -138,14 +161,14 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
                       >
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="font-bold text-sm text-slate-100">
-                            {dept.name}
+                            {deptName}
                           </span>
                           <span className="text-sm bg-emerald-500/20 text-emerald-300 font-medium px-2 py-0.5 rounded-full border border-emerald-500/30">
                             {dept.deliverables_count} {t.org.deliverablesCount}
                           </span>
                         </div>
                         <p className="text-sm text-slate-300 leading-relaxed line-clamp-2">
-                          {dept.role}
+                          {deptRole}
                         </p>
                       </div>
                     );
