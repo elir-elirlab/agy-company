@@ -86,7 +86,7 @@ export const translations = {
     deliverables: {
       title: 'Vault 成果物 (01_Inbox)',
       filesCount: '件',
-      all: 'すべて',
+      all: 'All',
       noDeliverables: '成果物はまだありません',
       noDeliverablesHint: 'サブエージェントがここに調査レポートや設計書を納品します',
       obsidianBtn: 'Obsidian',

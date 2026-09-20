@@ -148,7 +148,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               >
                 <div>
                   <div className="text-sm">日本語 (Japanese)</div>
-                  <div className="text-sm text-slate-400 font-normal mt-0.5">標準インターフェース</div>
+                  <div className="text-sm text-slate-400 font-normal mt-0.5">日本語 UI</div>
                 </div>
                 {language === 'ja' && <Check className="w-4 h-4 text-indigo-400" />}
               </button>
