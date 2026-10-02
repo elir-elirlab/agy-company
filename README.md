@@ -12,6 +12,9 @@ A dedicated **Executive Secretary** serves as your single primary interface—ha
 
 All deliverables are organized and persisted in a local **Obsidian Vault** (Markdown files), paired with a responsive, zero-cost **local Web Dashboard** for real-time visualization and management.
 
+![screenshot-en](docs/Screenshot-Dashboard-EN.png)
+
+
 ---
 
 ## 🌟 3 Core Design Principles
@@ -200,22 +203,7 @@ docker compose up -d
 Open **`http://localhost:18000`** in your web browser.  
 *(Bound to localhost `127.0.0.1:18000:3000` to prevent unintended exposure to the local network).*
 
-```text
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ 🏢 agy-company   Obsidian Cockpit       [Progress: 2/3]  [⚙️ Settings] [● Live Sync] │
-├─────────────────────┬───────────────────────────┬─────────────────────────────┤
-│ 1. Org Chart Panel   │ 2. Daily Tasks            │ 3. Deliverables (01_Inbox)   │
-│                     │                           │                             │
-│ 👑 Owner            │ 📅 2026-09-20             │ 📂 All | Research | Dev | PM│
-│         ↓           │ [x] Review morning agenda │ 📄 2026-09-19 Market Survey │
-│ 🛎️ Secretary Office │ [ ] Review API specs      │    [Open in Obsidian]       │
-│         ↓           │ [ ] Client follow-up      │ 📄 2026-09-18 Auth System   │
-│ 👥 Departments      │                           │                             │
-│  - Research (3)     │ [+ Quick Capture]         │                             │
-│  - Engineering (2)  │                           │                             │
-│ 📁 Vault Tree View  │                           │                             │
-└─────────────────────┴───────────────────────────┴─────────────────────────────┘
-```
+![screenshot-en](docs/Screenshot-Dashboard-EN.png)
 
 ### Dashboard Panels & Features
 
