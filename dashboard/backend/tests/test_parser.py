@@ -1,13 +1,22 @@
 # Unit tests for markdown parser and todo toggler
 import pytest
 from pathlib import Path
-from dashboard.backend.parser import (
-    parse_daily_todos,
-    toggle_daily_todo,
-    get_inbox_deliverables,
-    create_quick_inbox_note,
-    extract_frontmatter
-)
+try:
+    from dashboard.backend.parser import (
+        parse_daily_todos,
+        toggle_daily_todo,
+        get_inbox_deliverables,
+        create_quick_inbox_note,
+        extract_frontmatter
+    )
+except ImportError:
+    from backend.parser import (
+        parse_daily_todos,
+        toggle_daily_todo,
+        get_inbox_deliverables,
+        create_quick_inbox_note,
+        extract_frontmatter
+    )
 
 
 @pytest.fixture

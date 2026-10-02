@@ -58,8 +58,8 @@ A lightweight cockpit powered by FastAPI, React, and Tailwind CSS.
 
 ```text
 agy-company/
-├── README.md                           # Japanese Documentation
-├── README_EN.md                        # English Documentation (This file)
+├── README.md                           # English Documentation (This file)
+├── README_JP.md                        # Japanese Documentation
 ├── config/                             # Organization, department, and system settings (JSON)
 │   ├── config.json                     # System common config (Vault path, default language)
 │   ├── departments-ja.json             # Japanese organization, titles, and department definitions

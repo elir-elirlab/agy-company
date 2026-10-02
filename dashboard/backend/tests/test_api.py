@@ -2,8 +2,15 @@
 import pytest
 from pathlib import Path
 from fastapi.testclient import TestClient
-from dashboard.backend.main import app
-import dashboard.backend.main as backend_main
+
+try:
+    from dashboard.backend.main import app
+    import dashboard.backend.main as backend_main
+    from dashboard.backend.parser import get_current_datetime
+except ImportError:
+    from backend.main import app
+    import backend.main as backend_main
+    from backend.parser import get_current_datetime
 
 
 @pytest.fixture
@@ -16,7 +23,6 @@ def client_with_vault(tmp_path: Path):
     daily.mkdir(parents=True)
 
     # Today's daily note using timezone-aware helper
-    from dashboard.backend.parser import get_current_datetime
     today_str = get_current_datetime().strftime("%Y-%m-%d")
     daily_content = f"""# {today_str}
 
@@ -63,7 +69,6 @@ def test_api_todos_today(client_with_vault: TestClient):
 def test_api_toggle_todo(client_with_vault: TestClient):
     """Test /api/todos/toggle endpoint successfully updates the task state."""
     # Obtain current date string respecting configured timezone
-    from dashboard.backend.parser import get_current_datetime
     today_str = get_current_datetime().strftime("%Y-%m-%d")
 
     # Get today's todos first
@@ -114,7 +119,6 @@ def test_api_org(client_with_vault: TestClient):
 
 def test_api_daily_calendar(client_with_vault: TestClient):
     """Test /api/daily/calendar endpoint for the current month."""
-    from dashboard.backend.parser import get_current_datetime
     current_dt = get_current_datetime()
     year = current_dt.year
     month = current_dt.month

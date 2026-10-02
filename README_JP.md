@@ -57,7 +57,8 @@ LLMのAPIキー消費はゼロ（0円）で、Obsidian内のファイルを直�
 
 ```text
 agy-company/
-├── README.md                           # 本ドキュメント
+├── README.md                           # 英語ドキュメント
+├── README_JP.md                        # 日本語ドキュメント（本ファイル）
 ├── config/                             # 組織・部署・共通設定 (JSON)
 │   ├── config.json                     # システム共通設定 (Vaultパス・デフォルト言語)
 │   ├── departments-ja.json             # 日本語の組織（役職・部署名・役割）定義
