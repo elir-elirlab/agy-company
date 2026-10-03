@@ -48,7 +48,7 @@ ls -l .agents/plugins/company
 
 ### 手順 2: Vault フォルダの準備
 
-成果物やデイリーノートを保存するための `vault` ディレクトリを作成します：
+成果物やデイリーノートを保存するための `vault` ディレクトリを作成します (作成済み)：
 
 ```bash
 mkdir -p vault

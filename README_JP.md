@@ -11,6 +11,7 @@
 ユーザー（オーナー）専任の **エグゼクティブ秘書 (Executive Secretary)** が窓口となり、日常のタスク管理、壁打ち、メモの整理から、専門サブエージェント（`invoke_subagent`）への業務委譲までを一手に引き受けます。
 
 成果物はすべて **Obsidian Vault**（ローカルMarkdown）に蓄積され、専用の **ローカルWebダッシュボード** で快適に可視化・管理できます。
+(Obsidian がない場合は単なるマークダウンメモとして蓄積されます。)
 
 ![screenshot-en](docs/Screenshot-Dashboard.png)
 
@@ -93,14 +94,14 @@ agy-company/
 Antigravity CLI は、カレントディレクトリの `.agents/` または `~/.gemini/config/` からプラグイン・スキルを自動検出します。
 
 ### 1. ワークスペースへの配置
-本リポジトリのルートで、`.agents/plugins/company` へのシンボリックリンクを作成します（初期設定済み）：
+本リポジトリのルートで、`.agents/plugins/company` へのシンボリックリンクを作成します）：
 
 ```bash
 mkdir -p .agents/plugins
 ln -s "$(pwd)/plugins/company" .agents/plugins/company
 ```
 
-### 2. Obsidian Vault のマウント（推奨）
+### 2. ノート置き場（Vault）の設定
 Obsidian と連携させたい場合は、会社専用の Obsidian Vault を `./vault` にバインドマウントします。
 あるいはObsidian Vault のうち、会社専用フォルダを `./vault` にバインドマウントします：
 
@@ -110,7 +111,10 @@ sudo mount --bind "/path/to/Obsidian/MyVault/company" ./vault
 ```
 > [!IMPORTANT]
 > 既存の個人用Vault全体ではなく、必ずVault内の `company` などの**専用サブフォルダ**をマウントしてください。これにより、既存の個人ノートが誤って変更されるのを防ぎます。
-> Obsidian がインストールされていなくても、vault/ は単なる「普通の Markdown（.md）メモ帳フォルダ」として機能します（その場合は./vault内は空でOK）。
+
+> [!NOTE]
+> Obsidian と連携させない場合、vault/ は単なる「普通の Markdown（.md）メモ帳フォルダ」として機能します（その場合は./vault内は空でOK）。
+
 
 ---
 
