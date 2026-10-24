@@ -66,6 +66,7 @@ export const translations = {
       vaultTreeTitle: 'Vault フォルダツリー',
       inboxFolder: '01_Inbox/ (成果物)',
       dailyFolder: '02_Daily/ (デイリーノート)',
+      dailyRecentBadge: '直近7日分',
       empty: '空'
     },
     heatmap: {
@@ -176,6 +177,7 @@ export const translations = {
       vaultTreeTitle: 'Vault Directory Tree',
       inboxFolder: '01_Inbox/ (Deliverables)',
       dailyFolder: '02_Daily/ (Daily Notes)',
+      dailyRecentBadge: 'Recent 7 days',
       empty: 'Empty'
     },
     heatmap: {

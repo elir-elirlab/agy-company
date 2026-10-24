@@ -105,8 +105,38 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ todayDate, onO
     return cells;
   }, [totalCells, firstDayOffset, daysInMonth, currentYear, currentMonth, activeDates, todayDate]);
 
-  const activeDaysCount = activeDates.size;
-  const activityPercentage = daysInMonth > 0 ? Math.round((activeDaysCount / daysInMonth) * 100) : 0;
+  // Determine if the user is currently viewing the active ongoing month
+  const isCurrentMonth =
+    currentYear === today.getFullYear() && currentMonth === today.getMonth() + 1;
+
+  // For the current month, calculate total elapsed days from the 1st up to today.
+  // For past months, count all days in that month (daysInMonth).
+  const targetDaysCount = isCurrentMonth ? today.getDate() : daysInMonth;
+
+  // Count active days up to today if viewing the current month, or all active days for past months
+  const activeDaysCount = useMemo(() => {
+    if (!isCurrentMonth) {
+      return activeDates.size;
+    }
+    // Format today as YYYY-MM-DD for boundary date comparison
+    const todayStr =
+      todayDate ||
+      `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(
+        today.getDate()
+      ).padStart(2, '0')}`;
+    let count = 0;
+    activeDates.forEach((dateStr) => {
+      // Only include activity dates that are on or before today
+      if (dateStr <= todayStr) {
+        count++;
+      }
+    });
+    return count;
+  }, [activeDates, isCurrentMonth, today, todayDate]);
+
+  // Compute percentage based on elapsed days (1st to today) or total month days
+  const activityPercentage =
+    targetDaysCount > 0 ? Math.round((activeDaysCount / targetDaysCount) * 100) : 0;
 
   const monthLabel = language === 'ja' 
     ? `${currentYear}年${t.heatmap.months[currentMonth - 1]}`
@@ -223,10 +253,10 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ todayDate, onO
         )}
       </div>
 
-      {/* Summary */}
+      {/* Summary displaying active days vs elapsed/total days */}
       {!loading && !error && (
         <div className="text-xs text-slate-400 text-right mt-1 font-medium">
-          {activeDaysCount} / {daysInMonth} {t.heatmap.activeDays} ({activityPercentage}%)
+          {activeDaysCount} / {targetDaysCount} {t.heatmap.activeDays} ({activityPercentage}%)
         </div>
       )}
     </div>

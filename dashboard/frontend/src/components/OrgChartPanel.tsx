@@ -209,15 +209,22 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
                   )}
                 </div>
 
-                {/* 02_Daily Directory */}
+                {/* 02_Daily Directory (Limited to the most recent 7 days) */}
                 <div>
-                  <div className="font-bold text-indigo-400 flex items-center gap-2 text-base">
-                    <FileText className="w-4.5 h-4.5" />
-                    {t.org.dailyFolder}
+                  <div className="font-bold text-indigo-400 flex items-center justify-between text-base">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4.5 h-4.5" />
+                      <span>{t.org.dailyFolder}</span>
+                    </div>
+                    {/* Badge indicating that only the recent 7 days are displayed */}
+                    <span className="text-xs bg-indigo-500/20 text-indigo-300 font-medium px-2 py-0.5 rounded-full border border-indigo-500/30 font-sans">
+                      {t.org.dailyRecentBadge}
+                    </span>
                   </div>
                   {treeData.daily && treeData.daily.length > 0 ? (
                     <ul className="pl-4 border-l-2 border-slate-700 ml-2 mt-2 space-y-2 text-slate-300 text-sm">
-                      {treeData.daily.map((item: any) => (
+                      {/* Render only up to the most recent 7 daily notes */}
+                      {treeData.daily.slice(0, 7).map((item: any) => (
                         <li key={item.relative_path} className="truncate hover:text-white transition py-0.5">
                           📄 {item.name}
                         </li>
