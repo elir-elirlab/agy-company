@@ -149,3 +149,44 @@ def test_api_daily_calendar_invalid_month(client_with_vault: TestClient):
     """Test /api/daily/calendar endpoint rejects invalid month."""
     res = client_with_vault.get("/api/daily/calendar?year=2026&month=13")
     assert res.status_code == 422
+
+
+def test_api_tree_daily_limit(client_with_vault: TestClient):
+    """
+    Test /api/tree endpoint limits daily notes to the most recent 7 days by default,
+    sorted by date descending.
+    """
+    daily_dir = backend_main.VAULT_DIR / "02_Daily"
+
+    # Clear any preexisting daily files created by fixtures to ensure exact test counts
+    for existing_file in daily_dir.iterdir():
+        if existing_file.is_file():
+            existing_file.unlink()
+
+    # Create 10 distinct daily notes (from 2026-10-01 to 2026-10-10)
+    for i in range(1, 11):
+        day_str = f"2026-10-{i:02d}"
+        (daily_dir / f"{day_str}.md").write_text(f"# {day_str}\n- [ ] Task {i}\n", encoding="utf-8")
+
+    # Request tree without query parameter (should default to exactly 7 notes)
+    res = client_with_vault.get("/api/tree")
+    assert res.status_code == 200
+    data = res.json()
+
+    assert "daily" in data
+    assert "inbox" in data
+    assert len(data["daily"]) == 7
+
+    # Verify notes are sorted descending (latest date first)
+    assert data["daily"][0]["name"] == "2026-10-10.md"
+    assert data["daily"][6]["name"] == "2026-10-04.md"
+
+    # Test custom daily_limit parameter (should restrict to exactly 3 notes)
+    custom_res = client_with_vault.get("/api/tree?daily_limit=3")
+    assert custom_res.status_code == 200
+    custom_data = custom_res.json()
+    assert len(custom_data["daily"]) == 3
+    assert custom_data["daily"][0]["name"] == "2026-10-10.md"
+    assert custom_data["daily"][2]["name"] == "2026-10-08.md"
+
+

@@ -38,8 +38,8 @@ describe('ActivityHeatmap Component', () => {
 
     // Wait for the calendar cells and summary to be rendered after data fetch
     await waitFor(() => {
-      // Check summary: 3 / 30 active days (10%)
-      expect(screen.getByText(/3 \/ 30/)).toBeInTheDocument();
+      // Check summary: 3 / 14 active days (21%) since calculation counts 1st to today (14th)
+      expect(screen.getByText(/3 \/ 14/)).toBeInTheDocument();
     });
   });
 
@@ -76,7 +76,7 @@ describe('ActivityHeatmap Component', () => {
 
     // Wait for the calendar to finish loading
     await waitFor(() => {
-      expect(screen.getByText(/3 \/ 30/)).toBeInTheDocument();
+      expect(screen.getByText(/3 \/ 14/)).toBeInTheDocument();
     });
 
     // Locate the next month button (chevron right)
@@ -98,7 +98,7 @@ describe('ActivityHeatmap Component', () => {
 
     // Wait for the initial calendar fetch to complete
     await waitFor(() => {
-      expect(screen.getByText(/3 \/ 30/)).toBeInTheDocument();
+      expect(screen.getByText(/3 \/ 14/)).toBeInTheDocument();
     });
 
     const buttons = screen.getAllByRole('button');

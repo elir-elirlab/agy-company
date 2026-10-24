@@ -1,0 +1,25 @@
+# Dependabot configuration for agy-company repository
+# Restricts automated version bumps to non-breaking minor and patch updates
+version: 2
+updates:
+  # 1. Frontend dependencies (npm)
+  - package-ecosystem: "npm"
+    directory: "/dashboard/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    # Ignore breaking major version upgrades to prevent ecosystem incompatibility
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # 2. Backend dependencies (pip)
+  - package-ecosystem: "pip"
+    directory: "/dashboard/backend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    # Ignore breaking major version upgrades to prevent FastAPI / Pydantic incompatibilities
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

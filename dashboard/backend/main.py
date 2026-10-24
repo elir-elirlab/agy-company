@@ -387,11 +387,13 @@ def get_daily_calendar(year: int, month: int):
 
 
 @app.get("/api/tree")
-def get_tree():
+def get_tree(daily_limit: int = 7):
     """
     Generate directory and file tree for 01_Inbox and 02_Daily.
+    For 02_Daily, returns up to daily_limit most recent daily notes (default: 7 days) sorted by date descending.
     """
     def build_tree(directory: Path) -> List[Dict[str, Any]]:
+        # Recursive helper to build directory tree for 01_Inbox
         items = []
         if not directory.exists():
             return items
@@ -409,9 +411,37 @@ def get_tree():
             items.append(item)
         return items
 
+    def build_daily_tree(directory: Path, limit: int = 7) -> List[Dict[str, Any]]:
+        """
+        Build file tree for 02_Daily limited to the most recent daily notes.
+        Filters for markdown files, sorts by date descending, and limits to specified count.
+        """
+        if not directory.exists():
+            return []
+
+        # Collect non-hidden markdown daily files
+        daily_files = [
+            f for f in directory.iterdir()
+            if f.is_file() and not f.name.startswith(".") and f.name.endswith(".md")
+        ]
+        # Sort files by filename descending (e.g., 2026-10-24.md before 2026-10-23.md)
+        daily_files.sort(key=lambda p: p.name, reverse=True)
+
+        # Restrict list to the specified limit (most recent 7 days by default)
+        recent_files = daily_files[:limit]
+
+        return [
+            {
+                "name": f.name,
+                "relative_path": str(f.relative_to(VAULT_DIR)),
+                "is_dir": False
+            }
+            for f in recent_files
+        ]
+
     return {
         "inbox": build_tree(VAULT_DIR / "01_Inbox"),
-        "daily": build_tree(VAULT_DIR / "02_Daily")
+        "daily": build_daily_tree(VAULT_DIR / "02_Daily", limit=daily_limit)
     }
 
 
