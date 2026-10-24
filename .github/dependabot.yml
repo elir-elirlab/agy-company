@@ -1,13 +1,20 @@
 # Dependabot configuration for agy-company repository
-# Restricts automated version bumps to non-breaking minor and patch updates
+# Group updates into a single monthly PR and restrict breaking major upgrades
 version: 2
 updates:
   # 1. Frontend dependencies (npm)
   - package-ecosystem: "npm"
     directory: "/dashboard/frontend"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      # Run checks once a month to avoid notification overload
+      interval: "monthly"
+    # Keep maximum open pull requests limited to 1 at any time
+    open-pull-requests-limit: 1
+    # Combine all individual dependency upgrades into a single consolidated PR
+    groups:
+      frontend-deps:
+        patterns:
+          - "*"
     # Ignore breaking major version upgrades to prevent ecosystem incompatibility
     ignore:
       - dependency-name: "*"
@@ -17,8 +24,15 @@ updates:
   - package-ecosystem: "pip"
     directory: "/dashboard/backend"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      # Run checks once a month to avoid notification overload
+      interval: "monthly"
+    # Keep maximum open pull requests limited to 1 at any time
+    open-pull-requests-limit: 1
+    # Combine all individual dependency upgrades into a single consolidated PR
+    groups:
+      backend-deps:
+        patterns:
+          - "*"
     # Ignore breaking major version upgrades to prevent FastAPI / Pydantic incompatibilities
     ignore:
       - dependency-name: "*"
