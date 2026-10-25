@@ -23,7 +23,7 @@ project-root/ (作業ディレクトリ)
 ├── agy-company/                      <- 本リポジトリ一式
 ├── .agents/
 │   └── plugins/
-│       └── company -> ...            <- シンボリックリンク
+│       └── agy-company -> ...        <- シンボリックリンク
 └── vault/                            <- Obsidian Vault フォルダ
 ```
 
@@ -35,12 +35,12 @@ project-root/ (作業ディレクトリ)
 # 1. プラグイン用の配置ディレクトリを作成
 mkdir -p .agents/plugins
 
-# 2. agy-company の plugins/company へのシンボリックリンクを作成
+# 2. agy-company の plugins/agy-company へのシンボリックリンクを作成
 # （※ agy-company を project-root 直下に配置している場合の例）
-ln -sf "$(pwd)/agy-company/plugins/company" .agents/plugins/company
+ln -sf "$(pwd)/agy-company/plugins/agy-company" .agents/plugins/agy-company
 
 # 3. シンボリックリンクが正しく作成されたか確認
-ls -l .agents/plugins/company
+ls -l .agents/plugins/agy-company
 ```
 
 > **💡 シンボリックリンクとは？**  
@@ -65,7 +65,7 @@ mkdir -p vault
 Antigravity CLI を起動し、チャットで以下のように入力します：
 
 ```text
-/company
+/agy-company
 ```
 （または「秘書さん、よろしく」と話しかけても起動します）
 
@@ -82,11 +82,11 @@ Antigravity CLI を起動し、チャットで以下のように入力します�
 4. **秘書の言語と口調設定 (Persona & Language)**:
    - 言語: 日本語 / English / バイリンガル
    - 口調プリセット:
-     - 🌟 **丁寧・フレンドリー**（標準・明るいパートナー）
-     - 🎩 **執事・プロフェッショナル**（礼儀正しい英国風執事）
-     - 🤝 **カジュアル・相棒**（開発仲間・フランク）
-     - 🎯 **ストイックコーチ**（目標達成コミット・厳格）
-     - 🎨 **カスタム**（自由なキャラ設定）
+     - 🌟 **丁寧・フレンドリー** （標準・明るいパートナー）
+     - 🎩 **執事・プロフェッショナル** （礼儀正しい英国風執事）
+     - 🤝 **カジュアル・相棒** （開発仲間・フランク）
+     - 🎯 **ストイックコーチ** （目標達成コミット・厳格）
+     - 🎨 **カスタム** （自由なキャラ設定）
 
 ### Step 3: 自動生成されるフォルダ構造（2層アーキテクチャ）
 
@@ -111,13 +111,14 @@ project-root/
 
 ## 4. 日常の運用テクニック
 
-### 1. タスク管理・メモの保存
+### 1. 定型サブコマンド（Fast-Path）の活用
+日常業務は以下のサブコマンドを使うことで、事前確認待ちなしに即座に実行されます：
 ```text
-> 今日のTODOを教えて
-> 「新機能の要件定義」を今日のタスクに追加して
-> アイデアを思いついた。「AIを使った議事録要約ツール」
+> /agy-company daily          # 今日のデイリーノート作成＆前日からの未完了タスク引き継ぎ
+> /agy-company note           # 直前の議論・調査結果を整理して Vault (01_Inbox/) にノート保存
+> /agy-company sync-updates   # プラグインの最新ルール・テンプレートを既存環境へ反映
 ```
-- タスクは `vault/02_Daily/YYYY-MM-DD.md` に、メモは `vault/01_Inbox/` に即時反映されます。
+もちろん自然言語での指示（「今日のTODOを教えて」「アイデアをメモして」等）でも同様に動作します。
 
 ### 2. サブエージェントへの業務委譲 (`invoke_subagent`)
 ```text
@@ -129,7 +130,7 @@ project-root/
 ### 3. 秘書の口調・言語の変更
 運用中いつでも秘書のキャラクターを変更できます：
 ```text
-> /company tone
+> /agy-company tone
 > 秘書の口調を執事風に変えて
 > カジュアルな相棒として話して
 > Please speak in English
@@ -172,15 +173,16 @@ OBSIDIAN_VAULT_PATH=../vault docker compose up -d
 
 ## 6. トラブルシューティング
 
-### Q1. `/company` と打っても反応しない
+### Q1. `/agy-company` と打っても反応しない
 * **確認方法**: ターミナルで以下を実行し、シンボリックリンクが正しい実体フォルダを指しているか確認してください。
   ```bash
-  ls -l .agents/plugins/company
+  ls -l .agents/plugins/agy-company
   ```
 * 矢印（`->`）の先が赤色で点滅している場合、パスが切れています。もう一度 `ln -sf` で正しい絶対パスを指定して再作成してください。
+* 旧バージョン（`.agents/plugins/company`）のシンボリックリンクが残っている場合は、`rm .agents/plugins/company` で削除してから新しいリンクを作成してください。
 
 ### Q2. 途中で組織をやり直したい・初期化したい
-* `.company/` ディレクトリを削除すれば、次回 `/company` 実行時に再び初期オンボーディングからやり直せます：
+* `.company/` ディレクトリを削除すれば、次回 `/agy-company` 実行時に再び初期オンボーディングからやり直せます：
   ```bash
   rm -rf .company/
   ```
@@ -199,5 +201,5 @@ OBSIDIAN_VAULT_PATH=../vault docker compose up -d
 プラグインを削除したい場合は、作成したシンボリックリンクを削除するだけで完了です（元のファイルは消えません）：
 
 ```bash
-rm .agents/plugins/company
+rm .agents/plugins/agy-company
 ```
