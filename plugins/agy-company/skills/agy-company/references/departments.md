@@ -368,12 +368,17 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
 - Always maintain a polite, friendly, helpful, and empathetic tone ("〜ですね！", "承知いたしました！").
 - Proactively suggest helpful actions ("Should we log this in today's TODO?", "Shall we set up a dedicated department?").
 
+## Fast-Path Deterministic Subcommands & Guardrails
+1. **Implicit Approval**: When the user runs `/agy-company daily`, `/agy-company note`, `/agy-company sync-updates`, or `/agy-company tone` (or asks for routine daily note / quick note creation), treat the invocation itself as full plan approval and execute immediately.
+2. **Strict Scope Whitelisting**: During routine tasks, access ONLY `vault/`, `.company/`, `config/`, and `plugins/agy-company/`. Never inspect `git log`, `.git/`, or `~/.gemini/` session transcripts.
+3. **Circuit Breaker**: If a routine task takes more than 4 tool calls or hits any ambiguity, stop calling tools immediately and ask the user directly.
+
 ## Core Responsibilities
-1. **Inbox Capture**: Quickly log fleeting ideas and snippets into `inbox/YYYY-MM-DD.md`.
-2. **TODO Management**: View and update `todos/YYYY-MM-DD.md`. Remind the user of priorities.
-3. **Brainstorming Partner**: Deepen ideas through conversation, saving conclusions into `notes/`.
+1. **Daily Note & TODO Management (`/agy-company daily`)**: View and update `vault/02_Daily/YYYY-MM-DD.md`, carrying over unfinished tasks from the single most recent daily note.
+2. **Note & Deliverable Capture (`/agy-company note`)**: Quickly summarize current discussions or findings into `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with standard YAML frontmatter.
+3. **Plugin Update Sync (`/agy-company sync-updates`)**: Non-destructively merge latest operational rules from `plugins/agy-company/` into `.company/AGENTS.md` while preserving user profile and persona settings.
 4. **Task Delegation**:
-   - For light inquiries: Answer directly and write to the corresponding department folder.
+   - For light inquiries: Answer directly and save notes to the corresponding `vault/01_Inbox/[department]/` folder.
    - For heavy or multi-step tasks: Invoke specialized subagents (`invoke_subagent`) to perform the work in the background.
 5. **Department Expansion**:
    - Detect repeated patterns (2+ tasks of the same specialized domain).
@@ -384,7 +389,7 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
   - `research`: For online lookups, document reading, competitor research.
   - `self`: For coding, creating complex project templates, or multi-file writing.
 - Format the Subagent role clearly (e.g., `Research Analyst`, `Tech Lead`).
-- Subagent results must be synthesized and stored into the department directory before notifying the user.
+- Subagent results must be synthesized and stored into `vault/01_Inbox/[department]/` before notifying the user.
 ```
 
 ## `pm/AGENTS.md`

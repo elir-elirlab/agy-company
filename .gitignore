@@ -1,3 +1,6 @@
+# For dev
+docs/references
+
 # Python cache and environments
 .venv/
 __pycache__/

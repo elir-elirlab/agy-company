@@ -1,297 +1,328 @@
 # agy-company
 
-[English](./README.md) | [日本語](./README_JP.md)
+[English](./README_EN.md) | [日本語](./README.md)
 
 [![Antigravity CLI](https://img.shields.io/badge/Antigravity_CLI-Skill_&_Plugin-indigo)](https://github.com/)
 [![Obsidian Integration](https://img.shields.io/badge/Obsidian-Vault_Sync-purple)](https://obsidian.md/)
 [![Docker Compose](https://img.shields.io/badge/Docker_Compose-Dashboard-blue)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-**agy-company** is a virtual organization management plugin for Google DeepMind's **Antigravity CLI (AGY)**, ported, redesigned, and enhanced from the concept of `cc-company` (originally designed for Claude Code).  
-A dedicated **Executive Secretary** serves as your single primary interface—handling daily task tracking, brainstorming, quick note captures, and delegating complex workloads to specialized departmental subagents via `invoke_subagent`.
+**agy-company** は、Claude Code 向け仮想組織プラグイン `cc-company` に着想を得て、Google DeepMind の **Antigravity CLI (AGY)** 向けに **移植・再設計および機能拡張を行ったポート版（Port & Extension）** です。
+ユーザー（オーナー）専任の **エグゼクティブ秘書 (Executive Secretary)** が窓口となり、日常のタスク管理、壁打ち、メモの整理から、専門サブエージェント（`invoke_subagent`）への業務委譲までを一手に引き受けます。
 
-All deliverables are organized and persisted in a local **Obsidian Vault** (Markdown files), paired with a responsive, zero-cost **local Web Dashboard** for real-time visualization and management.
+成果物はすべて **Obsidian Vault** （ローカルMarkdown）に蓄積され、専用の **ローカルWebダッシュボード** で快適に可視化・管理できます。
+(Obsidian がない場合は単なるマークダウンメモとして蓄積されます。)
 
-![screenshot-en](docs/Screenshot-Dashboard-EN.png)
+![screenshot-en](docs/Screenshot-Dashboard.png)
 
 
 ---
 
-## 🌟 3 Core Design Principles
+## 🌟 3つのコア設計思想
 
-### 1. Unified Interface & Dynamic Department Spawning
+### 1. 秘書による窓口一本化 ＆ 部署の自己拡張
 ```text
-You (Owner) ────Dialogue────▶ Dedicated Executive Secretary
-                                │
-                                ├─ [Daily Tasks & Memos] ──▶ Immediately saved to Obsidian / Daily & Inbox
-                                │
-                                ├─ [Brainstorming] ────────▶ Refines ideas & creates meeting minutes
-                                │
-                                └─ [Specialized Tasks] ────▶ Spawns specialized subagents (invoke_subagent)
-                                                             ├─ Research Dept (Market research, tech surveys)
-                                                             ├─ Engineering Dept (Architecture, prototyping)
-                                                             └─ PM Office (Milestones, task ticketing)
+あなた (Owner) ────対話 / /agy-company────▶ 専任秘書 (Executive Secretary)
+                                              │
+                                              ├─ [定型コマンド (Fast-Path)]
+                                              │   ├─ /agy-company daily ──▶ 02_Daily/ にデイリー＆残タスク引継ぎ
+                                              │   ├─ /agy-company note  ──▶ 01_Inbox/ に議論・調査ノートを即時保存
+                                              │   └─ /agy-company sync-updates ──▶ 組織ルールを非破壊アップデート
+                                              │
+                                              ├─ [相談・壁打ち] ──────────▶ 思考を深め、決定事項を議事録化
+                                              │
+                                              └─ [専門・重厚タスク] ──────▶ 専門サブエージェント (Subagents) を起動
+                                                                            ├─ リサーチ部門 (市場調査・競合分析)
+                                                                            ├─ 開発部門 (技術設計・プロトタイプ作成)
+                                                                            └─ PM部門 (マイルストーン・タスク分解)
 ```
-- **Start Small**: Begins with only the Secretary Office. No complex upfront organizational setup needed.
-- **Natural Department Spawning**: When tasks in a domain occur 2 or more times, the Secretary proactively suggests establishing a dedicated department.
-- **Secretary Persona & Language**: Easily customize tone and language at any time (Friendly Partner, Formal Butler, Casual Peer, Strict Coach, or Custom) in Japanese, English, or Bilingual mode.
+- **スモールスタート**: 初期状態は秘書室のみ。初めから複雑な組織設計は不要です。
+- **Fast-Path 定型コマンドと暴走防止ガードレール**: 日常のルーティン作業（`/agy-company daily`, `/agy-company note`, `/agy-company sync-updates`）は事前確認待ちなしの **即時実行マクロ（Fast-Path）** として動作し、探索範囲のホワイトリスト制限とサーキットブレーカーによりエージェントの判断麻痺や過剰調査ループを防ぎます。
+- **自然な部署設立**: 同じドメインの相談が2回以上発生すると、秘書が「専用部門を設立しましょうか？」と自発的に提案します。
+- **秘書の口調・ペルソナ変更**: 「親しみやすいパートナー」「英国風の執事」「カジュアルな開発相棒」「ストイックなコーチ」など、好みの口調や言語（日本語 / 英語 / バイリンガル）にいつでも変更できます。
 
-### 2. 2-Tier Architecture: Git Workspace ⇄ Obsidian Vault
-Maintains a strict separation to prevent in-flight scratchpads and raw logs from polluting your clean Obsidian knowledge base:
+### 2. 2層アーキテクチャ (Git管理 ⇄ Obsidian Vault)
+作業中の生データでObsidianが散らかるのを防ぐため、明確な境界を設けています。
 
 ```text
-【In-flight Scratchpad & Raw Logs】          【Clean, Final Deliverables Only】
-Git-managed Repository (.company/)          Obsidian Vault (vault/)
-├── AGENTS.md (Root Guidelines)             ├── 01_Inbox/ (Organized Deliverables)
-├── secretary/ (Secretary Admin)            │   ├── research/ (Survey Reports)
-│   ├── AGENTS.md (Persona Config)          │   ├── engineering/ (Tech Specs)
+【作業中・生データ・下書き】                【完成したクリーンな成果物のみ】
+Git管理リポジトリ (.company/)              Obsidian Vault (vault/)
+├── AGENTS.md (組織全体ガイドライン)          ├── 01_Inbox/ (整理済み成果物)
+├── secretary/ (秘書室管理データ)            │   ├── research/ (調査レポート)
+│   ├── AGENTS.md (秘書の口調・設定)         │   ├── engineering/ (技術設計書)
 │   └── ...                                 │   └── ...
-└── [department]/work/                      ├── 02_Daily/ (Daily Notes with nav links)
-    └── (Drafts, raw data, logs)            └── AGENTS.md
+└── [department]/work/                      ├── 02_Daily/ (デイリーノート)
+    └── (下書き・スクラッチ・生ログ)         └── AGENTS.md
 ```
 
-### 3. Zero-API-Key Local Web Dashboard
-A lightweight cockpit powered by FastAPI, React, and Tailwind CSS.
-- **$0 LLM API Cost**: Reads and manipulates local Markdown files directly with zero LLM API consumption.
-- **Responsive & Accessible**: Optimized for 4K and ultra-wide monitors, supporting seamless Japanese/English language switching, customizable font scaling, and live WebSocket updates.
+### 3. APIキー不要・完全ローカルのWebダッシュボード
+FastAPI ＋ React ＋ Tailwind CSS による経営コックピット。
+LLMのAPIキー消費はゼロ（0円）で、Obsidian内のファイルを直接双方向同期します。4Kモニターや高解像度画面に最適化され、日本語／英語の切り替えや文字サイズの無段階調整に対応しています。
 
 ---
 
-## 📂 Directory Structure
+## 📂 ディレクトリ構成
 
 ```text
 agy-company/
-├── README.md                           # English Documentation (This file)
-├── README_JP.md                        # Japanese Documentation
-├── config/                             # Organization, department, and system settings (JSON)
-│   ├── config.json                     # System common config (Vault path, default language)
-│   ├── departments-ja.json             # Japanese organization, titles, and department definitions
-│   └── departments-en.json             # English organization, titles, and department definitions
-├── docker-compose.yml                  # Dashboard Docker Compose configuration
-├── Dockerfile                          # Multi-stage container build (Frontend + Backend)
+├── README_EN.md                        # 英語ドキュメント
+├── README.md                           # 日本語ドキュメント（本ファイル）
+├── config/                             # 組織・部署・共通設定 (JSON)
+│   ├── config.json                     # システム共通設定 (Vaultパス・デフォルト言語)
+│   ├── departments-ja.json             # 日本語の組織（役職・部署名・役割）定義
+│   └── departments-en.json             # 英語の組織（役職・部署名・役割）定義
+├── docker-compose.yml                  # ダッシュボード用 Docker Compose 設定
+├── Dockerfile                          # マルチステージビルド（フロントエンド + バックエンド）
 ├── plugins/
-│   └── company/                        # Antigravity CLI plugin bundle
-│       ├── plugin.json                 # Plugin manifest
+│   └── agy-company/                    # Antigravity CLI プラグイン本体
+│       ├── plugin.json                 # プラグインマニフェスト
 │       └── skills/
-│           └── company/
-│               ├── SKILL.md            # Workflow instructions and operating guidelines
+│           └── agy-company/
+│               ├── SKILL.md            # 秘書ワークフロー定義・運営ガイド
 │               └── references/
-│                   ├── agents-md-template.md  # Template for AGENTS.md generation
-│                   └── departments.md         # Default department definitions
-├── dashboard/                          # Web dashboard source code
-│   ├── backend/                        # FastAPI backend application
-│   └── frontend/                       # React + Vite + Tailwind CSS frontend
-├── .company/                           # Internal workspace & scratchpads (Git-tracked)
-└── vault/                              # Obsidian Vault mount point (Final deliverables)
+│                   ├── agents-md-template.md  # AGENTS.md 生成テンプレート
+│                   └── departments.md         # 部署別テンプレート定義
+├── dashboard/                          # Webダッシュボードソースコード
+│   ├── backend/                        # FastAPI バックエンド
+│   └── frontend/                       # React + Vite + Tailwind フロントエンド
+├── .company/                           # 稼働中の組織設定・作業領域 (Git管理)
+└── vault/                              # Obsidian Vault マウント先 (成果物)
 ```
 
 ---
 
-## 🚀 Installation & Activation
+## 🚀 インストール & 有効化
 
-> **For detailed step-by-step setup instructions, please see [docs/INSTALLATION.md](./docs/INSTALLATION.md).**
+> **初心者向けの詳しい導入手順は [docs/INSTALLATION.md](./docs/INSTALLATION.md) をご覧ください。**
 
-Antigravity CLI automatically discovers plugins and skills from `.agents/` in your current working directory or `~/.gemini/config/`.
+Antigravity CLI は、カレントディレクトリの `.agents/` または `~/.gemini/config/` からプラグイン・スキルを自動検出します。
 
-### 1. Workspace Setup
-In your project root, create a symbolic link pointing to `plugins/company`:
+### 1. ワークスペースへの配置
+本リポジトリのルートで、`.agents/plugins/agy-company` へのシンボリックリンクを作成します：
 
 ```bash
 mkdir -p .agents/plugins
-ln -s "$(pwd)/plugins/company" .agents/plugins/company
+ln -s "$(pwd)/plugins/agy-company" .agents/plugins/agy-company
 ```
 
-### 2. Obsidian Vault Mount (Recommended)
-To synchronize with Obsidian, bind-mount your dedicated Obsidian Vault (or subfolder) to `./vault`:
+### 2. ノート置き場（Vault）の設定
+Obsidian と連携させたい場合は、会社専用の Obsidian Vault を `./vault` にバインドマウントします。
+あるいはObsidian Vault のうち、会社専用フォルダを `./vault` にバインドマウントします：
 
 ```bash
-# Example: Mounting a dedicated 'company' folder from Google Drive / Obsidian Vault
+# 例: Google Drive 上の Obsidian/MyVault/company をマウントする場合
 sudo mount --bind "/path/to/Obsidian/MyVault/company" ./vault
 ```
-
 > [!IMPORTANT]
-> Always mount a dedicated subfolder (such as `company/`) rather than your entire personal Obsidian vault to prevent accidental modifications to personal notes.  
-> If you don't use Obsidian, `./vault` works seamlessly as a standard local Markdown directory (leaving `./vault` empty is completely fine).
+> 既存の個人用Vault全体ではなく、必ずVault内の `company` などの **専用サブフォルダ** をマウントしてください。これにより、既存の個人ノートが誤って変更されるのを防ぎます。
+
+> [!NOTE]
+> Obsidian と連携させない場合、vault/ は単なる「普通の Markdown（.md）メモ帳フォルダ」として機能します（その場合は./vault内は空でOK）。
+
 
 ---
 
-## 🤖 How to Use the Skill
+## 🤖 スキルの詳細な使い方
 
-### 1. Initial Onboarding (3-Minute Setup)
-Type `/company` in Antigravity CLI chat:
+### 1. 初回オンボーディング（3分セットアップ）
+Antigravity CLI のチャットで以下のように入力します：
 
 ```text
-> /company
+> /agy-company
 ```
-or
+または
 ```text
-> Hello secretary, please set up our company organization.
+> 秘書さん、組織のセットアップをお願いします
 ```
 
-The Secretary will guide you through 4 interactive onboarding questions:
-1. **Business & Activity**: What projects or business activities are you working on?
-2. **Goals & Challenges**: What targets are you pursuing, and what bottlenecks do you want to automate?
-3. **Daily Routine & Reminders**: Would you like scheduled morning check-ins? (Default: OFF)
-4. **Secretary Persona & Language**: Choose your preferred communication tone and language (Japanese, English, or Bilingual).
+秘書が以下の4つの質問を順番に行います：
+1. **事業や活動内容 (Business / Activity)**: 何を作っているか、どのような活動をしているか
+2. **目標や現在の課題 (Goals & Challenges)**: 達成したいこと、時間が足りない作業
+3. **定期リマインダーの確認 (Schedule)**: 朝会やタスク確認の自動通知を希望するか（デフォルト: OFF）
+4. **秘書の言語と口調設定 (Persona & Language)**: お好みの話し方と言語
 
-Once answered, organizational structure files are generated and your dedicated secretary starts operations immediately.
+回答が完了すると、自動的に必要なファイル群が生成され、専任秘書が着任します。
 
 ---
 
-### 2. Secretary Persona & Tone Customization 🎭
+### 2. 定型サブコマンド（Fast-Path 即時実行） ⚡
 
-You can customize the secretary's tone, personality, or language at any time during work:
+日常のルーティン業務を迷いなく数秒で完了させるための定型オプションを用意しています。
 
-#### Commands & Prompt Examples:
+| コマンド | 役割・動作 |
+|---|---|
+| `/agy-company daily` | 本日のデイリーノート（`vault/02_Daily/YYYY-MM-DD.md`）を作成し、前日ノートの未完了タスク（`- [ ]`）と双方向リンクを自動引き継ぎします。 |
+| `/agy-company note` | 現在の会話で議論・調査した内容を、標準 YAML フロントマター付きのノートとして `vault/01_Inbox/[department]/` に即時保存します。 |
+| `/agy-company sync-updates` | プラグインのアップデート内容（最新の運営ルールや安全ガードレール）を、既存のユーザー設定・口調・追加部署を保持したまま `.company/AGENTS.md` 等へ反映します。 |
+| `/agy-company tone` | 秘書の話し方（口調プリセット）や使用言語を対話形式で変更します。 |
+
+#### 🛡️ Fast-Path ガードレール設計（判断麻痺・暴走の防止）
+- **Implicit Approval（暗黙の事前合意）**: 定型サブコマンドの入力自体を「実行計画への事前承認」とみなすため、ユーザーがワークスペースに独自の事前合意ルール（`Plan Before Execution` 等）を設定していても干渉を受けずに即座に完遂します。
+- **Strict Scope Whitelisting（探索範囲の厳格固定）**: 定型処理中は `vault/`・`.company/`・`config/`・`plugins/agy-company/` 以外の参照を禁止し、`git log` や `~/.gemini/` 配下の過去セッションログ（`transcript.jsonl`）の調査を厳禁としています。
+- **Circuit Breaker（Ask, Don't Dig）**: 定型処理が最大 4 ツールコール以内で完了しない場合や判断に迷った場合は、過去ログを掘らずに即座にツール実行を止めてユーザーへ質問します。
+
+---
+
+### 3. 秘書の言語・口調カスタマイズ機能 🎭
+
+業務中いつでも、秘書の話し方や使用言語を変更できます。
+
+#### 変更コマンド・呼びかけ例:
 ```text
-> /company tone
-> Please switch secretary tone to Formal Butler
-> Speak like a friendly startup co-founder
+> /agy-company tone
+> 秘書の口調を執事風に変えて
+> カジュアルな相棒として話してほしい
 > Please speak in English
-> Respond in bilingual Japanese/English
+> 日英バイリンガルで対応して
 ```
 
-#### Available Persona Presets:
-| Preset | Characteristics | Sample Phrasing |
+#### 選択できるプリセット:
+| プリセット | 特徴 | 主な口調・語尾の例 |
 |---|---|---|
-| 🌟 **Friendly Partner** *(Default)* | Warm, positive, and collaborative | "Understood! I'll take care of that right away!" |
-| 🎩 **Formal Butler** | Courteous, refined, and sophisticated | "Very well, sir/madam. I shall arrange this immediately." |
-| 🤝 **Casual Peer** | Startup co-founder, concise peer | "Got it! On it! Let's ship this." |
-| 🎯 **Strict Coach** | Disciplined, milestone-driven mentor | "Let's reverse-engineer our goal. Here is today's top priority." |
-| 🎨 **Custom** | User-defined custom persona | Defined freely via your custom prompt. |
+| 🌟 **丁寧・フレンドリー** *(標準)* | 明るく前向きで共感力の高いパートナー | 「〜ですね！」「お任せください！」「承知いたしました！」 |
+| 🎩 **執事・プロフェッショナル** | 格式高く落ち着いた英国風エグゼクティブ執事 | 「かしこまりました」「〜でございます」「直ちに手配いたします」 |
+| 🤝 **カジュアル・相棒** | スタートアップ共同創業者・開発仲間の距離感 | 「了解！」「任せて！」「〜やっておくね！」「これどう？」 |
+| 🎯 **ストイックコーチ** | 目標達成にコミットする厳格なメンター | 「目標から逆算しましょう」「本日の最優先タスクはこれです」 |
+| 🎨 **カスタム** | ユーザー独自の指定 | 「関西弁で」「語尾を〜にして」など自由設定 |
 
-Configurations are persisted in `.company/secretary/AGENTS.md` and retained across sessions.
-
----
-
-### 3. Daily Operations & Subagent Delegation
-
-#### Daily Task Tracking
-```text
-> What are my TODOs for today?
-> Add "Draft wireframes for new dashboard feature" to today's tasks
-```
-- Automatically recorded in `vault/02_Daily/YYYY-MM-DD.md` with bidirectional daily navigation links.
-
-#### Quick Captures & Memos
-```text
-> Note down: "Explore local LLM code review automation tools"
-```
-- Timestamped Markdown notes are immediately saved to `vault/01_Inbox/`.
-
-#### Delegating to Specialized Subagents (`invoke_subagent`)
-```text
-> Ask the research department to create a comparative performance report on modern open-source vector databases.
-```
-1. The Secretary invokes a specialized background subagent using `invoke_subagent`.
-2. The subagent conducts intermediate research in `.company/research/work/` and delivers the polished final deliverable to `vault/01_Inbox/research/YYYY-MM-DD-HHmmss-VectorDB-Comparison.md`.
-3. Standard YAML frontmatter (ID, aliases, tags, created/updated timestamps, and cross-note wiki links) is automatically populated.
-4. The Secretary reviews the delivered file and presents an executive summary to you.
-5. **Safety Guardrails**: Destructive repository-wide reset commands (`git reset --hard`, `git clean -fd`) are strictly prohibited; undos are scoped strictly to specific files (`git restore <path>`).
+設定内容は `.company/secretary/AGENTS.md` に保存され、次回以降のセッションでも永続化されます。
 
 ---
 
-## 🖥️ Web Dashboard Guide
+### 4. 日常業務とサブエージェント連携
 
-A built-in local dashboard is included to manage your Obsidian Vault graphically.
+#### デイリータスクの管理
+```text
+> /agy-company daily
+> 今日のTODOを確認したい
+> 「新機能のワイヤーフレーム作成」を今日のタスクに追加して
+```
+- `vault/02_Daily/YYYY-MM-DD.md` に前日・翌日の双方向ナビゲーション付きで自動記録されます。
+
+#### 議論・調査結果のノート化とアイデアキャプチャ
+```text
+> /agy-company note
+> ちょっとメモ。「ローカルLLMを使ったコードレビュー自動化ツール」
+```
+- `vault/01_Inbox/` にタイムスタンプと標準フロントマター付きの Markdown として即座に保存されます。
+
+#### 専門サブエージェントへの業務委譲 (`invoke_subagent`)
+```text
+> リサーチ部門に、最新のオープンソースベクトルDBの性能比較レポートを作らせて
+```
+1. 秘書が裏で `invoke_subagent` を呼び出し、調査用サブエージェントをバックグラウンド起動します。
+2. サブエージェントは中間調査を `.company/research/work/` で行い、完成したレポートを `vault/01_Inbox/research/YYYY-MM-DD-HHmmss-VectorDB-Comparison.md` に納品します。
+3. 納品物には標準YAMLフロントマター（ID、タグ、関連ノートリンク）が自動付与されます。
+4. 秘書が「レポートの作成が完了いたしました！」と要約を報告します。
+5. **安全ガードレール**: サブエージェントによるリポジトリ全体の破壊的リセット（`git reset --hard` や `git clean -fd`）は全体ルールとして禁止されており、変更取り消しは必ず対象ファイル単位（`git restore <path>`）で行われます。
+
+---
+
+## 🖥️ Webダッシュボードの詳細な使い方
+
+Obsidian Vault の内容をグラフィカルに管理できるダッシュボードが付属しています。
 
 ```bash
-# Start dashboard container in background
+# バックグラウンドで起動
 docker compose up -d
 ```
 
-Open **`http://localhost:18000`** in your web browser.  
-*(Bound to localhost `127.0.0.1:18000:3000` to prevent unintended exposure to the local network).*
+起動後、ブラウザで **`http://localhost:18000`** にアクセスします。
+（※ ローカルホスト専用 `127.0.0.1:18000:3000` にバインドされているため、LAN内に漏洩しません）
 
-![screenshot-en](docs/Screenshot-Dashboard-EN.png)
+![screenshot-en](docs/Screenshot-Dashboard.png)
 
-### Dashboard Panels & Features
 
-#### ① Organization Chart Panel (Left Column)
-- **Hierarchy Tree**: Displays Owner ➔ Secretary Office ➔ Active Departments.
-- **1-Click Filtering**: Click any department card to filter the Deliverables list.
-- **Vault Directory Tree**: Live directory view of `01_Inbox/` and `02_Daily/`.
+### パネル構成と主な機能
 
-#### ② Daily Tasks (Center Column)
-- **Today's Tasks**: Parses `- [ ]` and `- [x]` items in `02_Daily/YYYY-MM-DD.md`.
-- **Bidirectional Sync**: Toggling checkboxes on the UI updates the Markdown files in the vault immediately.
+#### ① 組織図パネル（左カラム・常設）
+- **階層ビュー**: オーナー ➔ 秘書室 ➔ 設立済み専門部署をグラフィカルに表示。
+- **ワンクリックフィルタ**: 部署カードをクリックすると、右側の成果物一覧がその部署の成果物だけに絞り込まれます。
+- **Vault フォルダツリー**: `01_Inbox/` と `02_Daily/` の最新ファイル構造をリアルタイム表示。
 
-#### ③ Deliverables List (Right Column)
-- **Latest Deliverables**: Browse deliverables published by subagents.
-- **Obsidian Deep Linking**: Click "Obsidian" to open directly in the desktop Obsidian app via `obsidian://open?...` URI.
-- **Markdown & Diagram Viewer**: Click any deliverable to open a rich modal supporting Markdown, Mermaid diagrams, and KaTeX math formulas.
+#### ② デイリータスク（中央カラム）
+- **今日のタスク一覧**: `02_Daily/YYYY-MM-DD.md` 内のチェックボックスをリアルタイム反映。
+- **双方向チェック連動**: ダッシュボード上のチェックボックスをクリックすると、 **Vault内のMarkdownファイル側も即座に `- [ ]` ⇄ `- [x]` が書き換わります** 。
 
-#### ④ Quick Capture Modal
-- Quickly jot down notes or ideas from the header button; saved with standardized YAML metadata in `01_Inbox/`.
+#### ③ 成果物一覧（右カラム）
+- **最新成果物の閲覧**: 各部署のサブエージェントが納品したレポートをカード形式で一覧表示。
+- **Obsidian 連携**: 「Obsidian」ボタンをクリックすると、Obsidian URI（`obsidian://open?...`）経由でデスクトップのObsidianアプリで直接開きます。
+- **ドキュメントビューア**: カードをクリックするとモーダルが開き、Markdown本文とFrontmatterメタデータをその場でプレビューできます。
 
-#### ⑤ ⚙️ Settings Modal
-- **Language Switcher**: Toggle between Japanese (JA) and English (EN) instantly.
-- **Typography & Font Scaling**: Seamlessly scale root font size (14px–26px) with presets optimized for 4K screens (`16px`, `18.5px`, `21px`, `24px`).
-- **Mermaid & Modal Sizing**: Configure minimum diagram heights and modal widths. Settings are stored in `localStorage`.
+#### ④ クイックキャプチャ（上部ボタン）
+- ヘッダーの「⚡ クイックメモ」ボタンから、タイトル・部署・本文を入力して「Vaultに保存」を押すと、数秒でタイムスタンプ付きのノートが `01_Inbox/` に直接作成されます。
 
-#### ⑥ Real-Time Synchronization (WebSocket)
-- Automatically updates UI when files change in the Obsidian Vault.
+#### ⑤ ⚙️ 設定モーダル（ヘッダー右）
+- **言語切り替え**: 日本語（JA）／ 英語（EN）をワンクリックで切り替え可能。
+- **4K・フォントサイズ調整**:
+  - ルートの基準フォントサイズ（`rem`）を無段階スライダー（14px〜26px）で自由に変更。
+  - ワンタッチプリセット: `標準 (16px)`, `4K 推奨 (18.5px)`, `4K 大 (21px)`, `4K 特大 (24px)`
+  - リセットボタン: いつでも初期値（18.5px）に復帰。
+  - 設定値はブラウザの `localStorage` に保存され、次回訪問時も維持されます。
+
+#### ⑥ リアルタイム自動同期 (WebSocket)
+- Antigravity CLI や Obsidian 側でファイルが追加・編集されると、WebSocket経由でダッシュボードが自動リロードされます。ブラウザを手動更新する必要はありません。
 
 ---
 
-## ⚙️ Customizing Organization & Departments (`config/` Directory)
+## ⚙️ 組織・部署の設定カスタマイズ (`config/` ディレクトリ)
 
-You can freely define organization roles, department names, and descriptions by editing JSON files in the `config/` directory.
+ダッシュボードに表示される組織図、役職名、専門部署の名前や役割は、`config/` ディレクトリ内のJSONファイルを編集することで自由にカスタマイズできます。
 
-### 1. Configuration Files Overview
+### 1. 各設定ファイルの役割
 
-| File | Purpose | Main Settings |
+| ファイル | 役割 | 主な設定内容 |
 |---|---|---|
-| [`config/config.json`](./config/config.json) | Common System Settings | Vault path (`vault_dir`), Default language (`default_language`) |
-| [`config/departments-ja.json`](./config/departments-ja.json) | Japanese Locale | Owner/Secretary titles and roles, Japanese department definitions |
-| [`config/departments-en.json`](./config/departments-en.json) | English Locale | Owner/Secretary titles and roles, English department definitions |
+| [`config/config.json`](./config/config.json) | システム共通設定 | Vault のパス (`vault_dir`)、デフォルト言語 (`default_language`) |
+| [`config/departments-ja.json`](./config/departments-ja.json) | 日本語設定 | 日本語モード時のオーナー・秘書室の役職・役割、各部署名と役割 |
+| [`config/departments-en.json`](./config/departments-en.json) | 英語設定 | 英語モード時のオーナー・秘書室の役職・役割、各部署名と役割 |
 
-### 2. Configuration Examples
+### 2. 設定例と書き方
 
-#### ① Adding or Modifying Departments (`departments-ja.json` / `departments-en.json`)
-Department keys (lowercase slugs) match the folder names under `vault/01_Inbox/`:
+#### ① 部署の追加・変更 (`departments-ja.json` / `departments-en.json`)
+キー名（英小文字スラッグ）は `vault/01_Inbox/` 直下のフォルダ名と一致させます：
 
 ```json
 {
   "departments": {
     "research": {
-      "name": "Research Department",
-      "role": "Market research, competitor analysis & technical surveys"
+      "name": "リサーチ部門",
+      "role": "市場調査・競合分析・技術サーベイ"
     },
     "legal": {
-      "name": "Legal Department",
-      "role": "Contract review, compliance & intellectual property"
+      "name": "法務部門",
+      "role": "契約書レビュー・法令遵守・知財管理"
     }
   }
 }
 ```
 
 > [!TIP]
-> **Graceful Multi-Tier Fallback**:
-> If you add a new department to `departments-en.json` but forget to add it to `departments-ja.json` (or vice-versa), the backend automatically falls back to the other language or generates a clean capitalized title from the folder name. The application will never crash due to missing keys.
+> **親切なフォールバック（自動補完）設計**:
+> `departments-ja.json` に新しい部署を追加し、`departments-en.json` に書き忘れた場合でも、プログラムが日本語側の設定やフォルダ名から自動補完するため、エラーで落ちることはありません。
 
-#### ② Customizing Owner & Secretary Titles
-Rename roles to fit your organizational model (e.g. CEO, Founder, Lead AI Agent):
+#### ② オーナー・秘書室の名称変更
+「CEO」「代表取締役」「専属AIアシスタント」など、お好みの呼称に変更できます：
 
 ```json
 {
   "owner": {
-    "title": "Chief Executive Officer (CEO)",
-    "role": "Business Strategy, Decisions & Corporate Governance"
+    "title": "代表取締役 (CEO)",
+    "role": "事業推進・意思決定・統括"
   },
   "secretary": {
-    "title": "Lead AI Secretary",
-    "role": "Concierge, task management, brainstorming & delegation",
-    "permanent_badge": "Permanent Interface"
+    "title": "専属AI秘書",
+    "role": "タスク管理・壁打ち・部署への業務委譲",
+    "permanent_badge": "常設窓口"
   }
 }
 ```
 
 ---
 
-### 3. 🐳 Docker Compose Runtime Behavior
+### 3. 🐳 Docker Compose 起動時の挙動
 
-`docker-compose.yml` mounts the host's `./config` directory into `/app/config` inside the container:
+`docker-compose.yml` では、ホスト側の `./config` ディレクトリがコンテナ内の `/app/config` に自動バインドマウントされています：
 
 ```yaml
     environment:
@@ -300,63 +331,78 @@ Rename roles to fit your organizational model (e.g. CEO, Founder, Lead AI Agent)
       - ${CONFIG_PATH:-./config}:/app/config
 ```
 
-#### Key Highlights:
-- **Instant Hot-Reloading**:  
-  When you modify and save `config/departments-en.json` or `config/departments-ja.json` on your host machine, **you do NOT need to restart (`docker compose restart`) or rebuild (`docker compose build`) the container**. Simply refreshing your browser immediately reflects the updated titles and department details.
-- **Custom Config Directory Path**:  
-  To point to a configuration directory located elsewhere, start Docker Compose with the `CONFIG_PATH` environment variable:
+#### 特徴とメリット:
+- **即時反映（ホットリロード）**:
+  Docker コンテナ起動中にホスト側で `config/departments-ja.json` などを編集・保存すると、 **コンテナを再起動（`down` / `up`）や再ビルド（`build`）することなく、ブラウザ画面をリロードするだけで最新の設定が即座に反映** されます。
+- **外部フォルダの指定**:
+  別の場所にある設定ファイル群を使いたい場合は、環境変数 `CONFIG_PATH` を指定して起動できます：
   ```bash
   CONFIG_PATH=/path/to/my-config docker compose up -d
   ```
 
 ---
 
-## 🛠️ Troubleshooting & Tips
+## 🛠️ トラブルシューティング & Tips
 
-### Q. How do I update or rebuild the Docker container?
+### Q. プラグインを更新した後、既存の `.company/` に最新ルールを反映したい（旧 `/company` からの移行を含む）
+1. 旧バージョンのシンボリックリンク（`.agents/plugins/company`）がある場合は削除し、`plugins/agy-company` へリンクを張り直します：
+   ```bash
+   rm -f .agents/plugins/company
+   ln -sf "$(pwd)/plugins/agy-company" .agents/plugins/agy-company
+   ```
+2. Antigravity CLI のチャットで以下を実行します：
+   ```text
+   > /agy-company sync-updates
+   ```
+   オンボーディングで登録した事業プロフィールや秘書の口調・追加済み部署を保持したまま、最新の運営ルールとガードレール規程のみが安全にマージされます。
+
+### Q. Docker コンテナを更新・再ビルドしたい
 ```bash
 docker compose up -d --build
 ```
 
-### Q. How do I change the default port (18000)?
-Edit the `ports` mapping in `docker-compose.yml`:
+### Q. ポート 18000 を別のポートに変えたい
+`docker-compose.yml` の `ports` 設定を編集します：
 ```yaml
 ports:
   - "127.0.0.1:YOUR_PORT:3000"
 ```
 
-### Q. File change detection is delayed on Google Drive or WSL2
-File polling is enabled by default in `docker-compose.yml`:
+### Q. Google Drive / WSL2 でファイルの変更検知が遅い
+`docker-compose.yml` でポーリング検知が有効化されています：
 ```yaml
 environment:
   - WATCH_POLLING=true
 ```
-This ensures reliable change detection across network drives and Windows WSL2 mount points.
+Google Drive や Windowsのファイルシステム（drvfs）でも確実にファイル変更が検知されます。
 
-### Q. How do I specify a custom Vault directory?
-Set the `OBSIDIAN_VAULT_PATH` environment variable before running `docker compose up -d` (default: `./vault`):
+### Q. Vault フォルダの場所を別のディレクトリに指定したい
+親ディレクトリや任意の場所にある Vault を指定する場合、環境変数 `OBSIDIAN_VAULT_PATH` を指定して起動できます（デフォルト: `./vault`）：
 ```bash
-OBSIDIAN_VAULT_PATH=/path/to/my/vault docker compose up -d
+# 例: 親ディレクトリ (../vault) をマウントして起動する場合
+OBSIDIAN_VAULT_PATH=../vault docker compose up -d
 ```
-Alternatively, specify `OBSIDIAN_VAULT_PATH=/path/to/my/vault` in a `.env` file.
+または `.env` ファイルに `OBSIDIAN_VAULT_PATH=../vault` を記述しても適用されます。
 
-### Q. How do I specify a custom configuration (config/) directory?
-Set the `CONFIG_PATH` environment variable before starting Docker Compose (default: `./config`):
+### Q. 設定フォルダ（config/）の場所を別のディレクトリに指定したい
+Vault と同様に、環境変数 `CONFIG_PATH` を指定して起動できます（デフォルト: `./config`）：
 ```bash
+# 例: 任意の場所の設定フォルダを指定して起動する場合
 CONFIG_PATH=/path/to/my-config docker compose up -d
 ```
 
----
-
-## 🙏 Acknowledgments & Credits
-
-This project was inspired by the design philosophy (starting small, centralized secretary interface, dynamic department spawning) of the Claude Code virtual organization plugin [**cc-company**](https://github.com/Shin-sibainu/cc-company) created by [@Shin-sibainu](https://github.com/Shin-sibainu) (MIT License).
-
-We extended and re-architected this model natively for Google DeepMind's Antigravity CLI (AGY), adding native subagent delegation (`invoke_subagent`), Obsidian Vault integration, bilingual locale support, and a zero-cost local Web Dashboard. We express our deep appreciation to the original author for the pioneering concept.
 
 ---
 
-## 📄 License & Third-Party Notices
+## 🙏 謝辞 / クレジット (Acknowledgments & Credits)
 
-This project is open-sourced under the **MIT License**.  
-See [LICENSE](./LICENSE) for details. For AI assistance disclosures and third-party library licenses, please review [NOTICES.md](./NOTICES.md).
+本プロジェクトは、Claude Code 向け仮想組織プラグイン [**cc-company**](https://github.com/Shin-sibainu/cc-company) (作成者: [@Shin-sibainu](https://github.com/Shin-sibainu) 様 / MIT License) の優れた設計思想（スモールスタート、秘書による窓口一本化、部署の自然な自己拡張）に着想を得て、Google Antigravity CLI (AGY) 向けに **移植・再設計および機能拡張を行ったポート版（Port & Extension）** です。
+
+元の優れた組織運営モデルをベースに、Antigravity のネイティブサブエージェント連携（`invoke_subagent`）、Obsidian Vault 連携、およびローカル Web ダッシュボードなどの独自機能を追加・再構築しています。素晴らしい先行実装に深く感謝いたします。
+
+---
+
+## 📄 ライセンス & サードパーティ通知
+
+本プロジェクトは **MIT License** のもとで公開されています。
+詳細は [LICENSE](./LICENSE) をご覧ください。また、AI支援に関する免責事項および使用しているサードパーティ製ライブラリのライセンス一覧については [NOTICES.md](./NOTICES.md) をご確認ください。
