@@ -91,16 +91,24 @@ def test_api_toggle_todo(client_with_vault: TestClient):
 
 
 def test_api_create_quick_note(client_with_vault: TestClient):
-    """Test /api/inbox/quick endpoint creates note in 01_Inbox."""
+    """Test /api/inbox/quick endpoint creates note in 01_Inbox with optional summary."""
     payload = {
         "title": "API Test Note",
         "content": "Testing quick capture API.",
-        "department": "engineering"
+        "department": "engineering",
+        "summary": ["API summary bullet 1", "API summary bullet 2"]
     }
     res = client_with_vault.post("/api/inbox/quick", json=payload)
     assert res.status_code == 200
     assert res.json()["status"] == "created"
     assert "01_Inbox/engineering" in res.json()["relative_path"]
+
+    # Verify that /api/inbox returns the newly created note with its summary
+    inbox_res = client_with_vault.get("/api/inbox")
+    assert inbox_res.status_code == 200
+    items = inbox_res.json()
+    assert len(items) == 1
+    assert items[0]["summary"] == ["API summary bullet 1", "API summary bullet 2"]
 
 
 def test_api_org(client_with_vault: TestClient):

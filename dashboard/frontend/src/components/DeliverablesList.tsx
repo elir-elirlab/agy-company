@@ -105,6 +105,17 @@ export const DeliverablesList: React.FC<DeliverablesListProps> = ({
                   </a>
                 </div>
 
+                {/* Frontmatter Summary Preview (if present) */}
+                {item.summary && item.summary.length > 0 && (
+                  <ul className="text-sm text-slate-300 space-y-1 bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 list-disc list-inside">
+                    {item.summary.map((point, idx) => (
+                      <li key={idx} className="leading-snug text-slate-300">
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
                 {/* Metadata Row */}
                 <div className="flex flex-wrap items-center gap-2 text-sm">
                   <span className="bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-medium">

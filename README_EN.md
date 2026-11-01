@@ -67,10 +67,10 @@ A lightweight cockpit powered by FastAPI, React, and Tailwind CSS.
 agy-company/
 ├── README_EN.md                        # English Documentation (This file)
 ├── README.md                           # Japanese Documentation
-├── config/                             # Organization, department, and system settings (JSON)
-│   ├── config.json                     # System common config (Vault path, default language)
-│   ├── departments-ja.json             # Japanese organization, titles, and department definitions
-│   └── departments-en.json             # English organization, titles, and department definitions
+├── config/                             # Organization, department, and system settings (JSON templates)
+│   ├── config.example.json             # System common config template (Vault path, default language)
+│   ├── departments-ja.example.json     # Japanese organization, titles, and department definitions template
+│   └── departments-en.example.json     # English organization, titles, and department definitions template
 ├── docker-compose.yml                  # Dashboard Docker Compose configuration
 ├── Dockerfile                          # Multi-stage container build (Frontend + Backend)
 ├── plugins/
@@ -149,7 +149,9 @@ Use deterministic subcommands to execute daily operations immediately without de
 | Command | Description |
 |---|---|
 | `/agy-company daily` | Creates today's daily note (`vault/02_Daily/YYYY-MM-DD.md`), carries over unfinished `- [ ]` tasks from the previous note, and updates bidirectional navigation links. |
-| `/agy-company note` | Summarizes the current conversation or investigation findings into a structured note in `vault/01_Inbox/[department]/` with standard YAML frontmatter. |
+| `/agy-company note` | Summarizes the current conversation or investigation findings into a structured note in `vault/01_Inbox/[department]/` with standard YAML frontmatter (including 3–5 `summary` bullets and auto-discovered `link` references). |
+| `/agy-company search` | Queries past notes in `vault/01_Inbox/` via `search_notes.py` and outputs matching notes' frontmatter `summary` fields to answer questions with minimal context consumption. |
+| `/agy-company backfill-summary` | Detects existing notes missing the `summary` frontmatter field and backfills 3–5 takeaway bullets. |
 | `/agy-company sync-updates` | Non-destructively merges the latest plugin operational rules and guardrails into `.company/AGENTS.md` while preserving your custom profile, persona, and departments. |
 | `/agy-company tone` | Interactively switches the Secretary's communication persona and language. |
 

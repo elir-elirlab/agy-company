@@ -22,7 +22,7 @@ from .parser import (
 )
 
 # Initialize FastAPI application
-app = FastAPI(title="agy-company Dashboard API", version="1.0.0")
+app = FastAPI(title="agy-company Dashboard API", version="2.1.0")
 
 # Enable CORS for local Vite development server
 app.add_middleware(
@@ -42,16 +42,18 @@ CONFIG_DIR = Path(os.getenv("CONFIG_DIR", PROJECT_ROOT / "config"))
 
 def load_common_config() -> Dict[str, Any]:
     """
-    Load common application configuration from config/config.json.
-    Returns default settings dictionary if file is absent or invalid.
+    Load common application configuration from config/config.json,
+    falling back to config/config.example.json if the user-specific file does not exist.
+    Returns default settings dictionary if both files are absent or invalid.
     """
-    config_file = CONFIG_DIR / "config.json"
-    if config_file.exists() and config_file.is_file():
-        try:
-            return json.loads(config_file.read_text(encoding="utf-8"))
-        except Exception:
-            # Fallback to empty dictionary on JSON syntax or file read error
-            return {}
+    for filename in ("config.json", "config.example.json"):
+        config_file = CONFIG_DIR / filename
+        if config_file.exists() and config_file.is_file():
+            try:
+                return json.loads(config_file.read_text(encoding="utf-8"))
+            except Exception:
+                # Try next candidate or fallback to empty dictionary on error
+                continue
     return {}
 
 
@@ -81,6 +83,7 @@ class QuickNoteRequest(BaseModel):
     title: str
     content: str
     department: str = "general"
+    summary: List[str] = []
 
 
 class WebSocketManager:
@@ -182,18 +185,19 @@ DEFAULT_ORG_EN = {
 def load_locale_config(lang: str) -> Dict[str, Any]:
     """
     Load locale-specific department and org configuration from config/departments-{lang}.json.
-    Falls back to embedded defaults if file is missing or invalid.
+    Falls back to config/departments-{lang}.example.json, then embedded defaults if missing or invalid.
     """
-    file_path = CONFIG_DIR / f"departments-{lang}.json"
     fallback = DEFAULT_ORG_JA if lang == "ja" else DEFAULT_ORG_EN
-    if file_path.exists() and file_path.is_file():
-        try:
-            data = json.loads(file_path.read_text(encoding="utf-8"))
-            if isinstance(data, dict):
-                return data
-        except Exception:
-            # Fallback on JSON parse error
-            pass
+    for filename in (f"departments-{lang}.json", f"departments-{lang}.example.json"):
+        file_path = CONFIG_DIR / filename
+        if file_path.exists() and file_path.is_file():
+            try:
+                data = json.loads(file_path.read_text(encoding="utf-8"))
+                if isinstance(data, dict):
+                    return data
+            except Exception:
+                # Fallback to next candidate on JSON parse error
+                continue
     return fallback
 
 
@@ -326,7 +330,8 @@ def create_quick_note(req: QuickNoteRequest):
         vault_path=VAULT_DIR,
         title=req.title,
         content=req.content,
-        department=req.department
+        department=req.department,
+        summary=req.summary
     )
     return {
         "status": "created",

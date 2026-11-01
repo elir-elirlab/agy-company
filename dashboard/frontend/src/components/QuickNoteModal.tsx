@@ -5,7 +5,7 @@ import { useI18n } from '../i18n/context';
 interface QuickNoteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (title: string, content: string, department: string) => Promise<void>;
+  onSubmit: (title: string, content: string, department: string, summary: string[]) => Promise<void>;
   departments: string[];
 }
 
@@ -18,6 +18,7 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
   const { t } = useI18n();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [summaryText, setSummaryText] = useState('');
   const [department, setDepartment] = useState('general');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -27,11 +28,18 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
     e.preventDefault();
     if (!title.trim()) return;
 
+    // Convert multi-line summary input into an array of cleaned bullet strings
+    const summaryList = summaryText
+      .split('\n')
+      .map((line) => line.replace(/^\s*[-*•]\s*/, '').trim())
+      .filter((line) => line.length > 0);
+
     setIsSubmitting(true);
     try {
-      await onSubmit(title, content, department);
+      await onSubmit(title, content, department, summaryList);
       setTitle('');
       setContent('');
+      setSummaryText('');
       setDepartment('general');
       onClose();
     } finally {
@@ -91,6 +99,19 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-1.5">
+              {t.quickNote.summaryLabel}
+            </label>
+            <textarea
+              rows={3}
+              value={summaryText}
+              onChange={(e) => setSummaryText(e.target.value)}
+              placeholder={t.quickNote.summaryPlaceholder}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition resize-none shadow-inner"
+            />
           </div>
 
           <div>

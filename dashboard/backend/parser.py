@@ -39,6 +39,7 @@ class DeliverableMeta(BaseModel):
     created: Optional[str] = None
     updated: Optional[str] = None
     links: List[str] = []
+    summary: List[str] = []
     title: str = ""
     relative_path: str = ""
     department: str = "general"
@@ -168,13 +169,23 @@ def get_inbox_deliverables(vault_path: Path) -> List[DeliverableMeta]:
         if isinstance(raw_links, str):
             raw_links = [raw_links]
 
+        # Normalize summary into a list of strings
+        raw_summary = meta.get("summary") or []
+        if isinstance(raw_summary, str):
+            raw_summary = [raw_summary] if raw_summary.strip() else []
+        elif isinstance(raw_summary, list):
+            raw_summary = [str(item).strip() for item in raw_summary if str(item).strip()]
+        else:
+            raw_summary = []
+
         deliverables.append(DeliverableMeta(
             id=str(meta.get("id", file.stem)),
-            aliases=meta.get("aliases", []),
-            tags=meta.get("tags", []),
+            aliases=meta.get("aliases") or [],
+            tags=meta.get("tags") or [],
             created=str(meta.get("created", "")),
             updated=str(meta.get("updated", "")),
             links=raw_links,
+            summary=raw_summary,
             title=title,
             relative_path=str(file.relative_to(vault_path)),
             department=department
@@ -185,9 +196,16 @@ def get_inbox_deliverables(vault_path: Path) -> List[DeliverableMeta]:
     return deliverables
 
 
-def create_quick_inbox_note(vault_path: Path, title: str, content: str, department: str = "general") -> Path:
+def create_quick_inbox_note(
+    vault_path: Path,
+    title: str,
+    content: str,
+    department: str = "general",
+    summary: Optional[List[str]] = None
+) -> Path:
     """
     Create a new quick note in '01_Inbox/' following the timestamped naming standard.
+    Includes optional summary bullet points in the YAML frontmatter.
     """
     inbox_dir = vault_path / "01_Inbox"
     if department != "general":
@@ -205,6 +223,14 @@ def create_quick_inbox_note(vault_path: Path, title: str, content: str, departme
     filename = f"{timestamp_str}-{safe_title}.md"
     file_path = target_dir / filename
 
+    # Format summary list for YAML frontmatter
+    cleaned_summary = [s.strip() for s in (summary or []) if s and s.strip()]
+    if cleaned_summary:
+        escaped_lines = [s.replace('"', '\\"') for s in cleaned_summary]
+        summary_yaml = "summary:\n" + "\n".join(f'  - "{line}"' for line in escaped_lines)
+    else:
+        summary_yaml = "summary: []"
+
     # Build standardized frontmatter
     frontmatter = f"""---
 id: {timestamp_str}
@@ -215,6 +241,7 @@ tags:
 created: {timestamp_str}
 updated: {timestamp_str}
 link: []
+{summary_yaml}
 ---
 
 # {title}

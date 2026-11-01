@@ -55,6 +55,9 @@ created: 2026-09-08-231720
 updated: 2026-09-08-231900
 link:
   - "[[2026-09-07-010834-PreviousReport]]"
+summary:
+  - "Key competitor finding 1"
+  - "Key competitor finding 2"
 ---
 
 # Competitor Research Report
@@ -117,16 +120,18 @@ def test_get_inbox_deliverables(sample_vault: Path):
     assert "リサーチ" in item.tags
     assert item.department == "research"
     assert "[[2026-09-07-010834-PreviousReport]]" in item.links
+    assert item.summary == ["Key competitor finding 1", "Key competitor finding 2"]
     assert item.title == "Competitor Research Report"
 
 
 def test_create_quick_inbox_note(sample_vault: Path):
-    """Verify creation of quick note in 01_Inbox with timestamp naming."""
+    """Verify creation of quick note in 01_Inbox with timestamp naming and summary."""
     created_file = create_quick_inbox_note(
         vault_path=sample_vault,
         title="Quick Brainstorming",
         content="Testing note creation.",
-        department="engineering"
+        department="engineering",
+        summary=["Summary point A", "Summary point B"]
     )
 
     assert created_file.exists()
@@ -137,4 +142,5 @@ def test_create_quick_inbox_note(sample_vault: Path):
     meta, body = extract_frontmatter(created_file.read_text(encoding="utf-8"))
     assert "engineering" in meta.get("tags", [])
     assert "quick-capture" in meta.get("tags", [])
+    assert meta.get("summary") == ["Summary point A", "Summary point B"]
     assert "Testing note creation." in body

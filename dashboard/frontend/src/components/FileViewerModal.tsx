@@ -171,6 +171,28 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                         : String(data.frontmatter.link)}
                     </div>
                   )}
+
+                  {/* Frontmatter Summary Bullets */}
+                  {data.frontmatter.summary &&
+                    ((Array.isArray(data.frontmatter.summary) && data.frontmatter.summary.length > 0) ||
+                      (typeof data.frontmatter.summary === 'string' && data.frontmatter.summary.trim() !== '')) && (
+                      <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
+                        <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+                          {t.fileViewer.summaryTitle}
+                        </div>
+                        <ul className="list-disc list-inside space-y-1 text-slate-200 text-sm">
+                          {Array.isArray(data.frontmatter.summary) ? (
+                            data.frontmatter.summary.map((item: string, idx: number) => (
+                              <li key={idx} className="leading-relaxed">
+                                {item}
+                              </li>
+                            ))
+                          ) : (
+                            <li className="leading-relaxed">{String(data.frontmatter.summary)}</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
                 </div>
               )}
 
