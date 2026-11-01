@@ -67,10 +67,10 @@ A lightweight cockpit powered by FastAPI, React, and Tailwind CSS.
 agy-company/
 ├── README_EN.md                        # English Documentation (This file)
 ├── README.md                           # Japanese Documentation
-├── config/                             # Organization, department, and system settings (JSON)
-│   ├── config.json                     # System common config (Vault path, default language)
-│   ├── departments-ja.json             # Japanese organization, titles, and department definitions
-│   └── departments-en.json             # English organization, titles, and department definitions
+├── config/                             # Organization, department, and system settings (JSON templates)
+│   ├── config.example.json             # System common config template (Vault path, default language)
+│   ├── departments-ja.example.json     # Japanese organization, titles, and department definitions template
+│   └── departments-en.example.json     # English organization, titles, and department definitions template
 ├── docker-compose.yml                  # Dashboard Docker Compose configuration
 ├── Dockerfile                          # Multi-stage container build (Frontend + Backend)
 ├── plugins/

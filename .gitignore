@@ -26,6 +26,10 @@ vault/.obsidian/workspace*.json
 # Uncomment the line below if you want to keep your company notes private:
 .company/
 
+# User-specific configuration files (keep only *.example.json templates in Git)
+config/*.json
+!config/*.example.json
+
 # Environment variables
 .env
 .env.local

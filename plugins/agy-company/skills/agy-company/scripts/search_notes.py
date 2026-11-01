@@ -39,20 +39,21 @@ def resolve_vault_dir(explicit_vault_dir: Optional[str] = None) -> Path:
     repo_root = script_Path.parents[5] if len(script_Path.parents) >= 6 else cwd
 
     for base_dir in (cwd, repo_root):
-        config_path = base_dir / "config" / "config.json"
-        if config_path.exists() and config_path.is_file():
-            try:
-                config_data = json.loads(config_path.read_text(encoding="utf-8"))
-                vault_dir_setting = config_data.get("vault_dir")
-                if vault_dir_setting:
-                    candidate = Path(vault_dir_setting)
-                    if not candidate.is_absolute():
-                        candidate = (base_dir / candidate).resolve()
-                    if candidate.exists():
-                        return candidate
-            except Exception:
-                # Ignore malformed JSON and continue fallback resolution
-                pass
+        for cfg_name in ("config.json", "config.example.json"):
+            config_path = base_dir / "config" / cfg_name
+            if config_path.exists() and config_path.is_file():
+                try:
+                    config_data = json.loads(config_path.read_text(encoding="utf-8"))
+                    vault_dir_setting = config_data.get("vault_dir")
+                    if vault_dir_setting:
+                        candidate = Path(vault_dir_setting)
+                        if not candidate.is_absolute():
+                            candidate = (base_dir / candidate).resolve()
+                        if candidate.exists():
+                            return candidate
+                except Exception:
+                    # Ignore malformed JSON and continue fallback resolution
+                    pass
 
         # Fallback to base_dir / "vault" if it exists
         default_candidate = (base_dir / "vault").resolve()

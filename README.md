@@ -67,10 +67,10 @@ LLMのAPIキー消費はゼロ（0円）で、Obsidian内のファイルを直�
 agy-company/
 ├── README_EN.md                        # 英語ドキュメント
 ├── README.md                           # 日本語ドキュメント（本ファイル）
-├── config/                             # 組織・部署・共通設定 (JSON)
-│   ├── config.json                     # システム共通設定 (Vaultパス・デフォルト言語)
-│   ├── departments-ja.json             # 日本語の組織（役職・部署名・役割）定義
-│   └── departments-en.json             # 英語の組織（役職・部署名・役割）定義
+├── config/                             # 組織・部署・共通設定 (JSON / *.example.json テンプレ同梱)
+│   ├── config.example.json             # システム共通設定テンプレート (Vaultパス・デフォルト言語)
+│   ├── departments-ja.example.json     # 日本語の組織（役職・部署名・役割）定義テンプレート
+│   └── departments-en.example.json     # 英語の組織（役職・部署名・役割）定義テンプレート
 ├── docker-compose.yml                  # ダッシュボード用 Docker Compose 設定
 ├── Dockerfile                          # マルチステージビルド（フロントエンド + バックエンド）
 ├── plugins/
@@ -273,11 +273,14 @@ docker compose up -d
 
 ### 1. 各設定ファイルの役割
 
-| ファイル | 役割 | 主な設定内容 |
+Git リポジトリにはテンプレート（`*.example.json`）が同梱されており、ユーザー環境ごとの実ファイル（`config/*.json`）は `.gitignore` で保護されています。
+実ファイル（`config/*.json`）が存在しない場合は自動的に `*.example.json` の内容が使用されます。カスタマイズする場合は `cp config/departments-ja.example.json config/departments-ja.json` のようにコピーして編集してください（オンボーディングや部署追加時には秘書が自動生成します）。
+
+| ファイル | テンプレート | 役割・主な設定内容 |
 |---|---|---|
-| [`config/config.json`](./config/config.json) | システム共通設定 | Vault のパス (`vault_dir`)、デフォルト言語 (`default_language`) |
-| [`config/departments-ja.json`](./config/departments-ja.json) | 日本語設定 | 日本語モード時のオーナー・秘書室の役職・役割、各部署名と役割 |
-| [`config/departments-en.json`](./config/departments-en.json) | 英語設定 | 英語モード時のオーナー・秘書室の役職・役割、各部署名と役割 |
+| `config/config.json` | [`config/config.example.json`](./config/config.example.json) | Vault のパス (`vault_dir`)、デフォルト言語 (`default_language`) |
+| `config/departments-ja.json` | [`config/departments-ja.example.json`](./config/departments-ja.example.json) | 日本語モード時のオーナー・秘書室の役職・役割、各部署名と役割 |
+| `config/departments-en.json` | [`config/departments-en.example.json`](./config/departments-en.example.json) | 英語モード時のオーナー・秘書室の役職・役割、各部署名と役割 |
 
 ### 2. 設定例と書き方
 

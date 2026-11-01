@@ -268,7 +268,7 @@ Use `ask_question` (or friendly dialogue) to ask the 4 onboarding questions in t
      - 🎨 **カスタム (Custom)**: Custom character or persona defined by the user.
 
 ### Step 3: Automatic Organization Initialization
-Initialize `.company/` (using `references/agents-md-template.md` and `references/departments.md`) and `vault/`:
+Initialize `.company/` (using `references/agents-md-template.md` and `references/departments.md`), `vault/`, and local `config/*.json` (copying from `config/*.example.json` if `config/*.json` do not exist yet):
 
 ```text
 .company/
@@ -298,7 +298,7 @@ When a specialized domain is invoked 2+ times or requested by the user:
 3. **Register Department & Synchronize Dashboard Configs**:
    - Update `.company/AGENTS.md` and `vault/AGENTS.md` with new department details.
    - **Update Bilingual Dashboard Configurations**:
-     If `config/departments-ja.json` and `config/departments-en.json` exist, add the new department under `"departments"` in both files:
+     If `config/departments-ja.json` or `config/departments-en.json` do not exist yet, initialize them from `config/departments-ja.example.json` and `config/departments-en.example.json` first, then add the new department under `"departments"` in both files:
      - `config/departments-ja.json`:
        ```json
        "departments": {
