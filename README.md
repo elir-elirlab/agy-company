@@ -152,7 +152,9 @@ Antigravity CLI のチャットで以下のように入力します：
 | コマンド | 役割・動作 |
 |---|---|
 | `/agy-company daily` | 本日のデイリーノート（`vault/02_Daily/YYYY-MM-DD.md`）を作成し、前日ノートの未完了タスク（`- [ ]`）と双方向リンクを自動引き継ぎします。 |
-| `/agy-company note` | 現在の会話で議論・調査した内容を、標準 YAML フロントマター付きのノートとして `vault/01_Inbox/[department]/` に即時保存します。 |
+| `/agy-company note` | 現在の会話で議論・調査した内容を、標準 YAML フロントマター（3〜5行の `summary` 要約および自動関連ノートリンク付き）のノートとして `vault/01_Inbox/[department]/` に即時保存します。 |
+| `/agy-company search` | 専用スクリプト（`search_notes.py`）で過去ノートを高速検索し、該当ノートのフロントマター要約（`summary`）のみを抽出してコンテキストを圧迫せずに回答します。 |
+| `/agy-company backfill-summary` | `summary` が未設定の既存ノートを検出し、要約（3〜5行）をフロントマターへ自動追記します。 |
 | `/agy-company sync-updates` | プラグインのアップデート内容（最新の運営ルールや安全ガードレール）を、既存のユーザー設定・口調・追加部署を保持したまま `.company/AGENTS.md` 等へ反映します。 |
 | `/agy-company tone` | 秘書の話し方（口調プリセット）や使用言語を対話形式で変更します。 |
 

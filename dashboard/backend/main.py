@@ -81,6 +81,7 @@ class QuickNoteRequest(BaseModel):
     title: str
     content: str
     department: str = "general"
+    summary: List[str] = []
 
 
 class WebSocketManager:
@@ -326,7 +327,8 @@ def create_quick_note(req: QuickNoteRequest):
         vault_path=VAULT_DIR,
         title=req.title,
         content=req.content,
-        department=req.department
+        department=req.department,
+        summary=req.summary
     )
     return {
         "status": "created",

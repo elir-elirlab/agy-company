@@ -14,6 +14,7 @@ export interface DeliverableMeta {
   created?: string;
   updated?: string;
   links: string[];
+  summary?: string[];
   title: string;
   relative_path: string;
   department: string;

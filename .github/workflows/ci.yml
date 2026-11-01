@@ -61,5 +61,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run unit tests with pytest
+      - name: Run backend unit tests with pytest
         run: pytest tests/ -v
+
+      - name: Run plugin note search script unit tests
+        run: pytest ../../plugins/agy-company/skills/agy-company/scripts/tests/ -v
