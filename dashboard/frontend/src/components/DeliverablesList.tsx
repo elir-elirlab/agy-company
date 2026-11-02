@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText, ExternalLink, Link2, Tag } from 'lucide-react';
-import { DeliverableMeta } from '../types';
+import { DeliverableMeta, OrgChartData } from '../types';
 import { getObsidianUri } from '../utils/obsidian';
 import { useI18n } from '../i18n/context';
 
@@ -9,21 +9,113 @@ interface DeliverablesListProps {
   selectedDepartment: string | null;
   onSelectDepartment: (dept: string | null) => void;
   onOpenFile: (path: string) => void;
+  orgData?: OrgChartData | null;
 }
 
 export const DeliverablesList: React.FC<DeliverablesListProps> = ({
   deliverables,
   selectedDepartment,
   onSelectDepartment,
-  onOpenFile
+  onOpenFile,
+  orgData
 }) => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+
+  // Helper function to check if a department identifier refers to the secretary office
+  const isSecretaryDept = (dept: string): boolean => {
+    const normalized = dept.trim().toLowerCase();
+    return normalized === 'secretary' || normalized === '秘書室' || normalized.includes('秘書');
+  };
+
+  // Helper function to remove emoji characters from labels
+  const stripEmoji = (text: string): string => {
+    return text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}]/gu, '').trim();
+  };
+
+  // Resolve localized full display name for tooltips and accessibility
+  const getDepartmentFullLabel = (dept: string): string => {
+    if (isSecretaryDept(dept)) {
+      const orgTitle = orgData?.secretary?.translations?.[language]?.title;
+      const rawTitle = orgTitle || (language === 'ja' ? '秘書室 (Executive Secretary)' : 'Executive Secretary');
+      return stripEmoji(rawTitle);
+    }
+
+    if (dept.toLowerCase() === 'general') {
+      return language === 'ja' ? '全体 (General)' : 'General';
+    }
+
+    if (orgData?.departments) {
+      const matched = orgData.departments.find(
+        (d) => d.id.toLowerCase() === dept.toLowerCase() || d.name === dept
+      );
+      if (matched) {
+        const localized = matched.translations?.[language]?.name;
+        if (localized) {
+          return stripEmoji(localized);
+        }
+      }
+    }
+
+    return stripEmoji(dept);
+  };
+
+  // Resolve compact clean label for filter pill buttons without emojis
+  const getDepartmentShortLabel = (dept: string): string => {
+    if (isSecretaryDept(dept)) {
+      return language === 'ja' ? '秘書室' : 'Secretary';
+    }
+
+    if (dept.toLowerCase() === 'general') {
+      return language === 'ja' ? '全体' : 'General';
+    }
+
+    // Look up specialized department in orgData
+    if (orgData?.departments) {
+      const matched = orgData.departments.find(
+        (d) => d.id.toLowerCase() === dept.toLowerCase() || d.name === dept
+      );
+      if (matched) {
+        // 1. Priority: Explicit short_name in configuration if defined
+        const customShort =
+          matched.translations?.[language]?.short_name ||
+          matched.short_name;
+        if (customShort) {
+          return stripEmoji(customShort);
+        }
+
+        // 2. Derive short name from full name
+        const rawName = matched.translations?.[language]?.name || matched.name;
+        let clean = stripEmoji(rawName);
+        // Remove parenthesized content such as '(Engineering)'
+        clean = clean.replace(/\s*\(.*?\)/g, '').trim();
+        // Remove trailing ' Department' or ' Office' in English mode
+        if (language === 'en') {
+          clean = clean.replace(/\s+(Department|Office)$/i, '').trim();
+        }
+        if (clean) {
+          return clean;
+        }
+      }
+    }
+
+    // Default fallback: strip parentheses and capitalize first letter if ascii ID
+    let fallback = stripEmoji(dept).replace(/\s*\(.*?\)/g, '').trim();
+    if (/^[a-z]+$/i.test(fallback)) {
+      fallback = fallback.charAt(0).toUpperCase() + fallback.slice(1);
+    }
+    return fallback;
+  };
 
   // Extract unique departments
   const departments = Array.from(new Set(deliverables.map((d) => d.department)));
 
   const filtered = selectedDepartment
-    ? deliverables.filter((d) => d.department === selectedDepartment)
+    ? deliverables.filter((d) => {
+        if (isSecretaryDept(selectedDepartment)) {
+          return isSecretaryDept(d.department);
+        }
+        return d.department.toLowerCase() === selectedDepartment.toLowerCase();
+      })
     : deliverables;
 
   return (
@@ -41,10 +133,10 @@ export const DeliverablesList: React.FC<DeliverablesListProps> = ({
         </div>
 
         {/* Department Filter Pills */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto max-w-sm pb-1">
+        <div className="flex items-center space-x-1.5 overflow-x-auto max-w-sm pb-1 shrink-0">
           <button
             onClick={() => onSelectDepartment(null)}
-            className={`text-sm px-3 py-1.5 rounded-full font-medium transition duration-150 ${
+            className={`text-xs px-3 py-1.5 rounded-full font-medium transition duration-150 whitespace-nowrap shrink-0 ${
               selectedDepartment === null
                 ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
                 : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700'
@@ -52,19 +144,30 @@ export const DeliverablesList: React.FC<DeliverablesListProps> = ({
           >
             {t.deliverables.all}
           </button>
-          {departments.map((dept) => (
-            <button
-              key={dept}
-              onClick={() => onSelectDepartment(dept)}
-              className={`text-sm px-3 py-1.5 rounded-full font-medium transition duration-150 ${
-                selectedDepartment === dept
-                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
-                  : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              {dept}
-            </button>
-          ))}
+          {departments.map((dept) => {
+            // Determine if the department button is currently selected
+            const isSelected =
+              selectedDepartment === dept ||
+              (isSecretaryDept(selectedDepartment || '') && isSecretaryDept(dept));
+
+            const shortLabel = getDepartmentShortLabel(dept);
+            const fullLabel = getDepartmentFullLabel(dept);
+
+            return (
+              <button
+                key={dept}
+                onClick={() => onSelectDepartment(isSelected ? null : dept)}
+                title={fullLabel}
+                className={`text-xs px-3 py-1.5 rounded-full font-medium transition duration-150 whitespace-nowrap shrink-0 max-w-[130px] truncate ${
+                  isSelected
+                    ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
+                    : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                {shortLabel}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -118,8 +221,11 @@ export const DeliverablesList: React.FC<DeliverablesListProps> = ({
 
                 {/* Metadata Row */}
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-medium">
-                    {item.department}
+                  <span
+                    title={getDepartmentFullLabel(item.department)}
+                    className="bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-medium text-xs max-w-[150px] truncate"
+                  >
+                    {getDepartmentShortLabel(item.department)}
                   </span>
 
                   {/* Document purpose category badge (Knowledge / Proposal / Discussion / Undefined) */}

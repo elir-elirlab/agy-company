@@ -6,7 +6,7 @@ import { QuickNoteModal } from './components/QuickNoteModal';
 import { FileViewerModal } from './components/FileViewerModal';
 import { OrgChartPanel } from './components/OrgChartPanel';
 import { SettingsModal } from './components/SettingsModal';
-import { StatusResponse, TodoItem, DeliverableMeta } from './types';
+import { StatusResponse, TodoItem, DeliverableMeta, OrgChartData } from './types';
 
 import { ActivityHeatmap } from './components/ActivityHeatmap';
 
@@ -14,6 +14,8 @@ export const App: React.FC = () => {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [deliverables, setDeliverables] = useState<DeliverableMeta[]>([]);
+  // Organization and department structure metadata for localization
+  const [orgData, setOrgData] = useState<OrgChartData | null>(null);
   const [selectedDept, setSelectedDept] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -25,15 +27,17 @@ export const App: React.FC = () => {
   // Fetch all dashboard data
   const refreshData = useCallback(async () => {
     try {
-      const [statusRes, todosRes, inboxRes] = await Promise.all([
+      const [statusRes, todosRes, inboxRes, orgRes] = await Promise.all([
         fetch('/api/status').then((r) => r.json()),
         fetch('/api/todos/today').then((r) => r.json()),
-        fetch('/api/inbox').then((r) => r.json())
+        fetch('/api/inbox').then((r) => r.json()),
+        fetch('/api/org').then((r) => r.json())
       ]);
 
       setStatus(statusRes);
       setTodos(todosRes);
       setDeliverables(inboxRes);
+      setOrgData(orgRes);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
     }
@@ -192,6 +196,7 @@ export const App: React.FC = () => {
             selectedDepartment={selectedDept}
             onSelectDepartment={setSelectedDept}
             onOpenFile={(path) => setActiveFilePath(path)}
+            orgData={orgData}
           />
         </section>
       </main>

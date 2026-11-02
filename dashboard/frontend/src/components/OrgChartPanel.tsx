@@ -108,22 +108,39 @@ export const OrgChartPanel: React.FC<OrgChartPanelProps> = ({
             </div>
 
             {/* 2. Secretary Card */}
-            <div className="bg-indigo-950/50 border border-indigo-500/35 rounded-xl p-3.5 w-full text-center shadow-sm">
-              <div className="flex items-center justify-center space-x-1.5 text-indigo-300 font-bold text-sm">
-                <BellRing className="w-4 h-4" />
-                <span>
-                  {data.secretary.translations?.[language]?.title ??
-                    (language === 'ja' ? data.secretary.title : t.org.secretaryTitle)}
-                </span>
-              </div>
-              <p className="text-sm text-slate-300 mt-1 font-medium leading-relaxed">
-                {data.secretary.translations?.[language]?.role ??
-                  (language === 'ja' ? data.secretary.role : t.org.secretaryRole)}
-              </p>
-              <span className="inline-block mt-2 text-sm bg-indigo-500/20 text-indigo-300 font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
-                {data.secretary.translations?.[language]?.permanent_badge ?? t.org.permanentBadge}
-              </span>
-            </div>
+            {(() => {
+              // Check if secretary department is currently selected
+              const isSecretarySelected =
+                selectedDepartment === 'secretary' ||
+                selectedDepartment === '秘書室' ||
+                (selectedDepartment?.includes('秘書') ?? false);
+
+              return (
+                <div
+                  onClick={() => onSelectDepartment(isSecretarySelected ? null : 'secretary')}
+                  className={`border rounded-xl p-3.5 w-full text-center shadow-sm cursor-pointer transition duration-150 ${
+                    isSecretarySelected
+                      ? 'bg-indigo-600/30 border-indigo-500/80 ring-1 ring-indigo-500/40'
+                      : 'bg-indigo-950/50 hover:bg-indigo-900/50 border-indigo-500/35'
+                  }`}
+                >
+                  <div className="flex items-center justify-center space-x-1.5 text-indigo-300 font-bold text-sm">
+                    <BellRing className="w-4 h-4" />
+                    <span>
+                      {data.secretary.translations?.[language]?.title ??
+                        (language === 'ja' ? data.secretary.title : t.org.secretaryTitle)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-300 mt-1 font-medium leading-relaxed">
+                    {data.secretary.translations?.[language]?.role ??
+                      (language === 'ja' ? data.secretary.role : t.org.secretaryRole)}
+                  </p>
+                  <span className="inline-block mt-2 text-sm bg-indigo-500/20 text-indigo-300 font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+                    {data.secretary.translations?.[language]?.permanent_badge ?? t.org.permanentBadge}
+                  </span>
+                </div>
+              );
+            })()}
 
             {/* Connecting Arrow */}
             <div className="flex flex-col items-center text-slate-500">
