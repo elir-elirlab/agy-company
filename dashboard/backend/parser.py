@@ -35,6 +35,7 @@ class DeliverableMeta(BaseModel):
     """Represents metadata extracted from a deliverable note's frontmatter."""
     id: Optional[str] = None
     aliases: Optional[List[str]] = None
+    doc_type: str = "undefined"
     tags: List[str] = []
     created: Optional[str] = None
     updated: Optional[str] = None
@@ -178,9 +179,16 @@ def get_inbox_deliverables(vault_path: Path) -> List[DeliverableMeta]:
         else:
             raw_summary = []
 
+        # Normalize doc_type (defaults to 'undefined' if absent or empty)
+        raw_doc_type = meta.get("doc_type")
+        doc_type = str(raw_doc_type).strip().lower() if raw_doc_type else "undefined"
+        if not doc_type:
+            doc_type = "undefined"
+
         deliverables.append(DeliverableMeta(
             id=str(meta.get("id", file.stem)),
             aliases=meta.get("aliases") or [],
+            doc_type=doc_type,
             tags=meta.get("tags") or [],
             created=str(meta.get("created", "")),
             updated=str(meta.get("updated", "")),
@@ -201,11 +209,12 @@ def create_quick_inbox_note(
     title: str,
     content: str,
     department: str = "general",
-    summary: Optional[List[str]] = None
+    summary: Optional[List[str]] = None,
+    doc_type: str = "knowledge"
 ) -> Path:
     """
     Create a new quick note in '01_Inbox/' following the timestamped naming standard.
-    Includes optional summary bullet points in the YAML frontmatter.
+    Includes document type (doc_type) and optional summary bullet points in the YAML frontmatter.
     """
     inbox_dir = vault_path / "01_Inbox"
     if department != "general":
@@ -231,10 +240,14 @@ def create_quick_inbox_note(
     else:
         summary_yaml = "summary: []"
 
+    # Normalize doc_type (default: knowledge)
+    safe_doc_type = doc_type.strip().lower() if doc_type else "knowledge"
+
     # Build standardized frontmatter
     frontmatter = f"""---
 id: {timestamp_str}
 aliases:
+doc_type: {safe_doc_type}
 tags:
   - {department}
   - quick-capture

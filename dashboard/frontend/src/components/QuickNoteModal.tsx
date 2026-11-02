@@ -5,7 +5,8 @@ import { useI18n } from '../i18n/context';
 interface QuickNoteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (title: string, content: string, department: string, summary: string[]) => Promise<void>;
+  // Handler for note submission with title, content, target department, summary list, and doc_type
+  onSubmit: (title: string, content: string, department: string, summary: string[], docType: string) => Promise<void>;
   departments: string[];
 }
 
@@ -20,6 +21,8 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
   const [content, setContent] = useState('');
   const [summaryText, setSummaryText] = useState('');
   const [department, setDepartment] = useState('general');
+  // State for document purpose category: default to 'knowledge'
+  const [docType, setDocType] = useState('knowledge');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -36,11 +39,12 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(title, content, department, summaryList);
+      await onSubmit(title, content, department, summaryList, docType);
       setTitle('');
       setContent('');
       setSummaryText('');
       setDepartment('general');
+      setDocType('knowledge');
       onClose();
     } finally {
       setIsSubmitting(false);
@@ -98,6 +102,22 @@ export const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
                   01_Inbox/{d}/
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Document Purpose Type Selector (knowledge, proposal, discussion) */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-1.5">
+              {t.quickNote.docTypeLabel}
+            </label>
+            <select
+              value={docType}
+              onChange={(e) => setDocType(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition shadow-inner"
+            >
+              <option value="knowledge">{t.docTypes.knowledge}</option>
+              <option value="proposal">{t.docTypes.proposal}</option>
+              <option value="discussion">{t.docTypes.discussion}</option>
             </select>
           </div>
 

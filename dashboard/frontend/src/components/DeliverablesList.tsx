@@ -122,6 +122,30 @@ export const DeliverablesList: React.FC<DeliverablesListProps> = ({
                     {item.department}
                   </span>
 
+                  {/* Document purpose category badge (Knowledge / Proposal / Discussion / Undefined) */}
+                  {(() => {
+                    const docType = item.doc_type || 'undefined';
+                    let badgeStyle = 'bg-slate-700/60 text-slate-400 border-slate-600/40';
+                    let label = t.docTypes.undefined;
+
+                    if (docType === 'knowledge') {
+                      badgeStyle = 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+                      label = t.docTypes.knowledge;
+                    } else if (docType === 'proposal') {
+                      badgeStyle = 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+                      label = t.docTypes.proposal;
+                    } else if (docType === 'discussion') {
+                      badgeStyle = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+                      label = t.docTypes.discussion;
+                    }
+
+                    return (
+                      <span className={`px-2.5 py-0.5 rounded-full border text-xs font-semibold ${badgeStyle}`}>
+                        {label}
+                      </span>
+                    );
+                  })()}
+
                   {item.created && (
                     <span className="text-slate-400 font-mono text-sm">
                       {item.created}

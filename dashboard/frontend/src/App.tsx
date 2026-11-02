@@ -128,18 +128,19 @@ export const App: React.FC = () => {
     }
   };
 
-  // Handle Quick Note creation
+  // Handle Quick Note creation with title, content, department, summary, and doc_type
   const handleCreateQuickNote = async (
     title: string,
     content: string,
     department: string,
-    summary: string[] = []
+    summary: string[] = [],
+    doc_type: string = 'knowledge'
   ) => {
     try {
       const res = await fetch('/api/inbox/quick', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, department, summary })
+        body: JSON.stringify({ title, content, department, summary, doc_type })
       });
 
       if (res.ok) {

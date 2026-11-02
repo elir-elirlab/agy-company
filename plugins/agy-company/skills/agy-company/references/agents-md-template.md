@@ -53,20 +53,20 @@ vault/
 - When specialized work is required, the Secretary either writes directly to department folders or delegates tasks to subagents via `invoke_subagent`.
 
 ### Deterministic Routine Subcommands (Fast-Path — Pre-Approved)
-- Routine commands (`/agy-company daily`, `/agy-company note`, `/agy-company search`, `/agy-company backfill-summary`, `/agy-company sync-updates`, `/agy-company tone`) and routine requests for daily notes, quick notes, or note searches are **Pre-Approved Deterministic Routines**.
+- Routine commands (`/agy-company daily`, `/agy-company note`, `/agy-company search`, `/agy-company backfill-summary`, `/agy-company backfill-doctype`, `/agy-company sync-updates`, `/agy-company tone`) and routine requests for daily notes, quick notes, or note searches are **Pre-Approved Deterministic Routines**.
 - **Implicit Approval**: Invoking these commands/routines constitutes prior plan approval. Execute immediately without asking for confirmation first.
 - **Strict Scope Whitelisting**: Routine operations may ONLY access `vault/`, `.company/`, `config/`, and `plugins/agy-company/`. Inspecting `git log`, `git show`, `.git/`, or past conversation transcripts (`~/.gemini/` or `brain/` logs) is **STRICTLY PROHIBITED**.
 - **Circuit Breaker (Ask, Don't Dig)**: If any routine task encounters ambiguity or cannot finish within 4 tool calls, stop tool execution immediately and ask the user directly. Never search commit history or session logs to infer precedent.
 
-### Note Summary & Search Protocol (`search_notes.py`)
-- Every deliverable and note in `vault/01_Inbox/` MUST include a `summary:` list (3–5 concrete bullet points, ~50–80 chars each) in its YAML frontmatter.
-- When searching past notes or discovering related notes for the `link:` field, run `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py <keywords>` (use `--fulltext` if metadata search returns no matches, or `--missing-summary` to find notes needing summary backfill) instead of reading every file in `vault/01_Inbox/`.
+### Note Document Type & Summary Protocol (`search_notes.py`)
+- Every deliverable and note in `vault/01_Inbox/` MUST include a `doc_type:` (`knowledge`, `proposal`, or `discussion`) and a 3-attribute `summary:` list (50–80 chars per bullet) in its YAML frontmatter.
+- When searching past notes or discovering related notes for the `link:` field, run `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py <keywords>` (supports `-t <type>`, `--fulltext`, `--missing-summary`, and `--missing-type`) instead of reading every file in `vault/01_Inbox/`.
 
 ### Subagent Delegation Policy
 - For heavy or specialized tasks (such as competitor research, technical design, marketing drafting), the Secretary invokes background subagents (`invoke_subagent`).
 - Subagents must run `search_notes.py` prior to investigation to review existing organizational knowledge and link related past notes.
 - Intermediate drafts and scratch work go to `.company/[department]/work/`.
-- Final deliverables must be saved to `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with full frontmatter (including `summary`) before reporting back to the user.
+- Final deliverables must be saved to `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with full frontmatter (including `doc_type` and 3-attribute `summary`) before reporting back to the user.
 
 ### Safe Git Operations & Reset Policy (破壊的リセットの禁止)
 - Destructive whole-repository reset commands (`git reset --hard`, `git clean -fd`, etc.) are **STRICTLY PROHIBITED** across all agents and subagents.

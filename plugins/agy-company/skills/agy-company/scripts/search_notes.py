@@ -211,6 +211,12 @@ def scan_notes(vault_dir: Path, department_filter: Optional[str] = None) -> List
         updated_str = str(meta.get("updated") or created_str)
         title = extract_heading_title(body, md_file.stem)
 
+        # Normalize doc_type (defaults to 'undefined' if absent or empty)
+        raw_doc_type = meta.get("doc_type")
+        doc_type = str(raw_doc_type).strip().lower() if raw_doc_type else "undefined"
+        if not doc_type:
+            doc_type = "undefined"
+
         # Build a relative path from workspace root if possible, otherwise relative to vault_dir
         try:
             display_path = str(md_file.relative_to(Path.cwd()))
@@ -223,6 +229,7 @@ def scan_notes(vault_dir: Path, department_filter: Optional[str] = None) -> List
             "stem": md_file.stem,
             "department": dept,
             "id": str(meta.get("id") or md_file.stem),
+            "doc_type": doc_type,
             "title": title,
             "aliases": aliases,
             "tags": tags,
@@ -241,12 +248,14 @@ def scan_notes(vault_dir: Path, department_filter: Optional[str] = None) -> List
 def matches_filters(
     note: Dict[str, Any],
     keywords: List[str],
-    use_or: bool,
-    fulltext: bool,
-    tag_filter: Optional[str],
-    date_from: Optional[str],
-    date_to: Optional[str],
-    missing_summary: bool,
+    use_or: bool = False,
+    fulltext: bool = False,
+    tag_filter: Optional[str] = None,
+    doc_type_filter: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    missing_summary: bool = False,
+    missing_type: bool = False,
 ) -> bool:
     """
     Evaluate whether a parsed note satisfies all specified CLI search criteria.
@@ -256,13 +265,24 @@ def matches_filters(
     if missing_summary and has_summary:
         return False
 
-    # 2. Check --tag filter (case-insensitive substring match against note tags)
+    # 2. Check --missing-type filter (notes without a defined doc_type)
+    is_type_undefined = note.get("doc_type", "undefined") == "undefined"
+    if missing_type and not is_type_undefined:
+        return False
+
+    # 3. Check --type / doc_type filter (case-insensitive exact match)
+    if doc_type_filter:
+        target_doc_type = doc_type_filter.strip().lower()
+        if note.get("doc_type", "undefined").lower() != target_doc_type:
+            return False
+
+    # 4. Check --tag filter (case-insensitive substring match against note tags)
     if tag_filter:
         tag_lower = tag_filter.lower()
         if not any(tag_lower in t.lower() for t in note["tags"]):
             return False
 
-    # 3. Check --from and --to date range filters against created/updated date prefix (YYYY-MM-DD)
+    # 5. Check --from and --to date range filters against created/updated date prefix (YYYY-MM-DD)
     if date_from or date_to:
         note_date = normalize_date_prefix(note["created"]) or normalize_date_prefix(note["updated"]) or normalize_date_prefix(note["filename"])
         if not note_date:
@@ -272,7 +292,7 @@ def matches_filters(
         if date_to and note_date > date_to:
             return False
 
-    # 4. Check keyword matching
+    # 6. Check keyword matching
     if not keywords:
         return True
 
@@ -280,6 +300,7 @@ def matches_filters(
     searchable_parts = [
         note["filename"],
         note["title"],
+        note.get("doc_type", ""),
         " ".join(note["aliases"]),
         " ".join(note["tags"]),
         " ".join(note["summary"]),
@@ -298,9 +319,20 @@ def matches_filters(
 def format_note_text(index: int, note: Dict[str, Any]) -> str:
     """
     Format a single note's metadata and summary for human/LLM-friendly terminal output.
+    Includes bilingual doc_type labels (knowledge, proposal, discussion, undefined).
     """
+    doc_type_labels = {
+        "knowledge": "knowledge (知見)",
+        "proposal": "proposal (提案)",
+        "discussion": "discussion (議論)",
+        "undefined": "undefined (未定義)",
+    }
+    raw_type = note.get("doc_type", "undefined").lower()
+    type_display = doc_type_labels.get(raw_type, f"{raw_type} (カスタム)")
+
     lines = [f"[{index}] {note['path']}"]
     lines.append(f"  Title: {note['title']}")
+    lines.append(f"  Type: {type_display}")
     if note["aliases"]:
         lines.append(f"  Aliases: {', '.join(note['aliases'])}")
     if note["tags"]:
@@ -343,6 +375,19 @@ def build_arg_parser() -> argparse.ArgumentParser:
         dest="use_or",
         action="store_true",
         help="Use OR logic for multiple keywords instead of the default AND logic.",
+    )
+    parser.add_argument(
+        "-t",
+        "--type",
+        dest="doc_type",
+        type=str,
+        default=None,
+        help="Filter by document type (knowledge, proposal, discussion, or undefined).",
+    )
+    parser.add_argument(
+        "--missing-type",
+        action="store_true",
+        help="Only list notes that do not have a defined 'doc_type' in their frontmatter (or are undefined).",
     )
     parser.add_argument(
         "--dept",
@@ -415,9 +460,11 @@ def main() -> int:
             use_or=args.use_or,
             fulltext=args.fulltext,
             tag_filter=args.tag,
+            doc_type_filter=args.doc_type,
             date_from=args.date_from,
             date_to=args.date_to,
             missing_summary=args.missing_summary,
+            missing_type=args.missing_type,
         )
     ]
 

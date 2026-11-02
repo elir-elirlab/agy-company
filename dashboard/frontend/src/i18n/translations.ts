@@ -94,12 +94,19 @@ export const translations = {
       linksCount: '件のリンク',
       summaryLabel: '要約'
     },
+    docTypes: {
+      knowledge: '知見',
+      proposal: '提案',
+      discussion: '議論',
+      undefined: '未定義'
+    },
     quickNote: {
       modalTitle: '01_Inbox へのクイックキャプチャ',
       titleLabel: 'タイトル',
       titlePlaceholder: '例: 新機能のアイデア、会議メモ',
       deptLabel: '保存先部署',
       generalInbox: '01_Inbox/ (未分類 / 全体)',
+      docTypeLabel: '資料タイプ (目的属性)',
       summaryLabel: '要約・ポイント (任意 / 1行に1項目)',
       summaryPlaceholder: 'ノートの結論や要点を改行区切りで入力（3〜5行目安）...',
       contentLabel: 'メモ本文 / スクラッチパッド',
@@ -112,6 +119,7 @@ export const translations = {
       openInObsidian: 'Obsidian で開く',
       metadataTitle: 'Frontmatter メタデータ',
       summaryTitle: '要約 (Summary)',
+      docTypeTitle: '資料タイプ',
       loading: 'ドキュメントを読み込み中...',
       error: 'コンテンツの読み込みに失敗しました。',
       tabPreview: 'プレビュー',
@@ -209,12 +217,19 @@ export const translations = {
       linksCount: 'links',
       summaryLabel: 'Summary'
     },
+    docTypes: {
+      knowledge: 'Knowledge',
+      proposal: 'Proposal',
+      discussion: 'Discussion',
+      undefined: 'Undefined'
+    },
     quickNote: {
       modalTitle: 'Quick Capture to 01_Inbox',
       titleLabel: 'Title',
       titlePlaceholder: 'e.g. Next Feature Idea, Meeting Notes',
       deptLabel: 'Target Department',
       generalInbox: '01_Inbox/ (General / Unsorted)',
+      docTypeLabel: 'Document Type',
       summaryLabel: 'Summary Bullets (Optional / 1 per line)',
       summaryPlaceholder: 'Enter 3-5 key takeaways (one per line)...',
       contentLabel: 'Content / Scratchpad',
@@ -227,6 +242,7 @@ export const translations = {
       openInObsidian: 'Open in Obsidian',
       metadataTitle: 'Frontmatter Metadata',
       summaryTitle: 'Summary',
+      docTypeTitle: 'Document Type',
       loading: 'Loading document...',
       error: 'Failed to load content.',
       tabPreview: 'Preview',

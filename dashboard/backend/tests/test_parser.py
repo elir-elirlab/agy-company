@@ -55,6 +55,7 @@ created: 2026-09-08-231720
 updated: 2026-09-08-231900
 link:
   - "[[2026-09-07-010834-PreviousReport]]"
+doc_type: knowledge
 summary:
   - "Key competitor finding 1"
   - "Key competitor finding 2"
@@ -122,6 +123,8 @@ def test_get_inbox_deliverables(sample_vault: Path):
     assert "[[2026-09-07-010834-PreviousReport]]" in item.links
     assert item.summary == ["Key competitor finding 1", "Key competitor finding 2"]
     assert item.title == "Competitor Research Report"
+    # Verify doc_type is parsed accurately from frontmatter
+    assert item.doc_type == "knowledge"
 
 
 def test_create_quick_inbox_note(sample_vault: Path):
@@ -131,7 +134,8 @@ def test_create_quick_inbox_note(sample_vault: Path):
         title="Quick Brainstorming",
         content="Testing note creation.",
         department="engineering",
-        summary=["Summary point A", "Summary point B"]
+        summary=["Summary point A", "Summary point B"],
+        doc_type="proposal"
     )
 
     assert created_file.exists()
@@ -143,4 +147,6 @@ def test_create_quick_inbox_note(sample_vault: Path):
     assert "engineering" in meta.get("tags", [])
     assert "quick-capture" in meta.get("tags", [])
     assert meta.get("summary") == ["Summary point A", "Summary point B"]
+    # Verify custom doc_type is saved into frontmatter
+    assert meta.get("doc_type") == "proposal"
     assert "Testing note creation." in body

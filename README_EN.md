@@ -149,9 +149,10 @@ Use deterministic subcommands to execute daily operations immediately without de
 | Command | Description |
 |---|---|
 | `/agy-company daily` | Creates today's daily note (`vault/02_Daily/YYYY-MM-DD.md`), carries over unfinished `- [ ]` tasks from the previous note, and updates bidirectional navigation links. |
-| `/agy-company note` | Summarizes the current conversation or investigation findings into a structured note in `vault/01_Inbox/[department]/` with standard YAML frontmatter (including 3–5 `summary` bullets and auto-discovered `link` references). |
-| `/agy-company search` | Queries past notes in `vault/01_Inbox/` via `search_notes.py` and outputs matching notes' frontmatter `summary` fields to answer questions with minimal context consumption. |
+| `/agy-company note` | Automatically classifies the document purpose (`doc_type: knowledge | proposal | discussion`) and summarizes the current conversation into a structured note in `vault/01_Inbox/[department]/` with standard YAML frontmatter (including 3–5 structured `summary` bullets and auto-discovered `link` references). |
+| `/agy-company search` | Queries past notes in `vault/01_Inbox/` via `search_notes.py` with optional `-t` / `--type` filters (`knowledge`, `proposal`, `discussion`, `undefined`) and outputs matching notes' frontmatter `summary` fields with minimal context consumption. |
 | `/agy-company backfill-summary` | Detects existing notes missing the `summary` frontmatter field and backfills 3–5 takeaway bullets. |
+| `/agy-company backfill-doctype` | Detects existing notes without a `doc_type` and has AI classify and backfill the appropriate document type (`knowledge`, `proposal`, `discussion`) directly into their frontmatter. |
 | `/agy-company sync-updates` | Non-destructively merges the latest plugin operational rules and guardrails into `.company/AGENTS.md` while preserving your custom profile, persona, and departments. |
 | `/agy-company tone` | Interactively switches the Secretary's communication persona and language. |
 
@@ -204,6 +205,10 @@ Configurations are persisted in `.company/secretary/AGENTS.md` and retained acro
 > Note down: "Explore local LLM code review automation tools"
 ```
 - Timestamped Markdown notes are immediately saved to `vault/01_Inbox/`.
+- The AI classifies the document purpose (`doc_type: knowledge | proposal | discussion`) and generates purpose-specific structured takeaways:
+  - **Knowledge** (`knowledge`): Technical notes, how-to guides, survey deliverables (`[Topic]` / `[Key Takeaway]` / `[References]`)
+  - **Proposal** (`proposal`): Decision documents and action proposals (`[Proposal]` / `[Summary & Impact]` / `[Status & Deadline]`)
+  - **Discussion** (`discussion`): Working notes, RFCs, open problems (`[Objective]` / `[Status & Blockers]` / `[Open Questions]`)
 
 #### Delegating to Specialized Subagents (`invoke_subagent`)
 ```text

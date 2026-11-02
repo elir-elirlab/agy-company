@@ -122,7 +122,7 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                     {t.fileViewer.metadataTitle}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 text-slate-300">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-slate-300">
                     {data.frontmatter.id && (
                       <div>
                         <span className="text-slate-500">ID: </span>
@@ -136,6 +136,32 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ filePath, onCl
                         <span className="font-mono text-slate-200">{data.frontmatter.created}</span>
                       </div>
                     )}
+                    {/* Document purpose category (knowledge / proposal / discussion / undefined) */}
+                    <div>
+                      <span className="text-slate-500">{t.fileViewer.docTypeTitle}: </span>
+                      {(() => {
+                        const docType = data.frontmatter.doc_type || 'undefined';
+                        let badgeStyle = 'bg-slate-700/60 text-slate-400 border-slate-600/40';
+                        let label = t.docTypes.undefined;
+
+                        if (docType === 'knowledge') {
+                          badgeStyle = 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+                          label = t.docTypes.knowledge;
+                        } else if (docType === 'proposal') {
+                          badgeStyle = 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+                          label = t.docTypes.proposal;
+                        } else if (docType === 'discussion') {
+                          badgeStyle = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+                          label = t.docTypes.discussion;
+                        }
+
+                        return (
+                          <span className={`inline-block px-2 py-0.5 rounded-full border text-xs font-semibold ${badgeStyle}`}>
+                            {label}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </div>
 
                   {/* Tags */}

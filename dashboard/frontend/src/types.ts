@@ -15,6 +15,8 @@ export interface DeliverableMeta {
   updated?: string;
   links: string[];
   summary?: string[];
+  // Document purpose type: knowledge | proposal | discussion | undefined
+  doc_type?: string;
   title: string;
   relative_path: string;
   department: string;
