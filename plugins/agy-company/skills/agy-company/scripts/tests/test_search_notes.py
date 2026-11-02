@@ -34,9 +34,10 @@ class TestSearchNotes(unittest.TestCase):
         self.research_dir.mkdir(parents=True)
         self.eng_dir.mkdir(parents=True)
 
-        # Note 1: Research note with complete frontmatter and summary
+        # Note 1: Research note with complete frontmatter and summary (type: knowledge)
         note1_content = """---
 id: 2026-10-20-100000
+doc_type: knowledge
 aliases:
   - "VectorDB Survey"
   - "ベクトルDB比較"
@@ -49,9 +50,9 @@ updated: 2026-10-20-120000
 link:
   - "[[2026-10-20]]"
 summary:
-  - "Qdrant offers the best memory efficiency for under 10M vectors"
-  - "Milvus is suitable only for massive distributed deployments"
-  - "Recommend adopting Qdrant for our internal prototype"
+  - "[Topic] Optimization of vector DB latency and resource usage"
+  - "[Key Takeaway] Qdrant offers the best memory efficiency for under 10M vectors"
+  - "[References] Detailed benchmark script in scripts/benchmark.py"
 ---
 
 # Vector Database Performance Comparison
@@ -63,9 +64,10 @@ UniqueBodyKeywordAlpha is present only in the body of Note 1.
             note1_content, encoding="utf-8"
         )
 
-        # Note 2: Engineering note with complete frontmatter and summary
+        # Note 2: Engineering note with complete frontmatter and summary (type: proposal)
         note2_content = """---
 id: 2026-10-25-153000
+doc_type: proposal
 aliases:
   - "Auth Architecture"
 tags:
@@ -77,8 +79,9 @@ updated: 2026-10-25-160000
 link:
   - "[[2026-10-25]]"
 summary:
-  - "Use short-lived JWT access tokens (15 min) with HttpOnly refresh cookies"
-  - "Implement OAuth2 PKCE flow for CLI and SPA clients"
+  - "[Proposal] Implement OAuth2 PKCE flow for CLI and SPA clients"
+  - "[Summary & Impact] Reduces token leakage risks with short-lived JWT (15 min)"
+  - "[Status & Deadline] Awaiting review / Needed by 11/10"
 ---
 
 # Authentication Architecture Specification
@@ -250,11 +253,48 @@ Body text here.
         self.assertEqual(len(missing), 1)
         self.assertEqual(missing[0]["id"], "2026-10-10-090000")
 
+    def test_doc_type_filters(self) -> None:
+        """Verify filtering by --type (knowledge, proposal) and --missing-type (undefined)."""
+        all_notes = search_notes.scan_notes(self.vault_dir)
+
+        # 1. Filter by doc_type: knowledge
+        knowledge_notes = [
+            n for n in all_notes
+            if search_notes.matches_filters(
+                n, keywords=[], doc_type_filter="knowledge"
+            )
+        ]
+        self.assertEqual(len(knowledge_notes), 1)
+        self.assertEqual(knowledge_notes[0]["id"], "2026-10-20-100000")
+        self.assertEqual(knowledge_notes[0]["doc_type"], "knowledge")
+
+        # 2. Filter by doc_type: proposal
+        proposal_notes = [
+            n for n in all_notes
+            if search_notes.matches_filters(
+                n, keywords=[], doc_type_filter="proposal"
+            )
+        ]
+        self.assertEqual(len(proposal_notes), 1)
+        self.assertEqual(proposal_notes[0]["id"], "2026-10-25-153000")
+        self.assertEqual(proposal_notes[0]["doc_type"], "proposal")
+
+        # 3. Filter by missing_type (Note 3 lacks doc_type, so it defaults to 'undefined')
+        missing_type_notes = [
+            n for n in all_notes
+            if search_notes.matches_filters(
+                n, keywords=[], missing_type=True
+            )
+        ]
+        self.assertEqual(len(missing_type_notes), 1)
+        self.assertEqual(missing_type_notes[0]["id"], "2026-10-10-090000")
+        self.assertEqual(missing_type_notes[0]["doc_type"], "undefined")
+
     def test_cli_json_and_text_output(self) -> None:
-        """Verify end-to-end CLI execution with --json and standard text output."""
+        """Verify end-to-end CLI execution with --json and standard text output including doc_type."""
         script_file = SCRIPT_DIR / "search_notes.py"
 
-        # 1. Test --json output
+        # 1. Test --json output (ensuring doc_type is included in JSON payload)
         cmd_json = [
             sys.executable,
             str(script_file),
@@ -267,10 +307,11 @@ Body text here.
         payload = json.loads(proc_json.stdout)
         self.assertEqual(payload["total_matched"], 1)
         self.assertEqual(payload["results"][0]["id"], "2026-10-20-100000")
+        self.assertEqual(payload["results"][0]["doc_type"], "knowledge")
         self.assertNotIn("body", payload["results"][0])
         self.assertEqual(len(payload["results"][0]["summary"]), 3)
 
-        # 2. Test standard text output (ensuring body text is NOT printed, only summary)
+        # 2. Test standard text output (ensuring doc_type display and summary output)
         cmd_text = [
             sys.executable,
             str(script_file),
@@ -281,6 +322,7 @@ Body text here.
         ]
         proc_text = subprocess.run(cmd_text, capture_output=True, text=True, check=True)
         self.assertIn("Found 1 note(s)", proc_text.stdout)
+        self.assertIn("Type: knowledge (知見)", proc_text.stdout)
         self.assertIn("Qdrant offers the best memory efficiency", proc_text.stdout)
         self.assertNotIn("UniqueBodyKeywordAlpha", proc_text.stdout)
 

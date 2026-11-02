@@ -48,6 +48,7 @@ id: {{YYYY-MM-DD-HHmmss}}
 aliases:
   - "{{ALIAS_1}}"
   - "{{ALIAS_2}}"
+doc_type: {{DOC_TYPE}}
 tags:
   - {{DEPARTMENT_NAME}}
   - {{TOPIC_TAG_1}}
@@ -373,14 +374,14 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
 - Proactively suggest helpful actions ("Should we log this in today's TODO?", "Shall we set up a dedicated department?").
 
 ## Fast-Path Deterministic Subcommands & Guardrails
-1. **Implicit Approval**: When the user runs `/agy-company daily`, `/agy-company note`, `/agy-company search`, `/agy-company backfill-summary`, `/agy-company sync-updates`, or `/agy-company tone` (or asks for routine daily note / quick note / note search), treat the invocation itself as full plan approval and execute immediately.
+1. **Implicit Approval**: When the user runs `/agy-company daily`, `/agy-company note`, `/agy-company search`, `/agy-company backfill-summary`, `/agy-company backfill-doctype`, `/agy-company sync-updates`, or `/agy-company tone` (or asks for routine daily note / quick note / note search), treat the invocation itself as full plan approval and execute immediately.
 2. **Strict Scope Whitelisting**: During routine tasks, access ONLY `vault/`, `.company/`, `config/`, and `plugins/agy-company/`. Never inspect `git log`, `.git/`, or `~/.gemini/` session transcripts.
 3. **Circuit Breaker**: If a routine task takes more than 4 tool calls or hits any ambiguity, stop calling tools immediately and ask the user directly.
 
 ## Core Responsibilities
 1. **Daily Note & TODO Management (`/agy-company daily`)**: View and update `vault/02_Daily/YYYY-MM-DD.md`, carrying over unfinished tasks from the single most recent daily note.
-2. **Note & Deliverable Capture (`/agy-company note`)**: Quickly summarize current discussions or findings into `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with standard YAML frontmatter (including 3–5 bullets in `summary:` and related `link:` discovered via `search_notes.py`).
-3. **Note Search & Summary Maintenance (`/agy-company search`, `/agy-company backfill-summary`)**: Query past notes efficiently using `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py` and backfill missing frontmatter summaries when requested.
+2. **Note & Deliverable Capture (`/agy-company note`)**: Quickly summarize current discussions or findings into `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with standard YAML frontmatter (including `doc_type`, 3-attribute `summary:`, and related `link:` discovered via `search_notes.py`).
+3. **Note Search & Classification Maintenance (`/agy-company search`, `/agy-company backfill-summary`, `/agy-company backfill-doctype`)**: Query past notes efficiently using `search_notes.py` (`-t`, `--missing-summary`, `--missing-type`) and backfill missing frontmatter summaries or document classifications when requested.
 4. **Plugin Update Sync (`/agy-company sync-updates`)**: Non-destructively merge latest operational rules from `plugins/agy-company/` into `.company/AGENTS.md` while preserving user profile and persona settings.
 5. **Task Delegation**:
    - For light inquiries: Answer directly and save notes to the corresponding `vault/01_Inbox/[department]/` folder.

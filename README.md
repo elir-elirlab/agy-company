@@ -152,9 +152,10 @@ Antigravity CLI のチャットで以下のように入力します：
 | コマンド | 役割・動作 |
 |---|---|
 | `/agy-company daily` | 本日のデイリーノート（`vault/02_Daily/YYYY-MM-DD.md`）を作成し、前日ノートの未完了タスク（`- [ ]`）と双方向リンクを自動引き継ぎします。 |
-| `/agy-company note` | 現在の会話で議論・調査した内容を、標準 YAML フロントマター（3〜5行の `summary` 要約および自動関連ノートリンク付き）のノートとして `vault/01_Inbox/[department]/` に即時保存します。 |
-| `/agy-company search` | 専用スクリプト（`search_notes.py`）で過去ノートを高速検索し、該当ノートのフロントマター要約（`summary`）のみを抽出してコンテキストを圧迫せずに回答します。 |
+| `/agy-company note` | 現在の会話で議論・調査した内容を、資料目的属性（`doc_type: knowledge | proposal | discussion`）を自動判定の上、標準 YAML フロントマター（3〜5行の構造化 `summary` 要約および自動関連ノートリンク付き）のノートとして `vault/01_Inbox/[department]/` に即時保存します。 |
+| `/agy-company search` | 専用スクリプト（`search_notes.py`）で過去ノートを高速検索し、該当ノートのフロントマター要約（`summary`）および資料タイプ（`doc_type`）を抽出してコンテキストを圧迫せずに回答します（`-t` / `--type` による知見・提案・議論絞り込み対応）。 |
 | `/agy-company backfill-summary` | `summary` が未設定の既存ノートを検出し、要約（3〜5行）をフロントマターへ自動追記します。 |
+| `/agy-company backfill-doctype` | `doc_type` が未設定（未定義）の既存ノートを検出し、本文内容から適切な資料目的属性（知見・提案・議論）を AI が自動判定してフロントマターへ一括付与します。 |
 | `/agy-company sync-updates` | プラグインのアップデート内容（最新の運営ルールや安全ガードレール）を、既存のユーザー設定・口調・追加部署を保持したまま `.company/AGENTS.md` 等へ反映します。 |
 | `/agy-company tone` | 秘書の話し方（口調プリセット）や使用言語を対話形式で変更します。 |
 
@@ -207,6 +208,10 @@ Antigravity CLI のチャットで以下のように入力します：
 > ちょっとメモ。「ローカルLLMを使ったコードレビュー自動化ツール」
 ```
 - `vault/01_Inbox/` にタイムスタンプと標準フロントマター付きの Markdown として即座に保存されます。
+- ドキュメントの目的属性（`doc_type: knowledge | proposal | discussion`）を AI が自動判定し、各属性に応じた構造化要約（`summary`）を生成します：
+  - **知見** (`knowledge`): 読んで終わっていい技術メモ・手順・サーベイ結果（ラベル: `[Topic]` / `[Key Takeaway]` / `[References]`）
+  - **提案** (`proposal`): 承認・意思決定を取るための提案書（ラベル: `[Proposal]` / `[Summary & Impact]` / `[Status & Deadline]`）
+  - **議論** (`discussion`): 壁打ち・検討メモ・RFC（ラベル: `[Objective]` / `[Status & Blockers]` / `[Open Questions]`）
 
 #### 専門サブエージェントへの業務委譲 (`invoke_subagent`)
 ```text

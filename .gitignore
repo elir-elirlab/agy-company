@@ -1,5 +1,6 @@
 # For dev
 docs/references
+docker-compose.test.yml
 
 # Python cache and environments
 .venv/

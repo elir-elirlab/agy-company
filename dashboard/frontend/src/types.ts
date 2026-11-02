@@ -15,6 +15,8 @@ export interface DeliverableMeta {
   updated?: string;
   links: string[];
   summary?: string[];
+  // Document purpose type: knowledge | proposal | discussion | undefined
+  doc_type?: string;
   title: string;
   relative_path: string;
   department: string;
@@ -31,3 +33,38 @@ export interface StatusResponse {
   deliverables_count: number;
   departments: string[];
 }
+
+export interface DepartmentDetail {
+  id: string;
+  name: string;
+  short_name?: string;
+  role: string;
+  translations?: {
+    ja?: { name: string; short_name?: string; role: string };
+    en?: { name: string; short_name?: string; role: string };
+  };
+  deliverables_count: number;
+  path: string;
+}
+
+export interface OrgChartData {
+  owner: {
+    title: string;
+    role: string;
+    translations?: {
+      ja?: { title: string; role: string };
+      en?: { title: string; role: string };
+    };
+  };
+  secretary: {
+    title: string;
+    role: string;
+    is_permanent: boolean;
+    translations?: {
+      ja?: { title: string; role: string; permanent_badge?: string };
+      en?: { title: string; role: string; permanent_badge?: string };
+    };
+  };
+  departments: DepartmentDetail[];
+}
+

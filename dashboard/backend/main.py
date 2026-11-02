@@ -22,7 +22,7 @@ from .parser import (
 )
 
 # Initialize FastAPI application
-app = FastAPI(title="agy-company Dashboard API", version="2.1.0")
+app = FastAPI(title="agy-company Dashboard API", version="2.2.0")
 
 # Enable CORS for local Vite development server
 app.add_middleware(
@@ -84,6 +84,8 @@ class QuickNoteRequest(BaseModel):
     content: str
     department: str = "general"
     summary: List[str] = []
+    # Primary purpose category: knowledge | proposal | discussion
+    doc_type: str = "knowledge"
 
 
 class WebSocketManager:
@@ -331,7 +333,8 @@ def create_quick_note(req: QuickNoteRequest):
         title=req.title,
         content=req.content,
         department=req.department,
-        summary=req.summary
+        summary=req.summary,
+        doc_type=req.doc_type
     )
     return {
         "status": "created",
