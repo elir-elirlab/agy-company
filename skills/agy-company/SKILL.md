@@ -2,7 +2,7 @@
 name: agy-company
 description: >-
   Virtual organization management skill powered by an Executive Secretary agent with Obsidian Vault integration.
-  Provides deterministic Fast-Path subcommands (/agy-company daily, /agy-company note, /agy-company search, /agy-company backfill-summary, /agy-company backfill-doctype, /agy-company sync-updates, /agy-company tone),
+  Provides deterministic Fast-Path subcommands (/agy-company daily, /agy-company note, /agy-company search, /agy-company backfill-summary, /agy-company backfill-doctype, /agy-company sync-updates, /agy-company tone, /agy-company dashboard),
   lightweight frontmatter summary search via search_notes.py, interactive onboarding, dynamic department spawning, and subagent delegation via invoke_subagent.
   Outputs daily notes to vault/02_Daily/ with bidirectional navigation and deliverables across all departments to vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md.
   Use when the user runs /agy-company (or /company) or mentions secretary, 秘書, 会社, 組織, デイリーノート, daily note, TODO, inbox, ノート検索, or delegating tasks to departments.
@@ -13,13 +13,18 @@ description: >-
 
 ## When to Use
 
-- When the user runs `/agy-company` (or legacy `/company`) with or without options (`daily`, `note`, `search`, `backfill-summary`, `backfill-doctype`, `sync-updates`, `tone`)
-- When the user asks for their secretary ("秘書", "秘書さん"), task management ("TODO", "今日やること", "デイリーノート"), inbox captures ("ノートにまとめて", "メモして"), note search ("過去のノートを探して", "以前調べた〜"), or consultation / brainstorming
+- When the user runs `/agy-company` (or legacy `/company`) with or without options (`daily`, `note`, `search`, `backfill-summary`, `backfill-doctype`, `sync-updates`, `tone`, `dashboard`)
+- When the user asks for their secretary ("秘書", "秘書さん"), task management ("TODO", "今日やること", "デイリーノート"), inbox captures ("ノートにまとめて", "メモして"), note search ("過去のノートを探して", "以前調べた〜"), dashboard control ("ダッシュボード", "dashboard"), or consultation / brainstorming
 - When delegating work across departments (research, engineering, pm, marketing, etc.)
 
 ---
 
 ## ⚡ Core Execution Protocol: Fast-Path vs Slow-Path & Guardrails
+
+### Path & Command Variables
+- **`<SKILL_DIR>`**: The directory containing this `SKILL.md` file (e.g., `<PLUGIN_ROOT>/skills/agy-company` or `./skills/agy-company`).
+- **`<PLUGIN_ROOT>`**: The plugin root directory (2 levels above `<SKILL_DIR>`).
+- **`<PYTHON>`**: Use `python3` on macOS / Linux, or `python` on Windows.
 
 To prevent analysis paralysis and unintended background loops, all operations are strictly divided into two tracks:
 
@@ -32,13 +37,14 @@ Applies to:
 - `/agy-company backfill-doctype` (or requests to classify and assign missing `doc_type` to existing notes)
 - `/agy-company sync-updates` (syncing plugin template/rule updates into `.company/`)
 - `/agy-company tone` (changing Secretary language or persona)
+- `/agy-company dashboard` (or natural language requests to start, stop, or check the local Obsidian Web Dashboard)
 
 #### Fast-Path Rules:
 1. **Implicit Approval (Command = Pre-Approved Plan)**:
    User invocation of a Fast-Path command or routine request constitutes **complete prior approval of the execution plan**. Execute the defined steps immediately and report completion. Do NOT pause to ask for plan confirmation before creating or updating the target routine files.
 2. **Strict Scope Whitelisting (Forbidden Directories)**:
-   Fast-Path operations may ONLY read/write within `vault/`, `.company/`, `config/`, and `plugins/agy-company/`.
-   **STRICTLY FORBIDDEN**: Running `git log`, `git show`, inspecting `.git/`, or reading past conversation transcripts (`~/.gemini/`, `brain/`, `transcript.jsonl`) is strictly prohibited under all circumstances.
+   Fast-Path operations may ONLY read/write within the workspace's resolved `<vault_dir>` (default `vault/`), `.company/` (including `.company/.config/`), resolved `<config_dir>` (default `config/`), and the plugin installation directory (`<PLUGIN_ROOT>` / `<SKILL_DIR>`).
+   **STRICTLY FORBIDDEN**: Running `git log`, `git show`, inspecting `.git/`, or reading past conversation transcripts (`~/.gemini/antigravity-cli/brain/` or `transcript.jsonl`) is strictly prohibited under all circumstances.
 3. **Circuit Breaker (Ask, Don't Dig — Max 4 Tool Calls)**:
    If a Fast-Path routine cannot be completed within **4 tool calls**, or if you encounter any ambiguity or rule conflict, **STOP calling tools immediately** and ask the user a concise 1-sentence question. Never search commit history or session logs to infer past precedent.
 
@@ -80,7 +86,7 @@ Summarizes the current conversation topic, brainstorming conclusions, or investi
      - **`discussion`** (議論): Intermediate experiment log, open brainstorming, unresolved issues, RFC.
 2. **Determine Target Path & Auto-Discover Related Links via `search_notes.py`**:
    - Identify the target department folder (`vault/01_Inbox/[department]/` such as `research`, `engineering`, `pm`, or directly in `vault/01_Inbox/` for general notes).
-   - Run `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py <keyword1> <keyword2> --or --limit 5` (1 tool call) to find related past notes by their frontmatter summaries.
+   - Run `<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" <keyword1> <keyword2> --or --limit 5` (1 tool call) to find related past notes by their frontmatter summaries.
    - For the YAML `link:` field, include today's daily note (`"[[YYYY-MM-DD]]"`) and any relevant note filenames (`"[[YYYY-MM-DD-HHmmss-RelatedTitle]]"`) returned by `search_notes.py`.
 3. **Write Note with `doc_type` and 3-Attribute `summary`**:
    - Create `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` using `write_file` with the Universal Deliverable Note Header containing `doc_type:` and 3-attribute `summary:`:
@@ -95,7 +101,7 @@ Searches `vault/01_Inbox/` using the dedicated Python script `search_notes.py`, 
 
 **Deterministic Steps (Max 4 Tool Calls)**:
 1. **Run Metadata Search**:
-   Execute `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py <keywords>` (supports `-t <type>`, `--dept <dept>`, `--tag <tag>`, `--from YYYY-MM-DD`, `--to YYYY-MM-DD`, `--or`, `--limit 20`).
+   Execute `<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" <keywords>` (supports `-t <type>`, `--dept <dept>`, `--tag <tag>`, `--from YYYY-MM-DD`, `--to YYYY-MM-DD`, `--or`, `--limit 20`).
 2. **Fallback to Full-Text Search (If Needed)**:
    If metadata search returns no matches or insufficient results, re-run with `--fulltext` (`-f`) to search Markdown bodies while still outputting only metadata, `doc_type`, and `summary`.
 3. **Selective Deep Read (Optional)**:
@@ -108,7 +114,7 @@ Finds existing notes in `vault/01_Inbox/` that lack a `summary` field in their f
 
 **Steps**:
 1. **Detect Notes Missing Summary**:
-   Run `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py --missing-summary` to list all notes without a `summary` field.
+   Run `<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" --missing-summary` to list all notes without a `summary` field.
 2. **Read & Update**:
    For each listed note, read its content using `read_file`, determine its `doc_type`, synthesize 3 concrete summary bullets using the corresponding 3-attribute labels, and insert the `summary:` block into its YAML frontmatter using `edit_file`.
 3. **Report**:
@@ -121,7 +127,7 @@ Scans existing notes in `vault/01_Inbox/` lacking a defined `doc_type` (or marke
 
 **Steps**:
 1. **Detect Unclassified Notes**:
-   Run `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py --missing-type` to list notes without a defined `doc_type`.
+   Run `<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" --missing-type` to list notes without a defined `doc_type`.
 2. **Classify and Update**:
    For each note:
    - Read its content via `read_file`.
@@ -137,11 +143,11 @@ Scans existing notes in `vault/01_Inbox/` lacking a defined `doc_type` (or marke
 ---
 
 ### Option 6: `/agy-company sync-updates` — Synchronize Plugin Updates Non-Destructively
-Applies the latest operational guardrails, command definitions, and template updates from `plugins/agy-company/` into the user's active `.company/` and `vault/` configuration files without losing user customizations.
+Applies the latest operational guardrails, command definitions, and template updates from the installed agy-company plugin templates into the user's active `.company/` and `vault/` configuration files without losing user customizations.
 
 **Deterministic Steps (Max 4 Tool Calls)**:
 1. **Read Templates & Active Configs**:
-   Read `plugins/agy-company/skills/agy-company/references/agents-md-template.md` and `plugins/agy-company/skills/agy-company/references/departments.md`, along with the existing `.company/AGENTS.md`, `.company/secretary/AGENTS.md`, and `vault/AGENTS.md` (if present).
+   Read `<SKILL_DIR>/references/agents-md-template.md` and `<SKILL_DIR>/references/departments.md`, along with the existing `.company/AGENTS.md`, `.company/secretary/AGENTS.md`, and `vault/AGENTS.md` (if present).
 2. **Preserve User-Specific Data**:
    Strictly retain all user-customized sections in `.company/AGENTS.md` and `.company/secretary/AGENTS.md`:
    - `## Owner Profile` (Business / Activity, Goals & Challenges, Created Date)
@@ -150,11 +156,12 @@ Applies the latest operational guardrails, command definitions, and template upd
    - `## Personalization Notes`
 3. **Update System Operational Rules**:
    Use `edit_file` to update the `## Operational Rules` section in `.company/AGENTS.md` (and `vault/AGENTS.md` / `.company/secretary/AGENTS.md` as applicable) so they include:
-   - The `/agy-company` subcommands (`daily`, `note`, `search`, `backfill-summary`, `backfill-doctype`, `sync-updates`, `tone`)
+   - The `/agy-company` subcommands (`daily`, `note`, `search`, `backfill-summary`, `backfill-doctype`, `sync-updates`, `tone`, `dashboard`)
    - The `doc_type` standard (`knowledge`, `proposal`, `discussion`) and 3-attribute `summary` rules
-   - Fast-Path Implicit Approval & Strict Scope Whitelisting (forbidding `git log` and `~/.gemini/` transcript digging during routine tasks)
+   - Fast-Path Implicit Approval & Strict Scope Whitelisting (access ONLY resolved `<vault_dir>`, `.company/` including `.company/.config/`, `<config_dir>`, and `<SKILL_DIR>`, forbidding `git log` and `~/.gemini/antigravity-cli/brain/` transcript digging during routine tasks)
    - Circuit Breaker (Ask, Don't Dig)
    - Unified `vault/01_Inbox/` and `vault/02_Daily/` paths
+   - Dashboard control rules (`/agy-company dashboard`) and expanded template variables (`{{CONFIG_DIR}}`, `{{VAULT_DIR}}`, `{{SKILL_DIR}}`)
 4. **Report**: Present a concise summary of the synchronized rules and confirm that all user profile/persona settings were preserved.
 
 ---
@@ -170,6 +177,20 @@ Changes the Secretary's speaking style and language at any time.
 1. **Interactive Prompt**: If not already specified in the command, ask the user for their preferred language and tone preset (or custom persona description) using `ask_question`.
 2. **Update Guidelines**: Write the selected configuration into `.company/secretary/AGENTS.md` and `.company/AGENTS.md` (and `vault/AGENTS.md` if present).
 3. **Immediate Switch**: Respond immediately in the newly selected persona and language.
+
+---
+
+### Option 8: `/agy-company dashboard` — Launch or Stop the Local Web Dashboard
+Starts, stops, or checks the status of the local Obsidian Web Dashboard via Docker Compose, automatically mounting the workspace's `<vault_dir>` and `<config_dir>` and pre-creating host directories under user permissions.
+
+**Deterministic Steps (Max 2 Tool Calls)**:
+1. **Execute Dashboard Controller (`start_dashboard.py`)**:
+   - **Start (Default)**: Run `<PYTHON> "<SKILL_DIR>/scripts/start_dashboard.py"` (append `--port <port>` if the user specifies a custom port, or `--config-dir <path>` / `--vault-dir <path>` if explicitly requested).
+   - **Stop (`/agy-company dashboard stop`)**: Run `<PYTHON> "<SKILL_DIR>/scripts/start_dashboard.py" --stop`.
+   - **Status (`/agy-company dashboard status`)**: Run `<PYTHON> "<SKILL_DIR>/scripts/start_dashboard.py" --status`.
+2. **Report**:
+   - On start, present the dashboard URL (`http://localhost:<port>`, default `http://localhost:18000`) and the mounted Vault / Config paths to the user.
+   - If Docker is not installed or the daemon is not running, relay the error message and guide the user to start Docker Desktop / Docker Engine.
 
 ---
 
@@ -252,24 +273,24 @@ To search existing knowledge in `vault/01_Inbox/` without consuming excessive co
 
 ```bash
 # Default metadata search (matches filename, title, aliases, tags, and summary; AND logic by default)
-python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py "キーワード1" "キーワード2"
+<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" "キーワード1" "キーワード2"
 
 # Filter by document type (knowledge, proposal, discussion, or undefined)
-python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py --type proposal
-python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py "FastAPI" --type knowledge
+<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" --type proposal
+<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" "FastAPI" --type knowledge
 
 # OR search across multiple keywords
-python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py "キーワード1" "キーワード2" --or
+<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" "キーワード1" "キーワード2" --or
 
 # Full-text search including Markdown body (outputs only metadata & summary)
-python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py "キーワード" --fulltext
+<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" "キーワード" --fulltext
 
 # Filter by department, tag, or date range
-python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py --dept research --tag VectorDB --from 2026-10-01
+<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" --dept research --tag VectorDB --from 2026-10-01
 
 # Find existing notes that are missing the 'summary' or 'doc_type' field
-python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py --missing-summary
-python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py --missing-type
+<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" --missing-summary
+<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" --missing-type
 ```
 
 ---
@@ -309,7 +330,16 @@ Use `ask_question` (or friendly dialogue) to ask the 4 onboarding questions in t
      - 🎨 **カスタム (Custom)**: Custom character or persona defined by the user.
 
 ### Step 3: Automatic Organization Initialization
-Initialize `.company/` (using `references/agents-md-template.md` and `references/departments.md`), `vault/`, and local `config/*.json` (copying from `config/*.example.json` if `config/*.json` do not exist yet):
+Initialize `.company/` (using `<SKILL_DIR>/references/agents-md-template.md` and `<SKILL_DIR>/references/departments.md`), `<vault_dir>` (default `./vault`), and `<config_dir>`:
+
+- **Configuration Directory Resolution (`<config_dir>`)**:
+  Supports any of the following directory structures:
+  1. **`./config`** (Default)
+  2. **`.company/.config`** (Hidden configuration directory to avoid collision with existing project configs)
+  3. **Custom Path** (User-specified path)
+  If the configuration files do not exist yet in the target `<config_dir>`, initialize them by copying templates from `<PLUGIN_ROOT>/config/*.example.json` to `<config_dir>/*.json` (and `*.example.json`).
+- **Template Variable Expansion**:
+  When generating `.company/AGENTS.md`, expand and record `{{CONFIG_DIR}}`, `{{VAULT_DIR}}`, and `{{SKILL_DIR}}` as real paths alongside the onboarding profile variables.
 
 ```text
 .company/
@@ -335,12 +365,12 @@ When a specialized domain is invoked 2+ times or requested by the user:
    - Create `.company/[department_name]/work/`
    - Generate `.company/[department_name]/AGENTS.md` with operational guidelines.
 2. **Create Deliverables Directory (Obsidian Vault)**:
-   - Create `vault/01_Inbox/[department_name]/` for published deliverables.
+   - Create `<vault_dir>/01_Inbox/[department_name]/` for published deliverables.
 3. **Register Department & Synchronize Dashboard Configs**:
-   - Update `.company/AGENTS.md` and `vault/AGENTS.md` with new department details.
+   - Update `.company/AGENTS.md` and `<vault_dir>/AGENTS.md` with new department details.
    - **Update Bilingual Dashboard Configurations**:
-     If `config/departments-ja.json` or `config/departments-en.json` do not exist yet, initialize them from `config/departments-ja.example.json` and `config/departments-en.example.json` first, then add the new department under `"departments"` in both files:
-     - `config/departments-ja.json`:
+     Resolve `<config_dir>` from `.company/AGENTS.md` (or use the auto-resolved `<config_dir>`). If `departments-ja.json` or `departments-en.json` do not exist yet in `<config_dir>`, initialize them from `<PLUGIN_ROOT>/config/departments-ja.example.json` and `<PLUGIN_ROOT>/config/departments-en.example.json` first, then add the new department under `"departments"` in both files:
+     - `<config_dir>/departments-ja.json`:
        ```json
        "departments": {
          "[department_name]": {
@@ -349,7 +379,7 @@ When a specialized domain is invoked 2+ times or requested by the user:
          }
        }
        ```
-     - `config/departments-en.json`:
+     - `<config_dir>/departments-en.json`:
        ```json
        "departments": {
          "[department_name]": {
@@ -366,7 +396,7 @@ When a specialized domain is invoked 2+ times or requested by the user:
 For specialized tasks across all departments:
 1. Invoke subagents (`research` for surveys, `self` for coding/specs) via `invoke_subagent`.
 2. Instruct the subagent:
-   - **Prior Knowledge Lookup**: Before starting new research or design, run `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py <keywords> --or` to check past notes in `vault/01_Inbox/` and collect related note filenames for `link:`.
+   - **Prior Knowledge Lookup**: Before starting new research or design, run `<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" <keywords> --or` to check past notes in `vault/01_Inbox/` and collect related note filenames for `link:`.
    - **Working Space**: Save intermediate drafts, scraped text, or temporary test scripts into `.company/[department]/work/`.
    - **Publish Deliverable**: Once finalized, write the clean deliverable to `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md`.
    - **Header Standard**: Include YAML frontmatter (`id`, `aliases`, `doc_type` [`knowledge`|`proposal`|`discussion`], `tags`, `created`, `updated`, `link`, and 3-attribute `summary` matching the document type).

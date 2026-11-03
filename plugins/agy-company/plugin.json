@@ -1,5 +1,0 @@
-{
-  "name": "agy-company",
-  "description": "Virtual company management plugin with executive secretary, deterministic routine subcommands (daily, note, search, backfill-summary, sync-updates, tone), dynamic department spawning, and subagent delegation.",
-  "version": "2.2.0"
-}

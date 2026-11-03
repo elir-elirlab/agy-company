@@ -33,41 +33,73 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Base project root path resolution (three levels above dashboard/backend/main.py)
+# Base plugin/repository root path resolution (three levels above dashboard/backend/main.py)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+FALLBACK_CONFIG_DIR = PROJECT_ROOT / "config"
 
-# Configurable config directory (default: project root config/)
-CONFIG_DIR = Path(os.getenv("CONFIG_DIR", PROJECT_ROOT / "config"))
+
+def resolve_backend_config_dir() -> Path:
+    """
+    Resolve active configuration directory for the FastAPI backend:
+    1. CONFIG_DIR or CONFIG_PATH environment variable
+    2. <cwd>/.company/.config (if present)
+    3. <cwd>/config (if present)
+    4. PROJECT_ROOT / 'config'
+    """
+    env_cfg = os.getenv("CONFIG_DIR") or os.getenv("CONFIG_PATH")
+    if env_cfg:
+        return Path(env_cfg).expanduser().resolve()
+
+    cwd = Path.cwd().resolve()
+    hidden_cfg = cwd / ".company" / ".config"
+    if hidden_cfg.exists() and hidden_cfg.is_dir():
+        return hidden_cfg
+
+    cwd_cfg = cwd / "config"
+    if cwd_cfg.exists() and cwd_cfg.is_dir():
+        return cwd_cfg
+
+    return FALLBACK_CONFIG_DIR
+
+
+# Configurable config directory (default: resolved from env, .company/.config, ./config, or project root config/)
+CONFIG_DIR = resolve_backend_config_dir()
 
 
 def load_common_config() -> Dict[str, Any]:
     """
-    Load common application configuration from config/config.json,
-    falling back to config/config.example.json if the user-specific file does not exist.
+    Load common application configuration from CONFIG_DIR/config.json,
+    falling back to config.example.json in CONFIG_DIR or FALLBACK_CONFIG_DIR.
     Returns default settings dictionary if both files are absent or invalid.
     """
-    for filename in ("config.json", "config.example.json"):
-        config_file = CONFIG_DIR / filename
-        if config_file.exists() and config_file.is_file():
-            try:
-                return json.loads(config_file.read_text(encoding="utf-8"))
-            except Exception:
-                # Try next candidate or fallback to empty dictionary on error
-                continue
+    search_dirs = [CONFIG_DIR]
+    if FALLBACK_CONFIG_DIR != CONFIG_DIR:
+        search_dirs.append(FALLBACK_CONFIG_DIR)
+
+    for directory in search_dirs:
+        for filename in ("config.json", "config.example.json"):
+            config_file = directory / filename
+            if config_file.exists() and config_file.is_file():
+                try:
+                    return json.loads(config_file.read_text(encoding="utf-8"))
+                except Exception:
+                    # Try next candidate or fallback to empty dictionary on error
+                    continue
     return {}
 
 
 COMMON_CONFIG = load_common_config()
 
 # Configurable vault path with precedence:
-# 1. VAULT_DIR environment variable
+# 1. VAULT_DIR or OBSIDIAN_VAULT_PATH environment variable
 # 2. vault_dir specified in config/config.json
-# 3. Default fallback: PROJECT_ROOT / "vault"
-raw_vault = os.getenv("VAULT_DIR") or COMMON_CONFIG.get("vault_dir", "vault")
-vault_candidate = Path(raw_vault)
+# 3. Default fallback: <cwd>/vault (if exists) or PROJECT_ROOT / "vault"
+raw_vault = os.getenv("VAULT_DIR") or os.getenv("OBSIDIAN_VAULT_PATH") or COMMON_CONFIG.get("vault_dir", "vault")
+vault_candidate = Path(raw_vault).expanduser()
 if not vault_candidate.is_absolute():
-    # Resolve relative path against PROJECT_ROOT for consistent directory navigation
-    VAULT_DIR = (PROJECT_ROOT / vault_candidate).resolve()
+    # Resolve relative path against current working directory if present, otherwise PROJECT_ROOT
+    cwd_vault = (Path.cwd() / vault_candidate).resolve()
+    VAULT_DIR = cwd_vault if cwd_vault.exists() else (PROJECT_ROOT / vault_candidate).resolve()
 else:
     VAULT_DIR = vault_candidate.resolve()
 
@@ -186,20 +218,26 @@ DEFAULT_ORG_EN = {
 
 def load_locale_config(lang: str) -> Dict[str, Any]:
     """
-    Load locale-specific department and org configuration from config/departments-{lang}.json.
-    Falls back to config/departments-{lang}.example.json, then embedded defaults if missing or invalid.
+    Load locale-specific department and org configuration from CONFIG_DIR/departments-{lang}.json.
+    Falls back to departments-{lang}.example.json in CONFIG_DIR or FALLBACK_CONFIG_DIR,
+    then embedded defaults if missing or invalid.
     """
     fallback = DEFAULT_ORG_JA if lang == "ja" else DEFAULT_ORG_EN
-    for filename in (f"departments-{lang}.json", f"departments-{lang}.example.json"):
-        file_path = CONFIG_DIR / filename
-        if file_path.exists() and file_path.is_file():
-            try:
-                data = json.loads(file_path.read_text(encoding="utf-8"))
-                if isinstance(data, dict):
-                    return data
-            except Exception:
-                # Fallback to next candidate on JSON parse error
-                continue
+    search_dirs = [CONFIG_DIR]
+    if FALLBACK_CONFIG_DIR != CONFIG_DIR:
+        search_dirs.append(FALLBACK_CONFIG_DIR)
+
+    for directory in search_dirs:
+        for filename in (f"departments-{lang}.json", f"departments-{lang}.example.json"):
+            file_path = directory / filename
+            if file_path.exists() and file_path.is_file():
+                try:
+                    data = json.loads(file_path.read_text(encoding="utf-8"))
+                    if isinstance(data, dict):
+                        return data
+                except Exception:
+                    # Fallback to next candidate on JSON parse error
+                    continue
     return fallback
 
 

@@ -64,5 +64,5 @@ jobs:
       - name: Run backend unit tests with pytest
         run: pytest tests/ -v
 
-      - name: Run plugin note search script unit tests
-        run: pytest ../../plugins/agy-company/skills/agy-company/scripts/tests/ -v
+      - name: Run plugin script unit tests
+        run: pytest ../../skills/agy-company/scripts/tests/ -v

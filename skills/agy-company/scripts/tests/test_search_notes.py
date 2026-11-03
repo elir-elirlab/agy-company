@@ -6,11 +6,13 @@ standard `python3 -m unittest` (zero external dependencies) and `pytest` in CI.
 """
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 # Add the parent scripts/ directory to sys.path so search_notes can be imported directly
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
@@ -325,6 +327,79 @@ Body text here.
         self.assertIn("Type: knowledge (知見)", proc_text.stdout)
         self.assertIn("Qdrant offers the best memory efficiency", proc_text.stdout)
         self.assertNotIn("UniqueBodyKeywordAlpha", proc_text.stdout)
+
+    def test_resolve_config_and_vault_precedence(self) -> None:
+        """Verify unified precedence for config_dir and vault_dir resolution."""
+        with tempfile.TemporaryDirectory() as tmp_root:
+            workspace = Path(tmp_root).resolve()
+
+            # Ensure clean environment variables during test execution
+            with patch.dict(os.environ, {}, clear=True):
+                # 1. Default fallback: <cwd>/config and <cwd>/vault
+                default_cfg = search_notes.resolve_config_dir(cwd=workspace)
+                default_vault = search_notes.resolve_vault_dir(cwd=workspace)
+                self.assertEqual(default_cfg, workspace / "config")
+                self.assertEqual(default_vault, workspace / "vault")
+
+                # 2. Hidden .company/.config directory precedence
+                company_dir = workspace / ".company"
+                hidden_cfg_dir = company_dir / ".config"
+                hidden_cfg_dir.mkdir(parents=True)
+                hidden_cfg_file = hidden_cfg_dir / "config.json"
+                hidden_cfg_file.write_text(
+                    json.dumps({"vault_dir": "custom_vault"}),
+                    encoding="utf-8"
+                )
+
+                resolved_cfg = search_notes.resolve_config_dir(cwd=workspace)
+                self.assertEqual(resolved_cfg, hidden_cfg_dir)
+
+                resolved_vault = search_notes.resolve_vault_dir(cwd=workspace)
+                self.assertEqual(resolved_vault, workspace / "custom_vault")
+
+                # 3. Setting recorded in .company/AGENTS.md takes precedence over hidden .config
+                # First verify that unexpanded template placeholders like {{CONFIG_DIR}} are ignored
+                agents_md_file = company_dir / "AGENTS.md"
+                agents_md_file.write_text(
+                    "- **Config Directory**: `{{CONFIG_DIR}}`\n- **Vault Directory**: `{{VAULT_DIR}}`\n",
+                    encoding="utf-8"
+                )
+                self.assertIsNone(search_notes.extract_setting_from_agents_md(workspace, "Config Directory"))
+                self.assertIsNone(search_notes.extract_setting_from_agents_md(workspace, "Vault Directory"))
+
+                # Write valid custom paths in AGENTS.md
+                agents_md_file.write_text(
+                    "- **Config Directory**: `custom_cfg`\n- **Vault Directory**: `agents_vault`\n",
+                    encoding="utf-8"
+                )
+                self.assertEqual(
+                    search_notes.extract_setting_from_agents_md(workspace, "Config Directory"),
+                    "custom_cfg"
+                )
+                self.assertEqual(
+                    search_notes.extract_setting_from_agents_md(workspace, "Vault Directory"),
+                    "agents_vault"
+                )
+                self.assertEqual(
+                    search_notes.resolve_config_dir(cwd=workspace),
+                    workspace / "custom_cfg"
+                )
+                # When AGENTS.md specifies Vault Directory, resolve_vault_dir should pick it up
+                self.assertEqual(
+                    search_notes.resolve_vault_dir(cwd=workspace),
+                    workspace / "agents_vault"
+                )
+
+                # 4. Explicit arguments take highest precedence
+                explicit_cfg = search_notes.resolve_config_dir(
+                    explicit_config_dir="explicit_cfg", cwd=workspace
+                )
+                self.assertEqual(explicit_cfg, workspace / "explicit_cfg")
+
+                explicit_vault = search_notes.resolve_vault_dir(
+                    explicit_vault_dir="explicit_vault", cwd=workspace
+                )
+                self.assertEqual(explicit_vault, workspace / "explicit_vault")
 
 
 if __name__ == "__main__":

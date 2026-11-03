@@ -16,45 +16,30 @@
 
 ## 2. ワークスペースへの導入手順
 
-プロジェクト（作業ディレクトリ）に `agy-company` プラグインを導入します。
+`agy-company` は、Antigravity CLI (AGY) の公式プラグイン管理機能に対応しており、1 コマンドで導入が完了します。
 
+### プラグインのインストール
+
+ターミナル（CLI）から直接インストールする場合：
+```bash
+agy plugin install https://github.com/elir-elirlab/agy-company
+```
+
+または、Antigravity CLI を起動してチャットモード内からインストールする場合：
 ```text
-project-root/ (作業ディレクトリ)
-├── agy-company/                      <- 本リポジトリ一式
-├── .agents/
-│   └── plugins/
-│       └── agy-company -> ...        <- シンボリックリンク
-└── vault/                            <- Obsidian Vault フォルダ
+/plugin install https://github.com/elir-elirlab/agy-company
 ```
 
-### 手順 1: プラグインのシンボリックリンク作成
+### 既存プロジェクトへの導入と設定フォルダの配置
 
-ターミナルを開き、運用したいプロジェクトのルートディレクトリで以下を実行します：
+既存の開発リポジトリに `agy-company` を導入する場合、プロジェクト既存のフォルダと競合しないよう柔軟に設計されています：
 
-```bash
-# 1. プラグイン用の配置ディレクトリを作成
-mkdir -p .agents/plugins
-
-# 2. agy-company の plugins/agy-company へのシンボリックリンクを作成
-# （※ agy-company を project-root 直下に配置している場合の例）
-ln -sf "$(pwd)/agy-company/plugins/agy-company" .agents/plugins/agy-company
-
-# 3. シンボリックリンクが正しく作成されたか確認
-ls -l .agents/plugins/agy-company
-```
-
-> **💡 シンボリックリンクとは？**  
-> ファイルの実体をコピーするのではなく「ショートカット」を配置する仕組みです。`agy-company` 側でプラグインのアップデートがあった際にも、自動的に最新のコードが参照されます。
-
-### 手順 2: Vault フォルダの準備
-
-成果物やデイリーノートを保存するための `vault` ディレクトリを作成します (作成済み)：
-
-```bash
-mkdir -p vault
-```
-
-※ お使いの Obsidian アプリでこの `vault` フォルダを「既存の保管庫（Vault）として開く」設定にしておくと、エージェントが作成したノートがリアルタイムにObsidian上で反映されます。
+1. **設定フォルダ（config）の柔軟な配置**:
+   - 通常はプロジェクト直下の `./config` が参照されます。
+   - すでにプロジェクト内で `./config` を使用している場合は、隠しフォルダ **`.company/.config`** に設定ファイル群を配置することで、既存の設定と一切衝突せずに利用できます。
+2. **Vault フォルダの自動準備**:
+   - 成果物やデイリーノートを蓄積する `vault/` フォルダは、初回起動時や `/agy-company dashboard` 実行時に現在のユーザー権限で自動的に準備されます（手動で作成する必要はありません）。
+   - Obsidian をお使いの場合は、Obsidian アプリ側でこの `vault/` フォルダ（またはその専用サブフォルダ）を「保管庫（Vault）」として開いておくだけで、リアルタイム同期が有効になります。
 
 ---
 
@@ -116,9 +101,11 @@ project-root/
 ```text
 > /agy-company daily          # 今日のデイリーノート作成＆前日からの未完了タスク引き継ぎ
 > /agy-company note           # 直前の議論・調査結果を整理して Vault (01_Inbox/) にノート保存
+> /agy-company search         # 過去ノートの高速メタデータ検索（-t で知見・提案・議論絞り込み対応）
+> /agy-company dashboard      # ローカル Web ダッシュボードの起動・管理（--port 指定対応）
 > /agy-company sync-updates   # プラグインの最新ルール・テンプレートを既存環境へ反映
 ```
-もちろん自然言語での指示（「今日のTODOを教えて」「アイデアをメモして」等）でも同様に動作します。
+もちろん自然言語での指示（「今日のTODOを教えて」「アイデアをメモして」「ダッシュボードを開いて」等）でも同様に動作します。
 
 ### 2. サブエージェントへの業務委譲 (`invoke_subagent`)
 ```text
@@ -142,18 +129,50 @@ project-root/
 
 Vault 内のタスクや成果物を視覚的に確認・操作できる Web ダッシュボードが付属しています。
 
-### 起動方法
+### 方法 1: チャットからのワンタッチ起動（推奨）
+
+Antigravity CLI のチャットから直接 1 コマンドで起動・管理できます：
+
+```text
+> /agy-company dashboard
+```
+
+- ホスト側の `vault/` や `config/`（または `.company/.config/`）が現在の実行ユーザー権限で自動的に準備・マウントされるため、Docker の権限トラブルが起きません。
+- 停止したい場合もチャットから行えます：
+  ```text
+  > /agy-company dashboard stop
+  ```
+
+### 方法 2: Docker Compose による起動
+
+リポジトリ直下から Docker Compose で直接起動することも可能です：
 
 ```bash
-# agy-company ディレクトリに移動
-cd agy-company
-
 # コンテナをバックグラウンドで起動
 docker compose up -d
 ```
 
-起動後、ブラウザで **`http://localhost:18000`** を開きます。
+起動後、ブラウザで **`http://localhost:18000`** （または設定したポート）を開きます。  
 （※ ローカルホスト専用 `127.0.0.1:18000:3000` に安全にバインドされています）
+
+### ポート番号を変更したい場合
+
+ポート 18000 が他のサービスと重複している場合、以下のいずれかの方法で変更できます：
+
+1. **チャットから一時的にポートを指定** :
+   ```text
+   > /agy-company dashboard --port 18080
+   ```
+2. **設定ファイル（`config/config.json` または `.company/.config/config.json`）で恒久設定** :
+   ```json
+   {
+     "dashboard_port": 18080
+   }
+   ```
+3. **Docker Compose 起動時に環境変数を指定** :
+   ```bash
+   DASHBOARD_PORT=18080 docker compose up -d
+   ```
 
 ### 主な機能
 - **組織図パネル（常設）**: 組織階層と専門部署カード、Vaultフォルダツリー
@@ -174,12 +193,15 @@ OBSIDIAN_VAULT_PATH=../vault docker compose up -d
 ## 6. トラブルシューティング
 
 ### Q1. `/agy-company` と打っても反応しない
-* **確認方法**: ターミナルで以下を実行し、シンボリックリンクが正しい実体フォルダを指しているか確認してください。
+* **プラグインの確認** : Antigravity CLI でプラグイン一覧を確認してください。
   ```bash
-  ls -l .agents/plugins/agy-company
+  agy plugin list
   ```
-* 矢印（`->`）の先が赤色で点滅している場合、パスが切れています。もう一度 `ln -sf` で正しい絶対パスを指定して再作成してください。
-* 旧バージョン（`.agents/plugins/company`）のシンボリックリンクが残っている場合は、`rm .agents/plugins/company` で削除してから新しいリンクを作成してください。
+  またはチャット内で `/plugin list` を実行します。
+* プラグインが一覧にない場合は、再度インストールを実行してください：
+  ```bash
+  agy plugin install https://github.com/elir-elirlab/agy-company
+  ```
 
 ### Q2. 途中で組織をやり直したい・初期化したい
 * `.company/` ディレクトリを削除すれば、次回 `/agy-company` 実行時に再び初期オンボーディングからやり直せます：
@@ -187,19 +209,27 @@ OBSIDIAN_VAULT_PATH=../vault docker compose up -d
   rm -rf .company/
   ```
 
-### Q3. ポート 18000 を変更したい
-* `agy-company/docker-compose.yml` の `ports` 設定を編集してください：
-  ```yaml
-  ports:
-    - "127.0.0.1:YOUR_PORT:3000"
-  ```
+### Q3. ポート 18000 を別のポートに変更したい
+* チャットから `/agy-company dashboard --port 18080` を実行するか、`config/config.json`（または `.company/.config/config.json`）の `"dashboard_port"` を設定してください。
+* 直接 Docker Compose を利用している場合は、`DASHBOARD_PORT=18080 docker compose up -d` を指定できます。
 
 ---
 
 ## 7. アンインストール（削除方法）
 
-プラグインを削除したい場合は、作成したシンボリックリンクを削除するだけで完了です（元のファイルは消えません）：
+プラグインを一時的に無効化したい場合は、以下のコマンドを実行します：
 
 ```bash
-rm .agents/plugins/agy-company
+agy plugin disable agy-company
 ```
+
+プラグインを完全に削除したい場合は、以下のコマンドを実行します：
+
+```bash
+agy plugin uninstall agy-company
+```
+または Antigravity CLI のチャット内で以下を実行します：
+```text
+/plugin uninstall agy-company
+```
+（※ 生成された `.company/` や `vault/` のデータは削除されずにそのまま保持されます）

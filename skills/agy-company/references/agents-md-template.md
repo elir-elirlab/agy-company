@@ -16,6 +16,8 @@ Variables with `{{...}}` will be replaced with user onboarding input and system 
 - **Business / Activity**: {{BUSINESS_TYPE}}
 - **Goals & Challenges**: {{GOALS_AND_CHALLENGES}}
 - **Created Date**: {{CREATED_DATE}}
+- **Config Directory**: `{{CONFIG_DIR}}`
+- **Vault Directory**: `{{VAULT_DIR}}`
 
 ## Organization Structure
 
@@ -53,14 +55,17 @@ vault/
 - When specialized work is required, the Secretary either writes directly to department folders or delegates tasks to subagents via `invoke_subagent`.
 
 ### Deterministic Routine Subcommands (Fast-Path — Pre-Approved)
-- Routine commands (`/agy-company daily`, `/agy-company note`, `/agy-company search`, `/agy-company backfill-summary`, `/agy-company backfill-doctype`, `/agy-company sync-updates`, `/agy-company tone`) and routine requests for daily notes, quick notes, or note searches are **Pre-Approved Deterministic Routines**.
+- Routine commands (`/agy-company daily`, `/agy-company note`, `/agy-company search`, `/agy-company backfill-summary`, `/agy-company backfill-doctype`, `/agy-company sync-updates`, `/agy-company tone`, `/agy-company dashboard`) and routine requests for daily notes, quick notes, note searches, or dashboard control are **Pre-Approved Deterministic Routines**.
 - **Implicit Approval**: Invoking these commands/routines constitutes prior plan approval. Execute immediately without asking for confirmation first.
-- **Strict Scope Whitelisting**: Routine operations may ONLY access `vault/`, `.company/`, `config/`, and `plugins/agy-company/`. Inspecting `git log`, `git show`, `.git/`, or past conversation transcripts (`~/.gemini/` or `brain/` logs) is **STRICTLY PROHIBITED**.
+- **Strict Scope Whitelisting**: Routine operations may ONLY access `{{VAULT_DIR}}` (`vault/`), `.company/` (including `.company/.config/`), `{{CONFIG_DIR}}` (`config/`), and the plugin installation directory (`{{SKILL_DIR}}`). Inspecting `git log`, `git show`, `.git/`, or past conversation transcripts (`~/.gemini/antigravity-cli/brain/` or `transcript.jsonl`) is **STRICTLY PROHIBITED**.
 - **Circuit Breaker (Ask, Don't Dig)**: If any routine task encounters ambiguity or cannot finish within 4 tool calls, stop tool execution immediately and ask the user directly. Never search commit history or session logs to infer precedent.
 
 ### Note Document Type & Summary Protocol (`search_notes.py`)
 - Every deliverable and note in `vault/01_Inbox/` MUST include a `doc_type:` (`knowledge`, `proposal`, or `discussion`) and a 3-attribute `summary:` list (50–80 chars per bullet) in its YAML frontmatter.
-- When searching past notes or discovering related notes for the `link:` field, run `python3 plugins/agy-company/skills/agy-company/scripts/search_notes.py <keywords>` (supports `-t <type>`, `--fulltext`, `--missing-summary`, and `--missing-type`) instead of reading every file in `vault/01_Inbox/`.
+- When searching past notes or discovering related notes for the `link:` field, run `python3 "{{SKILL_DIR}}/scripts/search_notes.py" <keywords>` (use `python` on Windows; supports `-t <type>`, `--fulltext`, `--missing-summary`, and `--missing-type`) instead of reading every file in `vault/01_Inbox/`.
+
+### Local Web Dashboard (`/agy-company dashboard`)
+- To start or stop the local Obsidian Web Dashboard, run `python3 "{{SKILL_DIR}}/scripts/start_dashboard.py"` (or `--port <port>`, `--stop`, `--status`; use `python` on Windows).
 
 ### Subagent Delegation Policy
 - For heavy or specialized tasks (such as competitor research, technical design, marketing drafting), the Secretary invokes background subagents (`invoke_subagent`).
@@ -115,6 +120,9 @@ vault/
 | `{{BUSINESS_TYPE}}` | Q1 | Nature of user's business / activity |
 | `{{GOALS_AND_CHALLENGES}}` | Q2 | Current goals and pain points |
 | `{{CREATED_DATE}}` | Auto | Date of organization creation (YYYY-MM-DD) |
+| `{{CONFIG_DIR}}` | Onboarding / Default | Active configuration directory (`./config`, `.company/.config`, or custom path) |
+| `{{VAULT_DIR}}` | Onboarding / Default | Obsidian Vault directory (`./vault` or custom path) |
+| `{{SKILL_DIR}}` | Auto | Absolute or workspace-relative path to the `skills/agy-company` directory |
 | `{{ADDITIONAL_DEPARTMENTS}}` | Department addition | Directory tree representation of additional departments |
 | `{{DEPARTMENT_TABLE_ROWS}}` | Department addition | Markdown table rows for added departments |
 | `{{PERSONALIZATION_NOTES}}` | Q1 + Q2 | Contextual advice derived from onboarding |
