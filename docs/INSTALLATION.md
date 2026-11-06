@@ -16,18 +16,31 @@
 
 ## 2. ワークスペースへの導入手順
 
-`agy-company` は、Antigravity CLI (AGY) の公式プラグイン管理機能に対応しており、1 コマンドで導入が完了します。
+`agy-company` は、Antigravity CLI (AGY) の公式プラグイン管理機能に対応しています。
+AGY の仕様上、GitHub の URL を直接指定したインストールはサポートされていないため、手元にリポジトリをクローンし、そのディレクトリパス（相対パスまたは絶対パス）を指定してインストールします。
 
 ### プラグインのインストール
 
-ターミナル（CLI）から直接インストールする場合：
+ターミナル（CLI）からインストールする場合：
 ```bash
-agy plugin install https://github.com/elir-elirlab/agy-company
+# 1. リポジトリをクローン
+git clone https://github.com/elir-elirlab/agy-company.git
+
+# 2. クローンしたディレクトリパスを指定してインストール
+# 相対パス指定の場合:
+agy plugin install ./agy-company
+
+# または絶対パス指定の場合:
+agy plugin install /path/to/agy-company
 ```
 
 または、Antigravity CLI を起動してチャットモード内からインストールする場合：
 ```text
-/plugin install https://github.com/elir-elirlab/agy-company
+# 相対パス指定:
+/plugin install ./agy-company
+
+# または絶対パス指定:
+/plugin install /path/to/agy-company
 ```
 
 ### 既存プロジェクトへの導入と設定フォルダの配置
@@ -198,9 +211,13 @@ OBSIDIAN_VAULT_PATH=../vault docker compose up -d
   agy plugin list
   ```
   またはチャット内で `/plugin list` を実行します。
-* プラグインが一覧にない場合は、再度インストールを実行してください：
+* プラグインが一覧にない場合は、再度インストールを実行してください（クローンしたディレクトリパスを指定します）：
   ```bash
-  agy plugin install https://github.com/elir-elirlab/agy-company
+  # 相対パス指定の場合:
+  agy plugin install ./agy-company
+
+  # または絶対パス指定の場合:
+  agy plugin install /path/to/agy-company
   ```
 
 ### Q2. 途中で組織をやり直したい・初期化したい

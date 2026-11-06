@@ -97,18 +97,30 @@ agy-company/
 > [!TIP]
 > For detailed step-by-step setup instructions, please see [docs/INSTALLATION.md](./docs/INSTALLATION.md).
 
-`agy-company` is distributed as a standard Antigravity CLI plugin and can be installed with a single command.
+`agy-company` is distributed as a standard Antigravity CLI plugin. Since AGY requires a local directory path rather than a raw GitHub URL, clone the repository first and install by pointing to its local directory path (relative or absolute).
 
 ### 1. Workspace Setup
 
-To install directly from your terminal (CLI):
+To install from your terminal (CLI):
 ```bash
-agy plugin install https://github.com/elir-elirlab/agy-company
+# 1. Clone the repository
+git clone https://github.com/elir-elirlab/agy-company.git
+
+# 2. Install by specifying the local directory path
+# Using a relative path:
+agy plugin install ./agy-company
+
+# Or using an absolute path:
+agy plugin install /path/to/agy-company
 ```
 
-Or install from inside Antigravity CLI chat mode:
+Or from inside Antigravity CLI chat mode:
 ```text
-/plugin install https://github.com/elir-elirlab/agy-company
+# Relative path:
+/plugin install ./agy-company
+
+# Or absolute path:
+/plugin install /path/to/agy-company
 ```
 
 ### 2. Obsidian Vault Mount (Recommended)
