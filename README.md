@@ -97,18 +97,30 @@ agy-company/
 > [!TIP]
 > 初心者向けの詳しい導入手順は [docs/INSTALLATION.md](./docs/INSTALLATION.md) をご覧ください。
 
-Antigravity CLI (AGY) の公式プラグイン機能に対応しており、1 コマンドで簡単にインストール・有効化できます。
+Antigravity CLI (AGY) の公式プラグイン機能に対応しています。AGY の仕様上、GitHub の URL を直接指定したインストールはサポートされていないため、手元にリポジトリをクローンし、そのディレクトリパス（相対パスまたは絶対パス）を指定してインストールします。
 
 ### 1. ワークスペースへの配置
 
-ターミナル（CLI）から直接インストールする場合：
+ターミナル（CLI）からインストールする場合：
 ```bash
-agy plugin install https://github.com/elir-elirlab/agy-company
+# 1. リポジトリをクローン
+git clone https://github.com/elir-elirlab/agy-company.git
+
+# 2. クローンしたディレクトリパスを指定してインストール
+# 相対パス指定の場合:
+agy plugin install ./agy-company
+
+# または絶対パス指定の場合:
+agy plugin install /path/to/agy-company
 ```
 
 または、Antigravity CLI の対話モード（チャット内）からインストールする場合：
 ```text
-/plugin install https://github.com/elir-elirlab/agy-company
+# 相対パス指定:
+/plugin install ./agy-company
+
+# または絶対パス指定:
+/plugin install /path/to/agy-company
 ```
 
 ### 2. ノート置き場（Vault）の設定
