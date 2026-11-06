@@ -15,53 +15,124 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 
-def resolve_vault_dir(explicit_vault_dir: Optional[str] = None) -> Path:
+def extract_setting_from_agents_md(cwd: Path, label: str) -> Optional[str]:
     """
-    Resolve the path to the Obsidian Vault directory using the following precedence:
+    Extract a directory path setting (such as 'Config Directory' or 'Vault Directory')
+    from .company/AGENTS.md if present in the workspace.
+    Matches lines like: - **Config Directory**: `.company/.config` or - **Vault Directory**: ./vault
+    """
+    agents_md = cwd / ".company" / "AGENTS.md"
+    if not agents_md.exists() or not agents_md.is_file():
+        return None
+    try:
+        content = agents_md.read_text(encoding="utf-8")
+        # Match markdown bullet with optional backticks or quotes around the path
+        pattern = rf"^\s*-\s*\*\*\s*{re.escape(label)}\s*\*\*\s*:\s*[`'\"]?([^`'\"\r\n]+)[`'\"]?"
+        match = re.search(pattern, content, re.MULTILINE | re.IGNORECASE)
+        if match:
+            val = match.group(1).strip()
+            # Ignore unexpanded template placeholders like {{CONFIG_DIR}}
+            if val and not val.startswith("{{"):
+                return val
+    except Exception:
+        pass
+    return None
+
+
+def resolve_config_dir(
+    explicit_config_dir: Optional[str] = None,
+    cwd: Optional[Path] = None
+) -> Path:
+    """
+    Resolve the configuration directory using the unified precedence order:
+    1. Explicit --config-dir CLI argument
+    2. CONFIG_DIR or CONFIG_PATH environment variable
+    3. 'Config Directory' recorded in <cwd>/.company/AGENTS.md
+    4. Hidden '.company/.config' directory in <cwd> (if it exists)
+    5. Default '<cwd>/config' in current working directory
+    """
+    base_cwd = (cwd or Path.cwd()).resolve()
+
+    # 1. Explicit CLI argument
+    if explicit_config_dir:
+        candidate = Path(explicit_config_dir).expanduser()
+        return candidate.resolve() if candidate.is_absolute() else (base_cwd / candidate).resolve()
+
+    # 2. Environment variables
+    env_cfg = os.getenv("CONFIG_DIR") or os.getenv("CONFIG_PATH")
+    if env_cfg:
+        candidate = Path(env_cfg).expanduser()
+        return candidate.resolve() if candidate.is_absolute() else (base_cwd / candidate).resolve()
+
+    # 3. Setting recorded in .company/AGENTS.md
+    agents_cfg = extract_setting_from_agents_md(base_cwd, "Config Directory")
+    if agents_cfg:
+        candidate = Path(agents_cfg).expanduser()
+        return candidate.resolve() if candidate.is_absolute() else (base_cwd / candidate).resolve()
+
+    # 4. Hidden .company/.config directory (distinguished from department folders)
+    hidden_company_cfg = base_cwd / ".company" / ".config"
+    if hidden_company_cfg.exists() and hidden_company_cfg.is_dir():
+        return hidden_company_cfg.resolve()
+
+    # 5. Default project root ./config
+    return (base_cwd / "config").resolve()
+
+
+def resolve_vault_dir(
+    explicit_vault_dir: Optional[str] = None,
+    explicit_config_dir: Optional[str] = None,
+    cwd: Optional[Path] = None
+) -> Path:
+    """
+    Resolve the path to the Obsidian Vault directory using the unified precedence order:
     1. Explicit --vault-dir CLI argument
     2. OBSIDIAN_VAULT_PATH or VAULT_DIR environment variable
-    3. 'vault_dir' defined in ./config/config.json (relative to current working directory or project root)
-    4. Default './vault' in current working directory
+    3. 'vault_dir' defined in <resolved_config_dir>/config.json (or config.example.json)
+    4. 'Vault Directory' recorded in <cwd>/.company/AGENTS.md
+    5. Default '<cwd>/vault' in current working directory
     """
+    base_cwd = (cwd or Path.cwd()).resolve()
+
     # 1. Check explicit CLI argument
     if explicit_vault_dir:
-        return Path(explicit_vault_dir).resolve()
+        candidate = Path(explicit_vault_dir).expanduser()
+        return candidate.resolve() if candidate.is_absolute() else (base_cwd / candidate).resolve()
 
     # 2. Check environment variables
     env_vault = os.getenv("OBSIDIAN_VAULT_PATH") or os.getenv("VAULT_DIR")
     if env_vault:
-        return Path(env_vault).resolve()
+        candidate = Path(env_vault).expanduser()
+        return candidate.resolve() if candidate.is_absolute() else (base_cwd / candidate).resolve()
 
-    # Determine candidate root directories (current working directory first, then relative to script location)
-    cwd = Path.cwd()
-    script_Path = Path(__file__).resolve()
-    # Script is located at plugins/agy-company/skills/agy-company/scripts/search_notes.py
-    repo_root = script_Path.parents[5] if len(script_Path.parents) >= 6 else cwd
+    # 3. Check config.json / config.example.json inside resolved config_dir
+    config_dir = resolve_config_dir(explicit_config_dir=explicit_config_dir, cwd=base_cwd)
+    for cfg_name in ("config.json", "config.example.json"):
+        config_path = config_dir / cfg_name
+        if config_path.exists() and config_path.is_file():
+            try:
+                config_data = json.loads(config_path.read_text(encoding="utf-8"))
+                vault_dir_setting = config_data.get("vault_dir")
+                if vault_dir_setting:
+                    candidate = Path(vault_dir_setting).expanduser()
+                    if not candidate.is_absolute():
+                        # Always resolve relative vault_dir against workspace root (base_cwd)
+                        candidate = (base_cwd / candidate).resolve()
+                    else:
+                        candidate = candidate.resolve()
+                    return candidate
+            except Exception:
+                # Ignore malformed JSON and continue fallback resolution
+                pass
 
-    for base_dir in (cwd, repo_root):
-        for cfg_name in ("config.json", "config.example.json"):
-            config_path = base_dir / "config" / cfg_name
-            if config_path.exists() and config_path.is_file():
-                try:
-                    config_data = json.loads(config_path.read_text(encoding="utf-8"))
-                    vault_dir_setting = config_data.get("vault_dir")
-                    if vault_dir_setting:
-                        candidate = Path(vault_dir_setting)
-                        if not candidate.is_absolute():
-                            candidate = (base_dir / candidate).resolve()
-                        if candidate.exists():
-                            return candidate
-                except Exception:
-                    # Ignore malformed JSON and continue fallback resolution
-                    pass
+    # 4. Check setting recorded in .company/AGENTS.md
+    agents_vault = extract_setting_from_agents_md(base_cwd, "Vault Directory")
+    if agents_vault:
+        candidate = Path(agents_vault).expanduser()
+        return candidate.resolve() if candidate.is_absolute() else (base_cwd / candidate).resolve()
 
-        # Fallback to base_dir / "vault" if it exists
-        default_candidate = (base_dir / "vault").resolve()
-        if default_candidate.exists():
-            return default_candidate
-
-    # Final fallback: './vault' in current working directory
-    return (cwd / "vault").resolve()
+    # 5. Final fallback: './vault' in current working directory
+    return (base_cwd / "vault").resolve()
 
 
 def strip_quotes(value: str) -> str:
@@ -438,6 +509,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Explicit path to the Obsidian vault directory.",
     )
+    parser.add_argument(
+        "--config-dir",
+        type=str,
+        default=None,
+        help="Explicit path to config directory (default: auto-resolved from env, .company/.config, or ./config).",
+    )
     return parser
 
 
@@ -448,7 +525,7 @@ def main() -> int:
     parser = build_arg_parser()
     args = parser.parse_args()
 
-    vault_dir = resolve_vault_dir(args.vault_dir)
+    vault_dir = resolve_vault_dir(args.vault_dir, args.config_dir)
     all_notes = scan_notes(vault_dir, department_filter=args.dept)
 
     matched = [

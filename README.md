@@ -27,6 +27,7 @@
                                               ├─ [定型コマンド (Fast-Path)]
                                               │   ├─ /agy-company daily ──▶ 02_Daily/ にデイリー＆残タスク引継ぎ
                                               │   ├─ /agy-company note  ──▶ 01_Inbox/ に議論・調査ノートを即時保存
+                                              │   ├─ /agy-company dashboard ──▶ Web ダッシュボードの起動・管理
                                               │   └─ /agy-company sync-updates ──▶ 組織ルールを非破壊アップデート
                                               │
                                               ├─ [相談・壁打ち] ──────────▶ 思考を深め、決定事項を議事録化
@@ -37,7 +38,7 @@
                                                                             └─ PM部門 (マイルストーン・タスク分解)
 ```
 - **スモールスタート**: 初期状態は秘書室のみ。初めから複雑な組織設計は不要です。
-- **Fast-Path 定型コマンドと暴走防止ガードレール**: 日常のルーティン作業（`/agy-company daily`, `/agy-company note`, `/agy-company sync-updates`）は事前確認待ちなしの **即時実行マクロ（Fast-Path）** として動作し、探索範囲のホワイトリスト制限とサーキットブレーカーによりエージェントの判断麻痺や過剰調査ループを防ぎます。
+- **Fast-Path 定型コマンドと暴走防止ガードレール**: 日常のルーティン作業（`/agy-company daily`, `/agy-company note`, `/agy-company dashboard`, `/agy-company sync-updates`）は事前確認待ちなしの **即時実行マクロ（Fast-Path）** として動作し、探索範囲のホワイトリスト制限とサーキットブレーカーによりエージェントの判断麻痺や過剰調査ループを防ぎます。
 - **自然な部署設立**: 同じドメインの相談が2回以上発生すると、秘書が「専用部門を設立しましょうか？」と自発的に提案します。
 - **秘書の口調・ペルソナ変更**: 「親しみやすいパートナー」「英国風の執事」「カジュアルな開発相棒」「ストイックなコーチ」など、好みの口調や言語（日本語 / 英語 / バイリンガル）にいつでも変更できます。
 
@@ -68,21 +69,21 @@ agy-company/
 ├── README_EN.md                        # 英語ドキュメント
 ├── README.md                           # 日本語ドキュメント（本ファイル）
 ├── config/                             # 組織・部署・共通設定 (JSON / *.example.json テンプレ同梱)
-│   ├── config.example.json             # システム共通設定テンプレート (Vaultパス・デフォルト言語)
+│   ├── config.example.json             # システム共通設定テンプレート (Vaultパス・ポート・デフォルト言語)
 │   ├── departments-ja.example.json     # 日本語の組織（役職・部署名・役割）定義テンプレート
 │   └── departments-en.example.json     # 英語の組織（役職・部署名・役割）定義テンプレート
 ├── docker-compose.yml                  # ダッシュボード用 Docker Compose 設定
-├── Dockerfile                          # マルチステージビルド（フロントエンド + バックエンド）
-├── plugins/
-│   └── agy-company/                    # Antigravity CLI プラグイン本体
-│       ├── plugin.json                 # プラグインマニフェスト
-│       └── skills/
-│           └── agy-company/
-│               ├── SKILL.md            # 秘書ワークフロー定義・運営ガイド
-│               └── references/
-│                   ├── agents-md-template.md  # AGENTS.md 生成テンプレート
-│                   └── departments.md         # 部署別テンプレート定義
+├── plugin.json                         # Antigravity CLI プラグインマニフェスト
+├── skills/
+│   └── agy-company/                    # 秘書スキル本体
+│       ├── SKILL.md                    # 秘書ワークフロー定義・運営ガイド
+│       ├── references/                 # テンプレート定義 (departments.md / agents-md-template.md)
+│       └── scripts/                    # 自動化スクリプト群
+│           ├── search_notes.py         # 高速ノート検索スクリプト
+│           ├── start_dashboard.py      # ダッシュボード起動・管理スクリプト
+│           └── tests/                  # スクリプト単体テスト
 ├── dashboard/                          # Webダッシュボードソースコード
+│   ├── Dockerfile                      # マルチステージビルド（フロントエンド + バックエンド）
 │   ├── backend/                        # FastAPI バックエンド
 │   └── frontend/                       # React + Vite + Tailwind フロントエンド
 ├── .company/                           # 稼働中の組織設定・作業領域 (Git管理)
@@ -93,16 +94,21 @@ agy-company/
 
 ## 🚀 インストール & 有効化
 
-> **初心者向けの詳しい導入手順は [docs/INSTALLATION.md](./docs/INSTALLATION.md) をご覧ください。**
+> [!TIP]
+> 初心者向けの詳しい導入手順は [docs/INSTALLATION.md](./docs/INSTALLATION.md) をご覧ください。
 
-Antigravity CLI は、カレントディレクトリの `.agents/` または `~/.gemini/config/` からプラグイン・スキルを自動検出します。
+Antigravity CLI (AGY) の公式プラグイン機能に対応しており、1 コマンドで簡単にインストール・有効化できます。
 
 ### 1. ワークスペースへの配置
-本リポジトリのルートで、`.agents/plugins/agy-company` へのシンボリックリンクを作成します：
 
+ターミナル（CLI）から直接インストールする場合：
 ```bash
-mkdir -p .agents/plugins
-ln -s "$(pwd)/plugins/agy-company" .agents/plugins/agy-company
+agy plugin install https://github.com/elir-elirlab/agy-company
+```
+
+または、Antigravity CLI の対話モード（チャット内）からインストールする場合：
+```text
+/plugin install https://github.com/elir-elirlab/agy-company
 ```
 
 ### 2. ノート置き場（Vault）の設定
@@ -117,7 +123,7 @@ sudo mount --bind "/path/to/Obsidian/MyVault/company" ./vault
 > 既存の個人用Vault全体ではなく、必ずVault内の `company` などの **専用サブフォルダ** をマウントしてください。これにより、既存の個人ノートが誤って変更されるのを防ぎます。
 
 > [!NOTE]
-> Obsidian と連携させない場合、vault/ は単なる「普通の Markdown（.md）メモ帳フォルダ」として機能します（その場合は./vault内は空でOK）。
+> Obsidian と連携させない場合、`vault/` は単なる「普通の Markdown（.md）メモ帳フォルダ」として機能します（その場合は `./vault` 内は空でOK、初回起動時に自動準備されます）。
 
 
 ---
@@ -154,6 +160,7 @@ Antigravity CLI のチャットで以下のように入力します：
 | `/agy-company daily` | 本日のデイリーノート（`vault/02_Daily/YYYY-MM-DD.md`）を作成し、前日ノートの未完了タスク（`- [ ]`）と双方向リンクを自動引き継ぎします。 |
 | `/agy-company note` | 現在の会話で議論・調査した内容を、資料目的属性（`doc_type: knowledge | proposal | discussion`）を自動判定の上、標準 YAML フロントマター（3〜5行の構造化 `summary` 要約および自動関連ノートリンク付き）のノートとして `vault/01_Inbox/[department]/` に即時保存します。 |
 | `/agy-company search` | 専用スクリプト（`search_notes.py`）で過去ノートを高速検索し、該当ノートのフロントマター要約（`summary`）および資料タイプ（`doc_type`）を抽出してコンテキストを圧迫せずに回答します（`-t` / `--type` による知見・提案・議論絞り込み対応）。 |
+| `/agy-company dashboard` | ローカル Web ダッシュボードの起動（ポート指定 `--port <port>` 対応）、停止（`stop`）、状態確認（`status`）を実行します。ホスト側の `vault/` や `config/` もユーザー権限で自動準備・安全マウントされます。 |
 | `/agy-company backfill-summary` | `summary` が未設定の既存ノートを検出し、要約（3〜5行）をフロントマターへ自動追記します。 |
 | `/agy-company backfill-doctype` | `doc_type` が未設定（未定義）の既存ノートを検出し、本文内容から適切な資料目的属性（知見・提案・議論）を AI が自動判定してフロントマターへ一括付与します。 |
 | `/agy-company sync-updates` | プラグインのアップデート内容（最新の運営ルールや安全ガードレール）を、既存のユーザー設定・口調・追加部署を保持したまま `.company/AGENTS.md` 等へ反映します。 |
@@ -161,7 +168,7 @@ Antigravity CLI のチャットで以下のように入力します：
 
 #### 🛡️ Fast-Path ガードレール設計（判断麻痺・暴走の防止）
 - **Implicit Approval（暗黙の事前合意）**: 定型サブコマンドの入力自体を「実行計画への事前承認」とみなすため、ユーザーがワークスペースに独自の事前合意ルール（`Plan Before Execution` 等）を設定していても干渉を受けずに即座に完遂します。
-- **Strict Scope Whitelisting（探索範囲の厳格固定）**: 定型処理中は `vault/`・`.company/`・`config/`・`plugins/agy-company/` 以外の参照を禁止し、`git log` や `~/.gemini/` 配下の過去セッションログ（`transcript.jsonl`）の調査を厳禁としています。
+- **Strict Scope Whitelisting（探索範囲の厳格固定）**: 定型処理中は解決された `vault/`・`.company/`（`.company/.config/` を含む）・`config/`・プラグイン自身のインストールディレクトリ以外の参照を禁止し、`git log` や `~/.gemini/antigravity-cli/brain/` 配下の過去セッションログ（`transcript.jsonl`）の調査を厳禁としています。
 - **Circuit Breaker（Ask, Don't Dig）**: 定型処理が最大 4 ツールコール以内で完了しない場合や判断に迷った場合は、過去ログを掘らずに即座にツール実行を止めてユーザーへ質問します。
 
 ---
@@ -229,12 +236,37 @@ Antigravity CLI のチャットで以下のように入力します：
 
 Obsidian Vault の内容をグラフィカルに管理できるダッシュボードが付属しています。
 
+### 1. チャットからの起動（推奨・最優先）
+
+Antigravity CLI のチャットから、1 コマンドでダッシュボードを起動・管理できます：
+
+```text
+> /agy-company dashboard
+```
+
+ポート番号を指定して起動する場合：
+```text
+> /agy-company dashboard --port 18080
+```
+
+ダッシュボードを停止する場合：
+```text
+> /agy-company dashboard stop
+```
+
+> [!TIP]
+> `/agy-company dashboard` コマンドを実行すると、ホスト側の `vault/`（成果物フォルダ）や `config/`（設定フォルダ）が現在のユーザー権限で事前作成され、Docker の root 権限所有によるアクセス権トラブルを未然に防ぎながら自動マウントして起動します。
+
+### 2. Docker Compose による直接起動
+
+リポジトリ直下から Docker Compose で直接起動することも可能です：
+
 ```bash
 # バックグラウンドで起動
 docker compose up -d
 ```
 
-起動後、ブラウザで **`http://localhost:18000`** にアクセスします。
+起動後、ブラウザで **`http://localhost:18000`** （または指定したポート）にアクセスします。  
 （※ ローカルホスト専用 `127.0.0.1:18000:3000` にバインドされているため、LAN内に漏洩しません）
 
 ![screenshot-en](docs/Screenshot-Dashboard.png)
@@ -281,9 +313,14 @@ docker compose up -d
 Git リポジトリにはテンプレート（`*.example.json`）が同梱されており、ユーザー環境ごとの実ファイル（`config/*.json`）は `.gitignore` で保護されています。
 実ファイル（`config/*.json`）が存在しない場合は自動的に `*.example.json` の内容が使用されます。カスタマイズする場合は `cp config/departments-ja.example.json config/departments-ja.json` のようにコピーして編集してください（オンボーディングや部署追加時には秘書が自動生成します）。
 
+設定ディレクトリの配置場所として、以下の 3 つの場所に対応しています：
+- **① `./config`（デフォルト）** : 本リポジトリ単体運用や標準ワークスペースでの配置。
+- **② `.company/.config`（既存開発プロジェクトの `./config` と衝突を避けたい場合の隠しフォルダ）** : 既存リポジトリへの導入時に便利な隠しフォルダ配置。
+- **③ 任意のカスタムパス（`CONFIG_PATH` / `.company/AGENTS.md` 記録）** : 環境変数 `CONFIG_PATH` や `.company/AGENTS.md` への記録で指定された任意パス。
+
 | ファイル | テンプレート | 役割・主な設定内容 |
 |---|---|---|
-| `config/config.json` | [`config/config.example.json`](./config/config.example.json) | Vault のパス (`vault_dir`)、デフォルト言語 (`default_language`) |
+| `config/config.json` | [`config/config.example.json`](./config/config.example.json) | Vault のパス (`vault_dir`)、ダッシュボードポート (`dashboard_port`: 18000)、デフォルト言語 (`default_language`) |
 | `config/departments-ja.json` | [`config/departments-ja.example.json`](./config/departments-ja.example.json) | 日本語モード時のオーナー・秘書室の役職・役割、各部署名と役割 |
 | `config/departments-en.json` | [`config/departments-en.example.json`](./config/departments-en.example.json) | 英語モード時のオーナー・秘書室の役職・役割、各部署名と役割 |
 
@@ -355,16 +392,11 @@ Git リポジトリにはテンプレート（`*.example.json`）が同梱され
 ## 🛠️ トラブルシューティング & Tips
 
 ### Q. プラグインを更新した後、既存の `.company/` に最新ルールを反映したい（旧 `/company` からの移行を含む）
-1. 旧バージョンのシンボリックリンク（`.agents/plugins/company`）がある場合は削除し、`plugins/agy-company` へリンクを張り直します：
-   ```bash
-   rm -f .agents/plugins/company
-   ln -sf "$(pwd)/plugins/agy-company" .agents/plugins/agy-company
-   ```
-2. Antigravity CLI のチャットで以下を実行します：
-   ```text
-   > /agy-company sync-updates
-   ```
-   オンボーディングで登録した事業プロフィールや秘書の口調・追加済み部署を保持したまま、最新の運営ルールとガードレール規程のみが安全にマージされます。
+Antigravity CLI のチャットで以下を実行します：
+```text
+> /agy-company sync-updates
+```
+オンボーディングで登録した事業プロフィールや秘書の口調・追加済み部署を保持したまま、最新の運営ルールとガードレール規程のみが安全にマージされます。
 
 ### Q. Docker コンテナを更新・再ビルドしたい
 ```bash
@@ -372,11 +404,21 @@ docker compose up -d --build
 ```
 
 ### Q. ポート 18000 を別のポートに変えたい
-`docker-compose.yml` の `ports` 設定を編集します：
-```yaml
-ports:
-  - "127.0.0.1:YOUR_PORT:3000"
-```
+以下のいずれかの方法で簡単にポート番号を変更できます：
+1. **チャットから一時的に変更して起動** :
+   ```text
+   > /agy-company dashboard --port 18080
+   ```
+2. **設定ファイル（`config/config.json`）で恒久設定** :
+   ```json
+   {
+     "dashboard_port": 18080
+   }
+   ```
+3. **Docker Compose 起動時に環境変数を指定** :
+   ```bash
+   DASHBOARD_PORT=18080 docker compose up -d
+   ```
 
 ### Q. Google Drive / WSL2 でファイルの変更検知が遅い
 `docker-compose.yml` でポーリング検知が有効化されています：

@@ -26,6 +26,7 @@ You (Owner) ────Dialogue / /agy-company────▶ Dedicated Executi
                                                 ├─ [Deterministic Subcommands (Fast-Path)]
                                                 │   ├─ /agy-company daily ──▶ Creates daily note & carries over TODOs
                                                 │   ├─ /agy-company note  ──▶ Saves discussion/findings to 01_Inbox/
+                                                │   ├─ /agy-company dashboard ──▶ Starts and manages Web dashboard
                                                 │   └─ /agy-company sync-updates ──▶ Non-destructively updates rules
                                                 │
                                                 ├─ [Brainstorming] ─────────▶ Refines ideas & creates meeting minutes
@@ -36,7 +37,7 @@ You (Owner) ────Dialogue / /agy-company────▶ Dedicated Executi
                                                                                └─ PM Office (Milestones, task ticketing)
 ```
 - **Start Small**: Begins with only the Secretary Office. No complex upfront organizational setup needed.
-- **Fast-Path Deterministic Subcommands & Safety Guardrails**: Routine tasks (`/agy-company daily`, `/agy-company note`, `/agy-company sync-updates`) execute as pre-approved deterministic macros with strict scope whitelisting and circuit breakers, preventing analysis paralysis and unintended log-digging loops.
+- **Fast-Path Deterministic Subcommands & Safety Guardrails**: Routine tasks (`/agy-company daily`, `/agy-company note`, `/agy-company dashboard`, `/agy-company sync-updates`) execute as pre-approved deterministic macros with strict scope whitelisting and circuit breakers, preventing analysis paralysis and unintended log-digging loops.
 - **Natural Department Spawning**: When tasks in a domain occur 2 or more times, the Secretary proactively suggests establishing a dedicated department.
 - **Secretary Persona & Language**: Easily customize tone and language at any time (Friendly Partner, Formal Butler, Casual Peer, Strict Coach, or Custom) in Japanese, English, or Bilingual mode.
 
@@ -68,21 +69,21 @@ agy-company/
 ├── README_EN.md                        # English Documentation (This file)
 ├── README.md                           # Japanese Documentation
 ├── config/                             # Organization, department, and system settings (JSON templates)
-│   ├── config.example.json             # System common config template (Vault path, default language)
+│   ├── config.example.json             # System common config template (Vault path, port, default language)
 │   ├── departments-ja.example.json     # Japanese organization, titles, and department definitions template
 │   └── departments-en.example.json     # English organization, titles, and department definitions template
 ├── docker-compose.yml                  # Dashboard Docker Compose configuration
-├── Dockerfile                          # Multi-stage container build (Frontend + Backend)
-├── plugins/
-│   └── agy-company/                    # Antigravity CLI plugin bundle
-│       ├── plugin.json                 # Plugin manifest
-│       └── skills/
-│           └── agy-company/
-│               ├── SKILL.md            # Workflow instructions and operating guidelines
-│               └── references/
-│                   ├── agents-md-template.md  # Template for AGENTS.md generation
-│                   └── departments.md         # Default department definitions
+├── plugin.json                         # Antigravity CLI plugin manifest
+├── skills/
+│   └── agy-company/                    # Secretary skill definition & scripts
+│       ├── SKILL.md                    # Workflow instructions and operating guidelines
+│       ├── references/                 # Template definitions (departments.md / agents-md-template.md)
+│       └── scripts/                    # Automation scripts
+│           ├── search_notes.py         # Fast note search utility
+│           ├── start_dashboard.py      # Local dashboard runner script
+│           └── tests/                  # Script unit tests
 ├── dashboard/                          # Web dashboard source code
+│   ├── Dockerfile                      # Multi-stage container build (Frontend + Backend)
 │   ├── backend/                        # FastAPI backend application
 │   └── frontend/                       # React + Vite + Tailwind CSS frontend
 ├── .company/                           # Internal workspace & scratchpads (Git-tracked)
@@ -93,16 +94,21 @@ agy-company/
 
 ## 🚀 Installation & Activation
 
-> **For detailed step-by-step setup instructions, please see [docs/INSTALLATION.md](./docs/INSTALLATION.md).**
+> [!TIP]
+> For detailed step-by-step setup instructions, please see [docs/INSTALLATION.md](./docs/INSTALLATION.md).
 
-Antigravity CLI automatically discovers plugins and skills from `.agents/` in your current working directory or `~/.gemini/config/`.
+`agy-company` is distributed as a standard Antigravity CLI plugin and can be installed with a single command.
 
 ### 1. Workspace Setup
-In your project root, create a symbolic link pointing to `plugins/agy-company`:
 
+To install directly from your terminal (CLI):
 ```bash
-mkdir -p .agents/plugins
-ln -s "$(pwd)/plugins/agy-company" .agents/plugins/agy-company
+agy plugin install https://github.com/elir-elirlab/agy-company
+```
+
+Or install from inside Antigravity CLI chat mode:
+```text
+/plugin install https://github.com/elir-elirlab/agy-company
 ```
 
 ### 2. Obsidian Vault Mount (Recommended)
@@ -115,7 +121,7 @@ sudo mount --bind "/path/to/Obsidian/MyVault/company" ./vault
 
 > [!IMPORTANT]
 > Always mount a dedicated subfolder (such as `company/`) rather than your entire personal Obsidian vault to prevent accidental modifications to personal notes.  
-> If you don't use Obsidian, `./vault` works seamlessly as a standard local Markdown directory (leaving `./vault` empty is completely fine).
+> If you don't use Obsidian, `./vault` works seamlessly as a standard local Markdown directory (leaving `./vault` empty is completely fine; it will be initialized automatically).
 
 ---
 
@@ -151,6 +157,7 @@ Use deterministic subcommands to execute daily operations immediately without de
 | `/agy-company daily` | Creates today's daily note (`vault/02_Daily/YYYY-MM-DD.md`), carries over unfinished `- [ ]` tasks from the previous note, and updates bidirectional navigation links. |
 | `/agy-company note` | Automatically classifies the document purpose (`doc_type: knowledge | proposal | discussion`) and summarizes the current conversation into a structured note in `vault/01_Inbox/[department]/` with standard YAML frontmatter (including 3–5 structured `summary` bullets and auto-discovered `link` references). |
 | `/agy-company search` | Queries past notes in `vault/01_Inbox/` via `search_notes.py` with optional `-t` / `--type` filters (`knowledge`, `proposal`, `discussion`, `undefined`) and outputs matching notes' frontmatter `summary` fields with minimal context consumption. |
+| `/agy-company dashboard` | Starts the local Web dashboard (supports `--port <port>`), stops it (`stop`), or checks status (`status`). Prepares host `vault/` and `config/` directories safely under the current user permissions. |
 | `/agy-company backfill-summary` | Detects existing notes missing the `summary` frontmatter field and backfills 3–5 takeaway bullets. |
 | `/agy-company backfill-doctype` | Detects existing notes without a `doc_type` and has AI classify and backfill the appropriate document type (`knowledge`, `proposal`, `discussion`) directly into their frontmatter. |
 | `/agy-company sync-updates` | Non-destructively merges the latest plugin operational rules and guardrails into `.company/AGENTS.md` while preserving your custom profile, persona, and departments. |
@@ -158,7 +165,7 @@ Use deterministic subcommands to execute daily operations immediately without de
 
 #### 🛡️ Fast-Path Guardrail Design (Preventing Analysis Paralysis)
 - **Implicit Approval**: Invoking a routine subcommand counts as complete prior plan approval, executing immediately without colliding with custom workspace-level planning rules (such as `Plan Before Execution`).
-- **Strict Scope Whitelisting**: Routine operations are strictly scoped to `vault/`, `.company/`, `config/`, and `plugins/agy-company/`. Inspecting `git log` or past conversation transcripts (`~/.gemini/` or `transcript.jsonl`) is strictly prohibited.
+- **Strict Scope Whitelisting**: Routine operations are strictly scoped to resolved `vault/`, `.company/` (including `.company/.config/`), `config/`, and the plugin's own installation directory. Inspecting `git log` or past conversation transcripts (`~/.gemini/antigravity-cli/brain/` or `transcript.jsonl`) is strictly prohibited.
 - **Circuit Breaker (Ask, Don't Dig)**: If a routine task cannot finish within 4 tool calls or hits any ambiguity, tool execution halts immediately and asks the user directly instead of digging through history.
 
 ---
@@ -226,12 +233,37 @@ Configurations are persisted in `.company/secretary/AGENTS.md` and retained acro
 
 A built-in local dashboard is included to manage your Obsidian Vault graphically.
 
+### 1. Launch via Chat (Recommended)
+
+Start and manage the dashboard directly from Antigravity CLI chat with a single command:
+
+```text
+> /agy-company dashboard
+```
+
+To specify a custom port:
+```text
+> /agy-company dashboard --port 18080
+```
+
+To stop the dashboard:
+```text
+> /agy-company dashboard stop
+```
+
+> [!TIP]
+> Running `/agy-company dashboard` automatically prepares host directories (`vault/` for deliverables and `config/` for settings) under your current user account before mounting, preventing Docker root ownership permission issues.
+
+### 2. Launch via Docker Compose Directly
+
+You can also launch the dashboard directly using Docker Compose from the repository root:
+
 ```bash
 # Start dashboard container in background
 docker compose up -d
 ```
 
-Open **`http://localhost:18000`** in your web browser.  
+Open **`http://localhost:18000`** (or your configured port) in your web browser.  
 *(Bound to localhost `127.0.0.1:18000:3000` to prevent unintended exposure to the local network).*
 
 ![screenshot-en](docs/Screenshot-Dashboard-EN.png)
@@ -271,9 +303,14 @@ You can freely define organization roles, department names, and descriptions by 
 
 ### 1. Configuration Files Overview
 
+The system supports loading configuration files from three flexible locations:
+- **1. `./config` (Default)**: Standard configuration directory when operating in the standalone repository or standard workspace.
+- **2. `.company/.config` (For Existing Projects)**: Hidden directory used when integrating into an existing project to avoid collisions with an existing `./config` directory.
+- **3. Custom Path via Environment Variable**: Set `CONFIG_PATH` or specify custom configuration paths recorded in `.company/AGENTS.md`.
+
 | File | Purpose | Main Settings |
 |---|---|---|
-| [`config/config.json`](./config/config.json) | Common System Settings | Vault path (`vault_dir`), Default language (`default_language`) |
+| [`config/config.json`](./config/config.json) | Common System Settings | Vault path (`vault_dir`), Dashboard port (`dashboard_port`: 18000), Default language (`default_language`) |
 | [`config/departments-ja.json`](./config/departments-ja.json) | Japanese Locale | Owner/Secretary titles and roles, Japanese department definitions |
 | [`config/departments-en.json`](./config/departments-en.json) | English Locale | Owner/Secretary titles and roles, English department definitions |
 
@@ -345,16 +382,11 @@ Rename roles to fit your organizational model (e.g. CEO, Founder, Lead AI Agent)
 ## 🛠️ Troubleshooting & Tips
 
 ### Q. How do I apply the latest plugin rules to my existing `.company/` setup (including migrating from `/company`)?
-1. Remove any legacy `.agents/plugins/company` symlink and point it to `plugins/agy-company`:
-   ```bash
-   rm -f .agents/plugins/company
-   ln -sf "$(pwd)/plugins/agy-company" .agents/plugins/agy-company
-   ```
-2. Run the following command in Antigravity CLI chat:
-   ```text
-   > /agy-company sync-updates
-   ```
-   This non-destructively merges the latest operational rules and guardrails into `.company/AGENTS.md` while preserving your custom owner profile, secretary persona, and spawned departments.
+Run the following command in Antigravity CLI chat:
+```text
+> /agy-company sync-updates
+```
+This non-destructively merges the latest operational rules and guardrails into `.company/AGENTS.md` while preserving your custom owner profile, secretary persona, and spawned departments.
 
 ### Q. How do I update or rebuild the Docker container?
 ```bash
@@ -362,11 +394,21 @@ docker compose up -d --build
 ```
 
 ### Q. How do I change the default port (18000)?
-Edit the `ports` mapping in `docker-compose.yml`:
-```yaml
-ports:
-  - "127.0.0.1:YOUR_PORT:3000"
-```
+You can customize the dashboard port via any of the following methods:
+1. **Temporarily specify a port when launching from chat**:
+   ```text
+   > /agy-company dashboard --port 18080
+   ```
+2. **Set permanently in your configuration file (`config/config.json`)**:
+   ```json
+   {
+     "dashboard_port": 18080
+   }
+   ```
+3. **Pass environment variable when launching Docker Compose directly**:
+   ```bash
+   DASHBOARD_PORT=18080 docker compose up -d
+   ```
 
 ### Q. File change detection is delayed on Google Drive or WSL2
 File polling is enabled by default in `docker-compose.yml`:

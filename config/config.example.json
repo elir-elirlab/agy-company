@@ -1,4 +1,5 @@
 {
   "vault_dir": "vault",
-  "default_language": "en"
+  "default_language": "en",
+  "dashboard_port": 18000
 }

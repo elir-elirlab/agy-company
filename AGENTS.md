@@ -25,12 +25,17 @@ agy-company/
 │   ├── departments-ja.example.json     # Japanese department & role definitions
 │   └── departments-en.example.json     # English department & role definitions
 ├── docker-compose.yml                  # Standard container composition
-├── Dockerfile                          # Multi-stage container build (Node.js + Python)
-├── plugins/
-│   └── agy-company/                    # Antigravity CLI plugin & skills
-│       ├── plugin.json                 # Plugin manifest
-│       └── skills/agy-company/         # Skill instructions (SKILL.md, references, scripts)
+├── plugin.json                         # Antigravity plugin manifest
+├── skills/
+│   └── agy-company/                    # Skill definition & scripts
+│       ├── SKILL.md                    # Workflow instructions and operating guidelines
+│       ├── references/                 # Department & AGENTS.md templates
+│       └── scripts/                    # Automation scripts
+│           ├── search_notes.py         # Fast note search utility
+│           ├── start_dashboard.py      # Local dashboard runner script
+│           └── tests/                  # Plugin script unit tests
 ├── dashboard/                          # Web dashboard source code
+│   ├── Dockerfile                      # Multi-stage container build (Node.js + Python)
 │   ├── backend/                        # FastAPI application (Python 3.11+)
 │   │   ├── main.py                     # API routes, WebSocket, static mount
 │   │   ├── parser.py                   # Obsidian Markdown & Frontmatter parser
@@ -82,10 +87,13 @@ cd dashboard/frontend && npm run build
 
 ### 4.2 Backend Verification (Python + FastAPI)
 ```bash
-# Run unit tests via isolated virtualenv or system pytest
+# Run backend unit tests via isolated virtualenv or system pytest
 ./dashboard/backend/.venv/bin/pytest dashboard/backend/tests
 # Or:
 pytest dashboard/backend/tests
+
+# Run plugin scripts unit tests (search_notes.py & start_dashboard.py)
+python3 -m unittest discover -s skills/agy-company/scripts/tests -v
 ```
 
 ### 4.3 Container Verification (Docker)
