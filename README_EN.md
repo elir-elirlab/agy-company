@@ -140,15 +140,14 @@ sudo mount --bind "/path/to/Obsidian/MyVault/company" ./vault
 ## 🤖 How to Use the Skill
 
 ### 1. Initial Onboarding (3-Minute Setup)
-Type `/agy-company` in Antigravity CLI chat:
+Run the `/agy-company` command in Antigravity CLI chat (using the command is recommended for deterministic initialization):
 
 ```text
 > /agy-company
 ```
-or
-```text
-> Hello secretary, please set up our company organization.
-```
+
+> [!TIP]
+> Once initial onboarding is completed, secretary rules are permanently recorded in `.company/AGENTS.md`. After that, you can interact with the secretary naturally using phrases like "Hello Secretary", "What are my tasks today?", etc.
 
 The Secretary will guide you through 4 interactive onboarding questions:
 1. **Business & Activity**: What projects or business activities are you working on?
