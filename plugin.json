@@ -1,7 +1,7 @@
 {
   "name": "agy-company",
   "displayName": "AGY Company (Virtual Organization & Obsidian Cockpit)",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Virtual company management plugin with an Executive Secretary agent, deterministic Fast-Path routines (daily, note, search, dashboard, tone), dynamic department spawning, subagent delegation, and a local Obsidian Web Dashboard.",
   "logo": "assets/logo.svg",
   "repository": {

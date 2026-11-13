@@ -116,7 +116,11 @@ def prepare_host_directories(
     return actions
 
 
-def build_compose_command(plugin_root: Path, action: str) -> List[str]:
+def build_compose_command(
+    plugin_root: Path,
+    action: str,
+    build: bool = False,
+) -> List[str]:
     """Build the docker compose command list targeting the plugin root's docker-compose.yml."""
     compose_file = plugin_root / "docker-compose.yml"
     cmd = ["docker", "compose", "-f", str(compose_file)]
@@ -126,6 +130,9 @@ def build_compose_command(plugin_root: Path, action: str) -> List[str]:
         cmd.extend(["ps"])
     else:
         cmd.extend(["up", "-d"])
+        # Only pass --build when explicitly requested so normal restarts stay fast
+        if build:
+            cmd.append("--build")
     return cmd
 
 
@@ -151,6 +158,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=int,
         default=None,
         help="Host port to expose the dashboard on (default: DASHBOARD_PORT, config.json dashboard_port, or 18000).",
+    )
+    parser.add_argument(
+        "--build",
+        action="store_true",
+        help="Rebuild the Docker image before starting the dashboard container (docker compose up -d --build).",
     )
     parser.add_argument(
         "--stop",
@@ -190,7 +202,7 @@ def main() -> int:
     else:
         action = "start"
 
-    cmd = build_compose_command(plugin_root, action)
+    cmd = build_compose_command(plugin_root, action, build=args.build)
     compose_env = {
         "OBSIDIAN_VAULT_PATH": str(vault_dir),
         "CONFIG_PATH": str(config_dir),
