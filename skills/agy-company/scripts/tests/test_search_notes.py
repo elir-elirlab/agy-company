@@ -292,6 +292,56 @@ Body text here.
         self.assertEqual(missing_type_notes[0]["id"], "2026-10-10-090000")
         self.assertEqual(missing_type_notes[0]["doc_type"], "undefined")
 
+    def test_filename_filter(self) -> None:
+        """Verify case-insensitive substring filename filtering (with or without .md) via function and CLI."""
+        all_notes = search_notes.scan_notes(self.vault_dir)
+
+        # 1. Partial match without .md (case-insensitive)
+        matches_no_ext = [
+            n for n in all_notes
+            if search_notes.matches_filters(
+                n, keywords=[], filename_filter="vectordb-comparison"
+            )
+        ]
+        self.assertEqual(len(matches_no_ext), 1)
+        self.assertEqual(matches_no_ext[0]["id"], "2026-10-20-100000")
+
+        # 2. Partial match with .md (case-insensitive)
+        matches_with_ext = [
+            n for n in all_notes
+            if search_notes.matches_filters(
+                n, keywords=[], filename_filter="auth-architecture.md"
+            )
+        ]
+        self.assertEqual(len(matches_with_ext), 1)
+        self.assertEqual(matches_with_ext[0]["id"], "2026-10-25-153000")
+
+        # 3. Metadata-only terms not present in the filename should NOT match
+        matches_non_filename = [
+            n for n in all_notes
+            if search_notes.matches_filters(
+                n, keywords=[], filename_filter="Qdrant"
+            )
+        ]
+        self.assertEqual(len(matches_non_filename), 0)
+
+        # 4. End-to-end CLI execution with -n / --filename and --json
+        script_file = SCRIPT_DIR / "search_notes.py"
+        cmd = [
+            sys.executable,
+            str(script_file),
+            "-n",
+            "Legacy-Memo",
+            "--vault-dir",
+            str(self.vault_dir),
+            "--json",
+        ]
+        proc = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["total_matched"], 1)
+        self.assertEqual(payload["results"][0]["id"], "2026-10-10-090000")
+        self.assertTrue(payload["results"][0]["path"].endswith("2026-10-10-090000-Legacy-Memo.md"))
+
     def test_cli_json_and_text_output(self) -> None:
         """Verify end-to-end CLI execution with --json and standard text output including doc_type."""
         script_file = SCRIPT_DIR / "search_notes.py"

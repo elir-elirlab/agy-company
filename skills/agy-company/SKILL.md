@@ -96,7 +96,7 @@ Summarizes conversation, brainstorming conclusions, or investigation findings in
 Searches `vault/01_Inbox/` using `search_notes.py`, outputting only matching notes' metadata, `doc_type`, and `summary` to preserve context.
 
 **Deterministic Steps (Max 4 Tool Calls)**:
-1. **Run Metadata Search**: Run `<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" <keywords>` (supports `-t <type>`, `--dept <dept>`, `--tag <tag>`, `--from YYYY-MM-DD`, `--to YYYY-MM-DD`, `--or`, `--limit 20`).
+1. **Run Metadata Search**: Run `<PYTHON> "<SKILL_DIR>/scripts/search_notes.py" <keywords>` (supports `-n <filename>` / `--filename <filename>`, `-t <type>`, `--dept <dept>`, `--tag <tag>`, `--from YYYY-MM-DD`, `--to YYYY-MM-DD`, `--or`, `--limit 20`).
 2. **Fallback to Full-Text Search (If Needed)**: If metadata yields no or insufficient results, re-run with `--fulltext` (`-f`) to search Markdown bodies while still outputting only metadata, `doc_type`, and `summary`.
 3. **Selective Deep Read (Optional)**: If `summary` output identifies 1–2 notes needing details, answer directly or selectively read them via `read_file`.
 
