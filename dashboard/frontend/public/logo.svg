@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" fill="none">
+  <!--
+    AGY Company Logo: Virtual Organization Hierarchy Chart (Light Minimal Theme)
+    
+    Structure & Layer Overview for Engineers:
+    1. Defs & Gradients: White-base palette with crisp dark lines and RGB subagent accents.
+    2. Background Base: White squircle container with dark charcoal border and architectural grid rings.
+    3. Hierarchy Tree Branches: Sharp dark charcoal routing lines linking Executive Leader to subagents.
+    4. Executive Leadership Node: Top apex representing President / Orchestrator with bold solid black core.
+    5. Department Teams: Specialized autonomous subagents with distinct primary accents (Blue, Green, Red).
+    6. Multi-Color Accents: Engineering (Blue), Operations (Green), Research & Strategy (Red).
+  -->
+
+  <defs>
+    <!-- Soft Light Ambient Background Glow -->
+    <radialGradient id="agy-light-ambient" cx="50%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Executive Neutral Ambient Halo Glow -->
+    <radialGradient id="exec-dark-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0f172a" stop-opacity="0.08" />
+      <stop offset="70%" stop-color="#0f172a" stop-opacity="0.02" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Department Accent Core Gradients -->
+    <linearGradient id="blue-core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+
+    <linearGradient id="green-core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#16a34a" />
+    </linearGradient>
+
+    <linearGradient id="red-core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f87171" />
+      <stop offset="100%" stop-color="#dc2626" />
+    </linearGradient>
+  </defs>
+
+  <!-- Layer 1: Background Container & Ambient Tint (White Base, Dark Stroke) -->
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#agy-light-ambient)" />
+
+  <!-- Layer 2: Architectural Grid Rings (Enhanced Line Definition) -->
+  <circle cx="64" cy="34" r="32" stroke="#0f172a" stroke-opacity="0.18" stroke-width="1.4" />
+  <circle cx="64" cy="94" r="48" stroke="#0f172a" stroke-opacity="0.18" stroke-width="1.4" stroke-dasharray="3.5 3" />
+
+  <!-- Layer 3: Hierarchy Tree Branches (Solid Dark Charcoal Lines) -->
+  <!-- Center Trunk from Executive Leader to Operations -->
+  <path d="M 64 58 V 80" stroke="#0f172a" stroke-width="3.2" stroke-linecap="round" />
+  <!-- Left Branch to Engineering Department -->
+  <path d="M 64 69 H 36 Q 28 69 28 75 V 80" stroke="#0f172a" stroke-width="3.2" stroke-linecap="round" fill="none" />
+  <!-- Right Branch to Research & Strategy Department -->
+  <path d="M 64 69 H 92 Q 100 69 100 75 V 80" stroke="#0f172a" stroke-width="3.2" stroke-linecap="round" fill="none" />
+
+  <!-- Hierarchy Branch Junction Point (Mechanical Charcoal Pin) -->
+  <circle cx="64" cy="69" r="4.8" fill="#0f172a" />
+  <circle cx="64" cy="69" r="1.8" fill="#ffffff" />
+
+  <!-- Layer 4: Prominent Executive Leadership Node (President / Orchestrator - Solid Black Core) -->
+  <!-- Ambient Neutral Corona Glow -->
+  <circle cx="64" cy="34" r="32" fill="url(#exec-dark-halo)" />
+  <!-- Executive Leader Node Enclosure (Enlarged Apex Hub) -->
+  <circle cx="64" cy="34" r="24" fill="#ffffff" stroke="#0f172a" stroke-width="2.6" />
+  <!-- Central Solid Black Orchestrator Core Dot -->
+  <circle cx="64" cy="34" r="16" fill="#0f172a" />
+  <circle cx="64" cy="34" r="5.5" fill="#ffffff" />
+
+  <!-- Layer 5: Department Team Nodes (Autonomous Subagents with Maximized Colored Dot Area) -->
+  <!-- Department 1 (Left): Engineering Subagent (Maximized Blue Core) -->
+  <circle cx="28" cy="94" r="14" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+  <circle cx="28" cy="94" r="10.5" fill="url(#blue-core)" />
+  <circle cx="28" cy="94" r="3.5" fill="#ffffff" />
+  <!-- Status Dot (Blue) -->
+  <circle cx="39" cy="83" r="3.6" fill="#2563eb" />
+
+  <!-- Department 2 (Center): Operations Subagent (Maximized Green Core) -->
+  <circle cx="64" cy="94" r="14" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+  <circle cx="64" cy="94" r="10.5" fill="url(#green-core)" />
+  <circle cx="64" cy="94" r="3.5" fill="#ffffff" />
+  <!-- Status Dot (Green) -->
+  <circle cx="75" cy="83" r="3.6" fill="#16a34a" />
+
+  <!-- Department 3 (Right): Research Subagent (Maximized Red Core) -->
+  <circle cx="100" cy="94" r="14" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+  <circle cx="100" cy="94" r="10.5" fill="url(#red-core)" />
+  <circle cx="100" cy="94" r="3.5" fill="#ffffff" />
+  <!-- Status Dot (Red) -->
+  <circle cx="111" cy="83" r="3.6" fill="#dc2626" />
+</svg>

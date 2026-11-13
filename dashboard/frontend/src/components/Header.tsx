@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, CheckCircle2, Clock, FolderGit2, Settings } from 'lucide-react';
+import { CheckCircle2, Clock, FolderGit2, Settings } from 'lucide-react';
 import { StatusResponse } from '../types';
 import { useI18n } from '../i18n/context';
 
@@ -19,9 +19,11 @@ export const Header: React.FC<HeaderProps> = ({ status, isConnected, onOpenQuick
       <div className="w-full flex items-center justify-between">
         {/* Brand & Date */}
         <div className="flex items-center space-x-3.5">
-          <div className="bg-gradient-to-tr from-indigo-600 to-indigo-500 p-2.5 rounded-xl text-white shadow-md shadow-indigo-500/20 border border-indigo-400/20">
-            <Building2 className="w-6 h-6" />
-          </div>
+          <img
+            src="/logo.svg"
+            alt="agy-company logo"
+            className="w-11 h-11 shrink-0 drop-shadow-md"
+          />
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-xl font-extrabold tracking-tight text-white">
