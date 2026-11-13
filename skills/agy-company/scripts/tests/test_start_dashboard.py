@@ -177,6 +177,30 @@ class TestStartDashboard(unittest.TestCase):
         self.assertIn("-f", command_start)
         self.assertIn("up", command_start)
         self.assertIn("-d", command_start)
+        self.assertNotIn("--build", command_start)
+
+        # 1b. Test start action with --build and dry-run
+        cmd_start_build = [
+            sys.executable,
+            str(script_path),
+            "--dry-run",
+            "--build",
+            "--config-dir",
+            str(tmp_cfg),
+            "--vault-dir",
+            str(tmp_vault),
+        ]
+        result_start_build = subprocess.run(
+            cmd_start_build,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        data_start_build = json.loads(result_start_build.stdout)
+        command_start_build = data_start_build.get("command", [])
+        self.assertIn("up", command_start_build)
+        self.assertIn("-d", command_start_build)
+        self.assertIn("--build", command_start_build)
 
         # 2. Test stop action with dry-run
         cmd_stop = [

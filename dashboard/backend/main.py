@@ -22,7 +22,7 @@ from .parser import (
 )
 
 # Initialize FastAPI application
-app = FastAPI(title="agy-company Dashboard API", version="2.4.0")
+app = FastAPI(title="agy-company Dashboard API", version="2.4.1")
 
 # Enable CORS for local Vite development server
 app.add_middleware(

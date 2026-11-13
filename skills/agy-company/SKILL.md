@@ -166,7 +166,7 @@ Starts, stops, or checks status of local Obsidian Web Dashboard via Docker Compo
 
 **Deterministic Steps (Max 2 Tool Calls)**:
 1. **Execute Dashboard Controller (`start_dashboard.py`)**:
-   - **Start (Default)**: Run `<PYTHON> "<SKILL_DIR>/scripts/start_dashboard.py"` (append `--port <port>`, `--config-dir <path>`, or `--vault-dir <path>` if explicitly requested).
+   - **Start (Default)**: Run `<PYTHON> "<SKILL_DIR>/scripts/start_dashboard.py" --build` (append `--port <port>`, `--config-dir <path>`, or `--vault-dir <path>` if explicitly requested).
    - **Stop (`/agy-company dashboard stop`)**: Run `<PYTHON> "<SKILL_DIR>/scripts/start_dashboard.py" --stop`.
    - **Status (`/agy-company dashboard status`)**: Run `<PYTHON> "<SKILL_DIR>/scripts/start_dashboard.py" --status`.
 2. **Report**:
