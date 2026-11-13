@@ -327,10 +327,17 @@ def matches_filters(
     date_to: Optional[str] = None,
     missing_summary: bool = False,
     missing_type: bool = False,
+    filename_filter: Optional[str] = None,
 ) -> bool:
     """
     Evaluate whether a parsed note satisfies all specified CLI search criteria.
     """
+    # 0. Check --filename filter (case-insensitive substring match against filename)
+    if filename_filter and filename_filter.strip():
+        target_filename = filename_filter.strip().lower()
+        if target_filename not in note["filename"].lower():
+            return False
+
     # 1. Check --missing-summary filter
     has_summary = len(note["summary"]) > 0
     if missing_summary and has_summary:
@@ -434,6 +441,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "keywords",
         nargs="*",
         help="Search keywords (matched against filename, title, aliases, tags, and summary by default).",
+    )
+    parser.add_argument(
+        "-n",
+        "--filename",
+        dest="filename",
+        type=str,
+        default=None,
+        help="Filter by note filename (case-insensitive substring match, with or without .md).",
     )
     parser.add_argument(
         "-f",
@@ -542,6 +557,7 @@ def main() -> int:
             date_to=args.date_to,
             missing_summary=args.missing_summary,
             missing_type=args.missing_type,
+            filename_filter=args.filename,
         )
     ]
 
