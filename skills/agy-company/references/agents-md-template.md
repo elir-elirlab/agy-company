@@ -28,7 +28,7 @@ Variables with `{{...}}` will be replaced with user onboarding input and system 
     ├── AGENTS.md
     └── notes/
 
-vault/
+{{VAULT_DIR}}/
 ├── 01_Inbox/
 ├── 02_Daily/
 └── AGENTS.md
@@ -57,12 +57,12 @@ vault/
 ### Deterministic Routine Subcommands (Fast-Path — Pre-Approved)
 - Routine commands (`/agy-company daily`, `/agy-company note`, `/agy-company search`, `/agy-company backfill-summary`, `/agy-company backfill-doctype`, `/agy-company sync-updates`, `/agy-company tone`, `/agy-company dashboard`) and routine requests for daily notes, quick notes, note searches, or dashboard control are **Pre-Approved Deterministic Routines**.
 - **Implicit Approval**: Invoking these commands/routines constitutes prior plan approval. Execute immediately without asking for confirmation first.
-- **Strict Scope Whitelisting**: Routine operations may ONLY access `{{VAULT_DIR}}` (`vault/`), `.company/` (including `.company/.config/`), `{{CONFIG_DIR}}` (`config/`), and the plugin installation directory (`{{SKILL_DIR}}`). Inspecting `git log`, `git show`, `.git/`, or past conversation transcripts (`~/.gemini/antigravity-cli/brain/` or `transcript.jsonl`) is **STRICTLY PROHIBITED**.
+- **Strict Scope Whitelisting**: Routine operations may ONLY access `{{VAULT_DIR}}`, `.company/` (including `.company/.config/`), `{{CONFIG_DIR}}`, and the plugin installation directory (`{{SKILL_DIR}}`). Inspecting `git log`, `git show`, `.git/`, or past conversation transcripts (`~/.gemini/antigravity-cli/brain/` or `transcript.jsonl`) is **STRICTLY PROHIBITED**.
 - **Circuit Breaker (Ask, Don't Dig)**: If any routine task encounters ambiguity or cannot finish within 4 tool calls, stop tool execution immediately and ask the user directly. Never search commit history or session logs to infer precedent.
 
 ### Note Document Type & Summary Protocol (`search_notes.py`)
-- Every deliverable and note in `vault/01_Inbox/` MUST include a `doc_type:` (`knowledge`, `proposal`, or `discussion`) and a 3-attribute `summary:` list (50–80 chars per bullet) in its YAML frontmatter.
-- When searching past notes or discovering related notes for the `link:` field, run `python3 "{{SKILL_DIR}}/scripts/search_notes.py" <keywords>` (use `python` on Windows; supports `-t <type>`, `--fulltext`, `--missing-summary`, and `--missing-type`) instead of reading every file in `vault/01_Inbox/`.
+- Every deliverable and note in `{{VAULT_DIR}}/01_Inbox/` MUST include a `doc_type:` (`knowledge`, `proposal`, or `discussion`) and a 3-attribute `summary:` list (50–80 chars per bullet) in its YAML frontmatter.
+- When searching past notes or discovering related notes for the `link:` field, run `python3 "{{SKILL_DIR}}/scripts/search_notes.py" <keywords>` (use `python` on Windows; supports `-t <type>`, `--fulltext`, `--missing-summary`, and `--missing-type`) instead of reading every file in `{{VAULT_DIR}}/01_Inbox/`.
 
 ### Local Web Dashboard (`/agy-company dashboard`)
 - To start or stop the local Obsidian Web Dashboard, run `python3 "{{SKILL_DIR}}/scripts/start_dashboard.py"` (or `--port <port>`, `--stop`, `--status`; use `python` on Windows).
@@ -71,7 +71,7 @@ vault/
 - For heavy or specialized tasks (such as competitor research, technical design, marketing drafting), the Secretary invokes background subagents (`invoke_subagent`).
 - Subagents must run `search_notes.py` prior to investigation to review existing organizational knowledge and link related past notes.
 - Intermediate drafts and scratch work go to `.company/[department]/work/`.
-- Final deliverables must be saved to `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with full frontmatter (including `doc_type` and 3-attribute `summary`) before reporting back to the user.
+- Final deliverables must be saved to `{{VAULT_DIR}}/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with full frontmatter (including `doc_type` and 3-attribute `summary`) before reporting back to the user.
 
 ### Safe Git Operations & Reset Policy (破壊的リセットの禁止)
 - Destructive whole-repository reset commands (`git reset --hard`, `git clean -fd`, etc.) are **STRICTLY PROHIBITED** across all agents and subagents.
@@ -81,19 +81,19 @@ vault/
   - Example: `git restore .company/[department]/work/temp.txt`
 
 ### Automated Logging & Deliverable Storage
-- Daily notes with bidirectional navigation (`◀ 前日` / `翌日 ▶`) and daily TODOs: `vault/02_Daily/YYYY-MM-DD.md`
-- Formal notes, discussion summaries, and deliverables: `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` (or `vault/01_Inbox/YYYY-MM-DD-HHmmss-[Title].md`)
+- Daily notes with bidirectional navigation (`◀ 前日` / `翌日 ▶`) and daily TODOs: `{{VAULT_DIR}}/02_Daily/YYYY-MM-DD.md`
+- Formal notes, discussion summaries, and deliverables: `{{VAULT_DIR}}/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` (or `{{VAULT_DIR}}/01_Inbox/YYYY-MM-DD-HHmmss-[Title].md`)
 - Internal secretary decision/learning logs: `.company/secretary/notes/`
 
 ### Single Daily File Rule
-- If `vault/02_Daily/YYYY-MM-DD.md` for today already exists, update or append to it. Do NOT overwrite or create duplicate daily files.
+- If `{{VAULT_DIR}}/02_Daily/YYYY-MM-DD.md` for today already exists, update or append to it. Do NOT overwrite or create duplicate daily files.
 
 ### Date Checking
 - Always verify today's date before executing file operations.
 
 ### File Naming Conventions
-- **Daily files**: `vault/02_Daily/YYYY-MM-DD.md`
-- **Deliverable / Note files**: `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md`
+- **Daily files**: `{{VAULT_DIR}}/02_Daily/YYYY-MM-DD.md`
+- **Deliverable / Note files**: `{{VAULT_DIR}}/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md`
 
 ### TODO Format
 ```markdown
@@ -102,9 +102,9 @@ vault/
 ```
 
 ### Content Integrity
-1. When uncertain of the department, place the note in `vault/01_Inbox/`.
+1. When uncertain of the department, place the note in `{{VAULT_DIR}}/01_Inbox/`.
 2. Do not overwrite existing notes; append or update with clear change context.
-3. Include standard YAML frontmatter on all notes in `vault/01_Inbox/`.
+3. Include standard YAML frontmatter on all notes in `{{VAULT_DIR}}/01_Inbox/`.
 
 ## Personalization Notes
 
@@ -121,7 +121,7 @@ vault/
 | `{{GOALS_AND_CHALLENGES}}` | Q2 | Current goals and pain points |
 | `{{CREATED_DATE}}` | Auto | Date of organization creation (YYYY-MM-DD) |
 | `{{CONFIG_DIR}}` | Onboarding / Default | Active configuration directory (`./config`, `.company/.config`, or custom path) |
-| `{{VAULT_DIR}}` | Onboarding / Default | Obsidian Vault directory (`./vault` or custom path) |
+| `{{VAULT_DIR}}` | Q5 (Onboarding / Default) | Obsidian Vault directory (`./vault` or custom path) |
 | `{{SKILL_DIR}}` | Auto | Absolute or workspace-relative path to the `skills/agy-company` directory |
 | `{{ADDITIONAL_DEPARTMENTS}}` | Department addition | Directory tree representation of additional departments |
 | `{{DEPARTMENT_TABLE_ROWS}}` | Department addition | Markdown table rows for added departments |

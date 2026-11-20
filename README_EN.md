@@ -149,13 +149,14 @@ Run the `/agy-company` command in Antigravity CLI chat (using the command is rec
 > [!TIP]
 > Once initial onboarding is completed, secretary rules are permanently recorded in `.company/AGENTS.md`. After that, you can interact with the secretary naturally using phrases like "Hello Secretary", "What are my tasks today?", etc.
 
-The Secretary will guide you through 4 interactive onboarding questions:
+The Secretary will guide you through 5 interactive onboarding questions:
 1. **Business & Activity**: What projects or business activities are you working on?
 2. **Goals & Challenges**: What targets are you pursuing, and what bottlenecks do you want to automate?
 3. **Daily Routine & Reminders**: Would you like scheduled morning check-ins? (Default: OFF)
 4. **Secretary Persona & Language**: Choose your preferred communication tone and language (Japanese, English, or Bilingual).
+5. **Vault Folder Location**: Set up with the default `./vault` directory or specify a custom folder/path.
 
-Once answered, organizational structure files are generated and your dedicated secretary starts operations immediately.
+Once answered, organizational structure files and `config.json` (`vault_dir`, etc.) are generated automatically and your dedicated secretary starts operations immediately.
 
 ---
 
