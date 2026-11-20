@@ -26,12 +26,12 @@ Applies to `invoke_subagent` (research, engineering), spawning departments, or e
 
 ## 3. 2-Tier Architecture & File Boundaries
 - **`.company/` (Host Repo, Git-tracked)**: Scratchpads (`.company/[department]/work/`), Secretary notes (`.company/secretary/`), and workspace configs (`.company/AGENTS.md`).
-- **`vault/` (Obsidian Vault)**: Clean published deliverables (`vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md`) and daily notes (`vault/02_Daily/YYYY-MM-DD.md`). Never place temporary work in `vault/`.
+- **`<vault_dir>/` (Obsidian Vault, default `vault/`)**: Clean published deliverables (`<vault_dir>/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md`) and daily notes (`<vault_dir>/02_Daily/YYYY-MM-DD.md`). Never place temporary work in `<vault_dir>/`.
 
 ---
 
 ## 4. Deliverable Frontmatter Standard
-All notes in `vault/01_Inbox/` require YAML frontmatter:
+All notes in `<vault_dir>/01_Inbox/` require YAML frontmatter:
 ```yaml
 ---
 id: YYYY-MM-DD-HHmmss

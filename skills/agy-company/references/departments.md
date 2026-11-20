@@ -375,17 +375,17 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
 
 ## Fast-Path Deterministic Subcommands & Guardrails
 1. **Implicit Approval**: When the user runs `/agy-company daily`, `/agy-company note`, `/agy-company search`, `/agy-company backfill-summary`, `/agy-company backfill-doctype`, `/agy-company sync-updates`, `/agy-company tone`, or `/agy-company dashboard` (or asks for routine daily note / quick note / note search / dashboard control), treat the invocation itself as full plan approval and execute immediately.
-2. **Strict Scope Whitelisting**: During routine tasks, access ONLY `vault/`, `.company/` (including `.company/.config/`), `config/`, and the installed agy-company skill/plugin directory. Never inspect `git log`, `.git/`, or `~/.gemini/antigravity-cli/brain/` session transcripts.
+2. **Strict Scope Whitelisting**: During routine tasks, access ONLY `{{VAULT_DIR}}` (default `vault/`), `.company/` (including `.company/.config/`), `{{CONFIG_DIR}}` (default `config/`), and the installed agy-company skill/plugin directory. Never inspect `git log`, `.git/`, or `~/.gemini/antigravity-cli/brain/` session transcripts.
 3. **Circuit Breaker**: If a routine task takes more than 4 tool calls or hits any ambiguity, stop calling tools immediately and ask the user directly.
 
 ## Core Responsibilities
-1. **Daily Note & TODO Management (`/agy-company daily`)**: View and update `vault/02_Daily/YYYY-MM-DD.md`, carrying over unfinished tasks from the single most recent daily note.
-2. **Note & Deliverable Capture (`/agy-company note`)**: Quickly summarize current discussions or findings into `vault/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with standard YAML frontmatter (including `doc_type`, 3-attribute `summary:`, and related `link:` discovered via `search_notes.py`).
+1. **Daily Note & TODO Management (`/agy-company daily`)**: View and update `{{VAULT_DIR}}/02_Daily/YYYY-MM-DD.md`, carrying over unfinished tasks from the single most recent daily note.
+2. **Note & Deliverable Capture (`/agy-company note`)**: Quickly summarize current discussions or findings into `{{VAULT_DIR}}/01_Inbox/[department]/YYYY-MM-DD-HHmmss-[Title].md` with standard YAML frontmatter (including `doc_type`, 3-attribute `summary:`, and related `link:` discovered via `search_notes.py`).
 3. **Note Search & Classification Maintenance (`/agy-company search`, `/agy-company backfill-summary`, `/agy-company backfill-doctype`)**: Query past notes efficiently using `search_notes.py` (`-t`, `--missing-summary`, `--missing-type`) and backfill missing frontmatter summaries or document classifications when requested.
 4. **Plugin Update Sync (`/agy-company sync-updates`)**: Non-destructively merge latest operational rules from the installed agy-company plugin templates into `.company/AGENTS.md` while preserving user profile and persona settings.
 5. **Local Web Dashboard (`/agy-company dashboard`)**: Launch, manage custom ports for, or stop the local Obsidian Web Dashboard using `start_dashboard.py`.
 6. **Task Delegation**:
-   - For light inquiries: Answer directly and save notes to the corresponding `vault/01_Inbox/[department]/` folder.
+   - For light inquiries: Answer directly and save notes to the corresponding `{{VAULT_DIR}}/01_Inbox/[department]/` folder.
    - For heavy or multi-step tasks: Invoke specialized subagents (`invoke_subagent`) to perform the work in the background.
 7. **Department Expansion**:
    - Detect repeated patterns (2+ tasks of the same specialized domain).
@@ -396,7 +396,7 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
   - `research`: For online lookups, document reading, competitor research.
   - `self`: For coding, creating complex project templates, or multi-file writing.
 - Format the Subagent role clearly (e.g., `Research Analyst`, `Tech Lead`).
-- Subagent results must be synthesized and stored into `vault/01_Inbox/[department]/` before notifying the user.
+- Subagent results must be synthesized and stored into `{{VAULT_DIR}}/01_Inbox/[department]/` before notifying the user.
 ```
 
 ## `pm/AGENTS.md`
@@ -413,7 +413,7 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
 - **Role**: `Project Manager`
 - **Model**: `inherit` or `flash`
 - **Work Target**: `.company/pm/work/` (drafts, task breakdowns)
-- **Publish Target**: `vault/01_Inbox/pm/YYYY-MM-DD-HHmmss-[Title].md`
+- **Publish Target**: `{{VAULT_DIR}}/01_Inbox/pm/YYYY-MM-DD-HHmmss-[Title].md`
 ```
 
 ## `research/AGENTS.md`
@@ -430,7 +430,7 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
 - **Role**: `Research Analyst`
 - **TypeName**: `research`
 - **Work Target**: `.company/research/work/` (scraped pages, draft outlines)
-- **Publish Target**: `vault/01_Inbox/research/YYYY-MM-DD-HHmmss-[Title].md`
+- **Publish Target**: `{{VAULT_DIR}}/01_Inbox/research/YYYY-MM-DD-HHmmss-[Title].md`
 ```
 
 ## `marketing/AGENTS.md`
@@ -446,7 +446,7 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
 ## Subagent Profile
 - **Role**: `Marketing Strategist`
 - **Work Target**: `.company/marketing/work/` (content ideas, keyword research)
-- **Publish Target**: `vault/01_Inbox/marketing/YYYY-MM-DD-HHmmss-[Title].md`
+- **Publish Target**: `{{VAULT_DIR}}/01_Inbox/marketing/YYYY-MM-DD-HHmmss-[Title].md`
 ```
 
 ## `engineering/AGENTS.md`
@@ -463,7 +463,7 @@ When a department folder is created, an `AGENTS.md` file is automatically placed
 - **Role**: `Software Architect`
 - **TypeName**: `self`
 - **Work Target**: `.company/engineering/work/` (scratch scripts, spike code, RFC drafts)
-- **Publish Target**: `vault/01_Inbox/engineering/YYYY-MM-DD-HHmmss-[Title].md`
+- **Publish Target**: `{{VAULT_DIR}}/01_Inbox/engineering/YYYY-MM-DD-HHmmss-[Title].md`
 ```
 
 ## `finance/AGENTS.md`

@@ -142,8 +142,10 @@ class TestStartDashboard(unittest.TestCase):
         expected JSON payload with resolved port, URL, paths, and Docker Compose command.
         """
         script_path = SCRIPT_DIR / "start_dashboard.py"
-        tmp_cfg = Path(self.temp_dir.name) / "cli_cfg"
-        tmp_vault = Path(self.temp_dir.name) / "cli_vault"
+        # Resolve temp_dir so macOS /var -> /private/var symlink matches script output
+        temp_root = Path(self.temp_dir.name).resolve()
+        tmp_cfg = temp_root / "cli_cfg"
+        tmp_vault = temp_root / "cli_vault"
 
         # 1. Test start action with dry-run
         cmd_start = [
